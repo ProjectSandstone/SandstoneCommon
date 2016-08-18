@@ -25,28 +25,19 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common
+package com.github.projectsandstone.common.event
 
-import com.github.projectsandstone.api.Game
-import com.github.projectsandstone.api.Platform
-import com.github.projectsandstone.api.Server
-import com.github.projectsandstone.api.event.EventManager
-import com.github.projectsandstone.api.plugin.PluginManager
-import com.github.projectsandstone.api.service.ServiceManager
-import com.github.projectsandstone.common.event.SandstoneEventManager
-import com.github.projectsandstone.common.plugin.SandstonePluginManager
-import com.github.projectsandstone.common.service.SandstoneServiceManager
-import java.nio.file.Path
+import com.github.jonathanxd.iutils.`object`.TypeInfo
+import com.github.projectsandstone.api.event.Event
+import com.github.projectsandstone.api.event.EventListener
 
 /**
- * Created by jonathan on 15/08/16.
+ * Created by jonathan on 18/08/16.
  */
-abstract class AbstractGame(override val gamePath: Path,
-                            override val platform: Platform,
-                            override val eventManager: EventManager = SandstoneEventManager(),
-                            override val pluginManager: PluginManager = SandstonePluginManager(),
-                            override val serviceManager: ServiceManager = SandstoneServiceManager(),
-                            override val savePath: Path,
-                            override val server: Server) : Game {
+data class EventListenerContainer<T : Event>(val plugin: Any, val eventType: TypeInfo<T>, val eventListener: EventListener<T>) : Comparable<EventListenerContainer<*>> {
+    override fun compareTo(other: EventListenerContainer<*>): Int {
+        val compare = this.eventListener.getPriority().compareTo(other.eventListener.getPriority())
 
+        return if(compare == 0) -1 else compare
+    }
 }

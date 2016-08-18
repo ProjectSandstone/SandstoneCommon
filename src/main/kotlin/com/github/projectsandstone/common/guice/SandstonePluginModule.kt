@@ -29,13 +29,15 @@ package com.github.projectsandstone.common.guice
 
 import com.github.projectsandstone.api.logging.Logger
 import com.github.projectsandstone.api.plugin.PluginContainer
+import com.github.projectsandstone.api.plugin.PluginManager
 import com.google.inject.AbstractModule
 import com.google.inject.Scopes
+import com.google.inject.name.Names
 
 /**
  * Created by jonathan on 17/08/16.
  */
-class SandstonePluginModule(val pluginContainer: PluginContainer, val pluginClass: Class<*>) : AbstractModule() {
+class SandstonePluginModule(val pluginManager: PluginManager, val pluginContainer: PluginContainer, val pluginClass: Class<*>) : AbstractModule() {
     override fun configure() {
 
         bind(this.pluginClass).`in`(Scopes.SINGLETON)
@@ -43,6 +45,10 @@ class SandstonePluginModule(val pluginContainer: PluginContainer, val pluginClas
         bind(Logger::class.java).toInstance(pluginContainer.logger)
 
         // Bindings to @Named
+
+        pluginManager.getPlugins().forEach {
+            bind(PluginContainer::class.java).annotatedWith(Names.named(it.id)).toInstance(it)
+        }
 
     }
 

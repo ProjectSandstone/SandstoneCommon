@@ -34,7 +34,7 @@ import java.nio.file.Path
 /**
  * Created by jonathan on 17/08/16.
  */
-class SandstonePluginContainer(override val file: Path?,
+open class SandstonePluginContainer(override val file: Path?,
                                override val id: String,
                                override val name: String,
                                override val version: String,

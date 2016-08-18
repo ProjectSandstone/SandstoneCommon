@@ -27,6 +27,7 @@
  */
 package com.github.projectsandstone.common.plugin
 
+import com.github.projectsandstone.api.Sandstone
 import com.github.projectsandstone.api.plugin.DependencyResolver
 import com.github.projectsandstone.api.plugin.PluginContainer
 import com.github.projectsandstone.api.plugin.PluginLoader
@@ -40,6 +41,7 @@ import java.util.*
 class SandstonePluginManager : PluginManager {
     private val dependencyResolver_ = SandstoneDependencyResolver(this)
     private val pluginSet = dependencyResolver_.createDependencySet()
+    private val unmodifiablePluginSet = Collections.unmodifiableSet(this.pluginSet)
     private val pluginLoader_ = SandstonePluginLoader(this)
 
     override val dependencyResolver: DependencyResolver
@@ -48,12 +50,24 @@ class SandstonePluginManager : PluginManager {
     override val pluginLoader: PluginLoader
         get() = this.pluginLoader_
 
-    override fun loadPlugin(file: Path): PluginContainer? {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun loadPlugin(file: Path): List<PluginContainer> {
+        val containers = this.pluginLoader.loadFile(file)
+
+        containers.forEach {
+            this.dependencyResolver.checkDependencies(it)
+        }
+
+        return containers
     }
 
     override fun loadPlugin(pluginContainer: PluginContainer): Boolean {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        try {
+            this.pluginLoader.load(pluginContainer)
+            return true
+        }catch (t: Exception) {
+            Sandstone.logger.exception(t, "Failed to load PluginContainer: $pluginContainer!")
+            return false
+        }
     }
 
     override fun getPlugin(id: String): PluginContainer? {
@@ -61,7 +75,7 @@ class SandstonePluginManager : PluginManager {
     }
 
     override fun getPlugins(): Set<PluginContainer> { // TODO: Change to Set<PluginContainer>
-        return ArrayList(pluginSet)
+        return unmodifiablePluginSet
     }
 
 

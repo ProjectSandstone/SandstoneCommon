@@ -28,6 +28,9 @@
 package com.github.projectsandstone.common
 
 import com.github.projectsandstone.api.Game
+import com.github.projectsandstone.api.Platform
+import com.github.projectsandstone.api.Sandstone
+import com.github.projectsandstone.api.Server
 import com.github.projectsandstone.api.event.EventManager
 import com.github.projectsandstone.api.plugin.PluginManager
 import com.github.projectsandstone.api.service.ServiceManager
@@ -42,6 +45,10 @@ class TestInit {
     @Test
     fun testInit() {
         SandstoneInit.initGame(object : Game {
+            override val platform: Platform
+                get() = throw UnsupportedOperationException()
+            override val server: Server
+                get() = throw UnsupportedOperationException()
             override val eventManager: EventManager
                 get() = throw UnsupportedOperationException()
             override val serviceManager: ServiceManager
@@ -55,6 +62,7 @@ class TestInit {
 
         })
 
+        Sandstone.game.eventManager
 
     }
 

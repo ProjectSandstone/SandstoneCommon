@@ -60,13 +60,14 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
         pluginClassLoader.classes.forEach {
             val klass = pluginClassLoader.loadClass(it)
 
-            val injector = Constants.injector.createChildInjector(SandstonePluginModule(plugin, klass))
+            val injector = Constants.injector.createChildInjector(SandstonePluginModule(pluginManager, plugin, klass))
 
             val instance = injector.getInstance(klass)
 
             plugin.instance_ = instance
 
             // Register listeners (GameStartEvent) etc.
+            // Plugin Listeners WILL RUN BEFORE all listeners, in dependency order.
             Sandstone.game.eventManager.registerListeners(instance, instance)
         }
 

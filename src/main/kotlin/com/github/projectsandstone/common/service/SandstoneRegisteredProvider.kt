@@ -25,28 +25,15 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common
+package com.github.projectsandstone.common.service
 
-import com.github.projectsandstone.api.Game
-import com.github.projectsandstone.api.Platform
-import com.github.projectsandstone.api.Server
-import com.github.projectsandstone.api.event.EventManager
-import com.github.projectsandstone.api.plugin.PluginManager
-import com.github.projectsandstone.api.service.ServiceManager
-import com.github.projectsandstone.common.event.SandstoneEventManager
-import com.github.projectsandstone.common.plugin.SandstonePluginManager
-import com.github.projectsandstone.common.service.SandstoneServiceManager
-import java.nio.file.Path
+import com.github.projectsandstone.api.plugin.PluginContainer
+import com.github.projectsandstone.api.service.RegisteredProvider
 
 /**
- * Created by jonathan on 15/08/16.
+ * Created by jonathan on 18/08/16.
  */
-abstract class AbstractGame(override val gamePath: Path,
-                            override val platform: Platform,
-                            override val eventManager: EventManager = SandstoneEventManager(),
-                            override val pluginManager: PluginManager = SandstonePluginManager(),
-                            override val serviceManager: ServiceManager = SandstoneServiceManager(),
-                            override val savePath: Path,
-                            override val server: Server) : Game {
-
+class SandstoneRegisteredProvider<T : Any>(override val plugin: PluginContainer,
+                                           override val provider: T,
+                                           override val service: Class<T>) : RegisteredProvider<T> {
 }
