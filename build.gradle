@@ -24,14 +24,9 @@ version '1.0-SNAPSHOT'
 
 apply from: 'gradle/sandstone.gradle'
 
-repositories {
-    maven {
-        url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
-    }
-}
-
 dependencies {
-    compile 'com.github.ProjectSandstone:SandstoneAPI:-SNAPSHOT'
-    compile 'com.github.JonathanxD:Adapter:3.0.1'
+    compile 'com.github.ProjectSandstone:SandstoneAPI:0095258951'
+    compile 'com.github.JonathanxD:Adapter:3.0.2'
+
 }
 
