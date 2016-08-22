@@ -28,10 +28,7 @@
 package com.github.projectsandstone.common.plugin
 
 import com.github.projectsandstone.api.Sandstone
-import com.github.projectsandstone.api.plugin.DependencyResolver
-import com.github.projectsandstone.api.plugin.PluginContainer
-import com.github.projectsandstone.api.plugin.PluginLoader
-import com.github.projectsandstone.api.plugin.PluginManager
+import com.github.projectsandstone.api.plugin.*
 import java.nio.file.Path
 import java.util.*
 
@@ -57,17 +54,33 @@ class SandstonePluginManager : PluginManager {
             this.dependencyResolver.checkDependencies(it)
         }
 
+        pluginSet += containers
+
         return containers
     }
 
     override fun loadPlugin(pluginContainer: PluginContainer): Boolean {
+
         try {
             this.pluginLoader.load(pluginContainer)
+
+            if(pluginContainer.state == PluginState.FAILED) {
+                this.pluginSet -= pluginContainer
+            } else if (!this.pluginSet.contains(pluginContainer)) {
+                this.pluginSet.add(pluginContainer)
+            }
+
             return true
         }catch (t: Exception) {
             Sandstone.logger.exception(t, "Failed to load PluginContainer: $pluginContainer!")
             return false
         }
+    }
+
+    override fun loadAllPlugins(): Boolean {
+        val pluginList = pluginSet.toList().filter { it.state == PluginState.ABOUT_TO_LOAD }
+
+        return pluginList.all { this.loadPlugin(it) }
     }
 
     override fun getPlugin(id: String): PluginContainer? {

@@ -31,6 +31,8 @@ import com.github.projectsandstone.api.Game
 import com.github.projectsandstone.api.Sandstone
 import com.github.projectsandstone.api.logging.Logger
 import com.github.projectsandstone.api.logging.LoggerFactory
+import com.github.projectsandstone.api.plugin.PluginContainer
+import java.nio.file.Path
 
 /**
  * Created by jonathan on 15/08/16.
@@ -59,4 +61,21 @@ object SandstoneInit {
         field.set(Sandstone, loggerFactory)
     }
 
+    /**
+     * Load plugins from directory
+     *
+     * @param pluginsDir Directory with plugins.
+     */
+    @JvmStatic
+    fun loadPlugins(pluginsDir: Path) {
+        Sandstone.game.pluginManager.loadPlugins(pluginsDir)
+    }
+
+    /**
+     * Start loaded plugins.
+     */
+    @JvmStatic
+    fun startPlugins() {
+        Sandstone.game.pluginManager.loadAllPlugins()
+    }
 }

@@ -58,19 +58,31 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
         plugin.state_ = PluginState.LOADING
 
         pluginClassLoader.classes.forEach {
-            val klass = pluginClassLoader.loadClass(it)
 
-            val injector = Constants.injector.createChildInjector(SandstonePluginModule(pluginManager, plugin, klass))
+            if(plugin.state_ != PluginState.FAILED) {
 
-            val instance = injector.getInstance(klass)
+                try {
+                    val klass = pluginClassLoader.loadClass(it)
 
-            plugin.instance_ = instance
+                    val injector = Constants.injector.createChildInjector(SandstonePluginModule(pluginManager, plugin, klass))
 
-            // Register listeners (GameStartEvent) etc.
-            // Plugin Listeners WILL RUN BEFORE all listeners, in dependency order.
-            Sandstone.game.eventManager.registerListeners(instance, instance)
+                    val instance = injector.getInstance(klass)
+
+                    plugin.instance_ = instance
+
+                    // Register listeners (GameStartEvent) etc.
+                    // Plugin Listeners WILL RUN BEFORE all listeners, in dependency order.
+                    Sandstone.game.eventManager.registerListeners(instance, instance)
+                } catch (exception: Exception) {
+                    plugin.state_ = PluginState.FAILED
+                    Sandstone.logger.exception(exception, "Failed to load plugin: $plugin!")
+                }
+            }
         }
 
+        if(plugin.state_ != PluginState.FAILED) {
+            plugin.state_ = PluginState.LOADED
+        }
     }
 
     override fun loadFile(file: Path): List<PluginContainer> {

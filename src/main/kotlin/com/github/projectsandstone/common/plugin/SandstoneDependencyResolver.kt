@@ -42,7 +42,7 @@ import java.util.*
  * Created by jonathan on 15/08/16.
  */
 class SandstoneDependencyResolver(override val pluginManager: PluginManager) : DependencyResolver {
-    override fun createDependencySet(): Set<PluginContainer> {
+    override fun createDependencySet(): MutableSet<PluginContainer> { //TODO: Change in base class
         return TreeSet(DependencyComparator(this))
     }
 

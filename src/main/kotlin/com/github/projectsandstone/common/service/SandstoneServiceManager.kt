@@ -46,7 +46,7 @@ class SandstoneServiceManager : ServiceManager {
             // TODO: Call ProviderOverwriteEvent
         }
 
-        val pluginContainer = Sandstone.game.pluginManager.getRequirePlugin(plugin)
+        val pluginContainer = Sandstone.game.pluginManager.getRequiredPlugin(plugin)
 
         val registeredProvider = SandstoneRegisteredProvider(pluginContainer, instance, service)
 
