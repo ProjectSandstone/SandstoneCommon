@@ -48,7 +48,6 @@ class SandstoneEventManager : EventManager {
         throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    // TODO Change to Set<Pair<TypeInfo<*>, EventListener<*>>
     override fun getListeners(): Set<Pair<TypeInfo<*>, EventListener<*>>> {
         return this.listeners
                 .map { Pair(it.eventType, it.eventListener) }

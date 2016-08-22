@@ -74,7 +74,7 @@ class SandstonePluginManager : PluginManager {
         return this.pluginSet.find { it.id == id }
     }
 
-    override fun getPlugins(): Set<PluginContainer> { // TODO: Change to Set<PluginContainer>
+    override fun getPlugins(): Set<PluginContainer> {
         return unmodifiablePluginSet
     }
 
