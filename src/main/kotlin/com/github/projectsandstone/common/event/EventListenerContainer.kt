@@ -34,7 +34,7 @@ import com.github.projectsandstone.api.event.EventListener
 /**
  * Created by jonathan on 18/08/16.
  */
-data class EventListenerContainer<T : Event>(val plugin: Any, val eventType: TypeInfo<T>, val eventListener: EventListener<T>) : Comparable<EventListenerContainer<*>> {
+open class EventListenerContainer<T : Event>(val plugin: Any, val eventType: TypeInfo<T>, val eventListener: EventListener<T>) : Comparable<EventListenerContainer<*>> {
     override fun compareTo(other: EventListenerContainer<*>): Int {
         val compare = this.eventListener.getPriority().compareTo(other.eventListener.getPriority())
 

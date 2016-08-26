@@ -28,46 +28,12 @@
 package com.github.projectsandstone.common.event
 
 import com.github.jonathanxd.iutils.`object`.TypeInfo
-import com.github.jonathanxd.iutils.`object`.TypeUtil
 import com.github.projectsandstone.api.event.Event
 import com.github.projectsandstone.api.event.EventPriority
-import com.github.projectsandstone.api.event.MethodEventListener
-import com.github.projectsandstone.api.plugin.PluginContainer
-import java.lang.invoke.MethodHandle
-import java.lang.invoke.MethodHandles
 import java.lang.reflect.Method
 
 /**
- * Created by jonathan on 18/08/16.
+ * Created by jonathan on 25/08/16.
  */
-open class SandstoneMethodListener(override val eventType: TypeInfo<Event>,
-                              override val instance: Any?,
-                              val ignoreCancelled: Boolean,
-                              val isBeforeMods: Boolean,
-                              val method_: Method,
-                              val priority_: EventPriority) : MethodEventListener {
-
-    override val method: MethodHandle = lookup.unreflect(this.method_).bindTo(this.instance)
-    override val parameters: Array<TypeInfo<*>> = this.method_.genericParameterTypes.map { TypeUtil.toReference(it) }.toTypedArray()
-
-    override fun onEvent(event: Event, pluginContainer: PluginContainer) {
-        // Process [parameters]
-        method.invokeWithArguments(event)
-    }
-
-    override fun getPriority(): EventPriority {
-        return this.priority_
-    }
-
-    override fun isBeforeModifications(): Boolean {
-        return this.isBeforeMods
-    }
-
-    override fun ignoreCancelled(): Boolean {
-        return this.ignoreCancelled
-    }
-
-    companion object {
-        val lookup = MethodHandles.publicLookup()
-    }
+internal class PluginMethodListener(eventType: TypeInfo<Event>, instance: Any?, ignoreCancelled: Boolean, isBeforeMods: Boolean, method_: Method, priority_: EventPriority) : SandstoneMethodListener(eventType, instance, ignoreCancelled, isBeforeMods, method_, priority_) {
 }

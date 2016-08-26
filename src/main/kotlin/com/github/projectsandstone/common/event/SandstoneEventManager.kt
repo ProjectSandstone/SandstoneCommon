@@ -42,10 +42,17 @@ class SandstoneEventManager : EventManager {
 
     private val listeners: MutableSet<EventListenerContainer<*>> = TreeSet()
 
-
+    // TODO: dispatch(TypeInfo<*>)
+    // TODO: dispatch_async
     // First dispatch plugins, then dispatch to normal event listeners. (plugin specific registration need to be created).
     override fun <T : Event> dispatch(event: T, pluginContainer: PluginContainer, isBeforeModifications: Boolean) {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        listeners.filter {
+            it.eventListener is PluginMethodListener && it.eventType.compareToAssignable(TypeInfo.aEnd(event.javaClass)) == 0
+        }.forEach { it.eventListener.helpOnEvent(event, pluginContainer) }
+
+        listeners.filter {
+            it.eventListener !is PluginMethodListener && it.eventType.compareToAssignable(TypeInfo.aEnd(event.javaClass)) == 0
+        }.forEach { it.eventListener.helpOnEvent(event, pluginContainer) }
     }
 
     override fun getListeners(): Set<Pair<TypeInfo<*>, EventListener<*>>> {
@@ -82,12 +89,22 @@ class SandstoneEventManager : EventManager {
     }
 
     override fun registerMethodListener(plugin: Any, instance: Any?, method: Method, eventPriority: EventPriority, ignoreCancelled: Boolean, isBeforeModifications: Boolean) {
-        this.createMethodListener(instance = instance,
-                method = method,
-                eventPriority = eventPriority,
-                ignoreCancelled = ignoreCancelled,
-                isBeforeModifications = isBeforeModifications).let {
-            this.registerGenericListener<Event>(plugin, it.eventType, it)
+        if(instance != null && plugin == instance) {
+            this.createPluginMethodListener(instance = instance,
+                    method = method,
+                    eventPriority = eventPriority,
+                    ignoreCancelled = ignoreCancelled,
+                    isBeforeModifications = isBeforeModifications).let {
+                this.registerGenericListener<Event>(plugin, it.eventType, it)
+            }
+        } else {
+            this.createMethodListener(instance = instance,
+                    method = method,
+                    eventPriority = eventPriority,
+                    ignoreCancelled = ignoreCancelled,
+                    isBeforeModifications = isBeforeModifications).let {
+                this.registerGenericListener<Event>(plugin, it.eventType, it)
+            }
         }
     }
 
@@ -109,6 +126,21 @@ class SandstoneEventManager : EventManager {
                 ignoreCancelled = ignoreCancelled)
     }
 
+    @Suppress("UNCHECKED_CAST")
+    private fun createPluginMethodListener(instance: Any?,
+                                     method: Method,
+                                     isBeforeModifications: Boolean = false,
+                                     eventPriority: EventPriority = EventPriority.NORMAL,
+                                     ignoreCancelled: Boolean = false): MethodEventListener {
+
+        return PluginMethodListener(eventType = TypeUtil.toReference(method.genericParameterTypes[0]) as TypeInfo<Event>,
+                instance = instance,
+                isBeforeMods = isBeforeModifications,
+                method_ = method,
+                priority_ = eventPriority,
+                ignoreCancelled = ignoreCancelled)
+    }
+
 
     private fun createMethodListeners(plugin: Any,
                                      instance: Any,
@@ -121,12 +153,23 @@ class SandstoneEventManager : EventManager {
                     && Event::class.java.isAssignableFrom(it.parameterTypes[0])
         }.map {
             val listenerAnnotation = it.getDeclaredAnnotation(Listener::class.java)
-
-            this.createMethodListener(instance = instance,
-                    isBeforeModifications = listenerAnnotation.beforeModifications,
-                    method = it,
-                    eventPriority = listenerAnnotation.priority,
-                    ignoreCancelled = listenerAnnotation.ignoreCancelled)
+            if(plugin == instance) {
+                this.createPluginMethodListener(instance = instance,
+                        isBeforeModifications = listenerAnnotation.beforeModifications,
+                        method = it,
+                        eventPriority = listenerAnnotation.priority,
+                        ignoreCancelled = listenerAnnotation.ignoreCancelled)
+            } else {
+                this.createMethodListener(instance = instance,
+                        isBeforeModifications = listenerAnnotation.beforeModifications,
+                        method = it,
+                        eventPriority = listenerAnnotation.priority,
+                        ignoreCancelled = listenerAnnotation.ignoreCancelled)
+            }
         }
+    }
+
+    fun <T : Event> EventListener<T>.helpOnEvent(event: Any, pluginContainer: PluginContainer) {
+        this.onEvent(event as T, pluginContainer)
     }
 }
