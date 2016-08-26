@@ -43,36 +43,40 @@ object ASM {
 
     @Suppress("UNCHECKED_CAST")
     fun findPluginAnnotation(inputStream: InputStream): SimpleDesc? {
-        val reader = ClassReader(inputStream)
+        try {
+            val reader = ClassReader(inputStream)
 
-        val node: ClassNode = ClassNode()
+            val node: ClassNode = ClassNode()
 
-        reader.accept(node, 0)
+            reader.accept(node, 0)
 
-        val visibleAnnotations: List<AnnotationNode> = node.visibleAnnotations as List<AnnotationNode>
+            val visibleAnnotations: List<AnnotationNode> = node.visibleAnnotations as List<AnnotationNode>
 
-        for(annotation in visibleAnnotations) {
-            if(annotation.desc == ASM.annotationType) {
+            for (annotation in visibleAnnotations) {
+                if (annotation.desc == ASM.annotationType) {
 
-                val values = annotation.values;
+                    val values = annotation.values;
 
 
-                for(x in 0..values.size) {
-                    val value = values[x]
+                    for (x in 0..values.size) {
+                        val value = values[x]
 
-                    if(value == "usePlatformInternals") {
-                        return SimpleDesc(values[x + 1] as Boolean)
+                        if (value == "usePlatformInternals") {
+                            return SimpleDesc(values[x + 1] as Boolean)
+                        }
                     }
+
+                    println("Annotation Values: $values")
+
+                    return SimpleDesc(false)
+
                 }
-
-                println("Annotation Values: $values")
-
-                return SimpleDesc(false)
-
             }
-        }
 
-        return null
+            return null
+        }catch(e: Exception) {
+            return null
+        }
     }
 
 }
