@@ -112,7 +112,11 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
                 if (simpleDesc == null)
                     simpleDesc = desc
 
-                mutableClasses.add(next.name)
+                var name = next.name
+
+                name = name.replace('/', '.').substring(0, name.length-CLASS_LENGTH)
+
+                mutableClasses.add(name)
             }
 
         }
@@ -132,7 +136,7 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
             val containers = mutableListOf<PluginContainer>()
 
             containers +=
-                    classes.map { it.replace('/', '.').substring(0, it.length-CLASS_LENGTH) }.map {
+                    classes.map {
                         classLoader.loadClass(it)
                     }.map {
                         val declaredAnnotation = it.getDeclaredAnnotation(Plugin::class.java)
