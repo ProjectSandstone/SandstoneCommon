@@ -98,6 +98,9 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
         while (enumeration.hasMoreElements()) {
             val next = enumeration.nextElement()
 
+            if(!next.name.endsWith(".class"))
+                continue
+
             val stream = jarFile.getInputStream(next)
 
             val desc = ASM.findPluginAnnotation(stream)

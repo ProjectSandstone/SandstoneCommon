@@ -58,7 +58,7 @@ object ASM {
                     val values = annotation.values;
 
 
-                    for (x in 0..values.size) {
+                    for (x in 0..(values.size-1)) {
                         val value = values[x]
 
                         if (value == "usePlatformInternals") {
