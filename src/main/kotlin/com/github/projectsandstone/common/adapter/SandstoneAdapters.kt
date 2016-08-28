@@ -25,20 +25,47 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common
+package com.github.projectsandstone.common.adapter
 
-import com.github.projectsandstone.common.adapter.SandstoneAdapters
-import com.github.projectsandstone.common.guice.SandstoneModule
-import com.google.inject.Guice
-import java.util.concurrent.Executors
+import com.github.jonathanxd.adapter.AdapterEnvironment
+import com.github.jonathanxd.adapter.AdapterFactory
+import com.github.jonathanxd.adapter.adapter.AdapterSpecificationSpec
+import com.github.jonathanxd.iutils.`object`.Bi
 
 /**
- * Created by jonathan on 17/08/16.
+ * Created by jonathan on 28/08/16.
  */
-object Constants {
+class SandstoneAdapters {
 
-    val cachedThreadPool = Executors.newCachedThreadPool()
-    val injector = Guice.createInjector(SandstoneModule)
+    val adapterEnvironment: AdapterEnvironment = AdapterEnvironment()
+    val adapterFactory = AdapterFactory(adapterEnvironment)
 
-    val adapters = SandstoneAdapters()
+    /**
+     * Retain data of [AdapterEnvironment.cachedInstances].
+     *
+     * Cached adapters is good because avoid class generation.
+     */
+    private val map: MutableMap<Bi<Class<*>, Any>, Any> = mutableMapOf()
+
+    fun registerAdapterSpecification(adapterSpecificationSpec: AdapterSpecificationSpec) {
+        this.adapterEnvironment.registerAdapterSpecification(adapterSpecificationSpec)
+    }
+
+    fun adapt(type: Class<*>, instance: Any) : Any? {
+        val opt = this.adapterEnvironment.adapt<Any>(type, instance)
+
+        if(opt.isPresent) {
+            val get = opt.get()
+
+            this.store(type, instance, get)
+
+            return get
+        } else {
+            return null
+        }
+    }
+
+    fun store(type: Class<*>, instance: Any, generated: Any) = this.map.put(Bi(type, instance), generated)
+
+    fun remove(type: Class<*>, instance: Any) = this.map.remove(Bi(type, instance))
 }
