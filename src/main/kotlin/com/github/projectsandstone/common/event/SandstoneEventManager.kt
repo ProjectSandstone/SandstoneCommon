@@ -65,10 +65,11 @@ class SandstoneEventManager : EventManager {
                 }
 
             } catch (throwable: Throwable) {
-                throw RuntimeException("Cannot dispatch event $event (type: $eventType) to listener " +
+                Sandstone.logger.exception(RuntimeException("Cannot dispatch event $event (type: $eventType) to listener " +
                         "${eventListenerContainer.eventListener} (of event type: ${eventListenerContainer.eventType}) of plugin " +
                         "${eventListenerContainer.pluginContainer}. " +
-                        "(Source Plugin: $pluginContainer, isBeforeModifications: $isBeforeModifications)")
+                        "(Source Plugin: $pluginContainer, isBeforeModifications: $isBeforeModifications)", throwable), "")
+
             }
         }
 
