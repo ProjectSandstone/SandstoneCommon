@@ -30,7 +30,6 @@ package com.github.projectsandstone.common.scheduler
 import com.github.projectsandstone.api.scheduler.SandstoneExecutorService
 import com.github.projectsandstone.api.scheduler.Scheduler
 import com.github.projectsandstone.api.scheduler.Task
-import com.github.projectsandstone.bukkit.scheduler.SandstoneTask
 import java.time.Duration
 
 /**
@@ -38,11 +37,11 @@ import java.time.Duration
  */
 abstract class SandstoneScheduler : Scheduler {
     override fun createAsyncExecutor(plugin: Any): SandstoneExecutorService {
-        return com.github.projectsandstone.common.scheduler.SandstoneExecutorService(plugin, isAsync = true)
+        return com.github.projectsandstone.common.scheduler.SandstoneExecutorService(this, plugin, isAsync = true)
     }
 
     override fun createSyncExecutor(plugin: Any): SandstoneExecutorService {
-        return com.github.projectsandstone.common.scheduler.SandstoneExecutorService(plugin, isAsync = true)
+        return com.github.projectsandstone.common.scheduler.SandstoneExecutorService(this, plugin, isAsync = true)
     }
 
     override fun createTask(name: String?, delay: Duration, interval: Duration, isAsync: Boolean, runnable: Runnable): Task {

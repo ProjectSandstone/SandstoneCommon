@@ -25,7 +25,7 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.bukkit.scheduler
+package com.github.projectsandstone.common.scheduler
 
 import com.github.projectsandstone.api.scheduler.Task
 import java.time.Duration
