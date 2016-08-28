@@ -27,17 +27,15 @@
  */
 package com.github.projectsandstone.common.scheduler
 
-import com.github.projectsandstone.api.scheduler.Task
-import java.time.Duration
-
 /**
- * Created by jonathan on 27/08/16.
+ * Created by jonathan on 28/08/16.
  */
-data class SandstoneTask(override val name: String?,
-                         override val delay: Duration,
-                         override val interval: Duration,
-                         override val isAsync: Boolean,
-                         val runnable_: Runnable) : Task {
-
-    override val runnable: Runnable = SandstoneRunnable(name, runnable_)
+class SandstoneRunnable(val name: String?, val runnable: Runnable) : Runnable {
+    override fun run() {
+        try {
+            runnable.run()
+        } catch (t: Throwable) {
+            throw RuntimeException("An exception occurred during task execution. (Task Name: $name, Runnable: $runnable)")
+        }
+    }
 }

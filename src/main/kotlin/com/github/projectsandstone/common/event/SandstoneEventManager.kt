@@ -35,21 +35,35 @@ import com.github.projectsandstone.api.event.EventListener
 import com.github.projectsandstone.api.plugin.PluginContainer
 import java.lang.reflect.Method
 import java.util.*
+import java.util.concurrent.Executors
 
 /**
  * Created by jonathan on 18/08/16.
  */
 class SandstoneEventManager : EventManager {
     private val listeners: MutableSet<EventListenerContainer<*>> = TreeSet()
+    private val executor = Executors.newCachedThreadPool()
 
     override fun <T : Event> dispatch(event: T, eventType: TypeInfo<T>, pluginContainer: PluginContainer, isBeforeModifications: Boolean) {
+
+        this.dispatch_(event, eventType, pluginContainer, isBeforeModifications, isAsync = false)
+    }
+
+    private fun <T : Event> dispatch_(event: T, eventType: TypeInfo<T>, pluginContainer: PluginContainer, isBeforeModifications: Boolean, isAsync: Boolean) {
 
         fun <T : Event> tryDispatch(eventListenerContainer: EventListenerContainer<*>,
                                     event: T,
                                     pluginContainer: PluginContainer,
                                     isBeforeModifications: Boolean) {
             try {
-                eventListenerContainer.eventListener.helpOnEvent(event, pluginContainer)
+                if (isAsync) {
+                    executor.execute({
+                        eventListenerContainer.eventListener.helpOnEvent(event, pluginContainer)
+                    })
+                } else {
+                    eventListenerContainer.eventListener.helpOnEvent(event, pluginContainer)
+                }
+
             } catch (throwable: Throwable) {
                 throw RuntimeException("Cannot dispatch event $event (type: $eventType) to listener " +
                         "${eventListenerContainer.eventListener} (of event type: ${eventListenerContainer.eventType}) of plugin " +
@@ -73,6 +87,10 @@ class SandstoneEventManager : EventManager {
         }.forEach {
             tryDispatch(it, event, pluginContainer, isBeforeModifications)
         }
+    }
+
+    override fun <T : Event> dispatchAsync(event: T, eventType: TypeInfo<T>, pluginContainer: PluginContainer, isBeforeModifications: Boolean) {
+        this.dispatch_(event, eventType, pluginContainer, isBeforeModifications, isAsync = true)
     }
 
     override fun getListeners(): Set<Pair<TypeInfo<*>, EventListener<*>>> {
