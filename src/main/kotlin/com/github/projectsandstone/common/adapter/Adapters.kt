@@ -25,18 +25,11 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common
-
-import com.github.projectsandstone.common.adapter.SandstoneAdapters
-import com.github.projectsandstone.common.guice.SandstoneModule
-import com.google.inject.Guice
-import java.util.concurrent.Executors
+package com.github.projectsandstone.common.adapter
 
 /**
- * Created by jonathan on 17/08/16.
+ * Created by jonathan on 28/08/16.
  */
-object Constants {
-
-    val cachedThreadPool = Executors.newCachedThreadPool()
-    val injector = Guice.createInjector(SandstoneModule)
+object Adapters {
+    val adapters = SandstoneAdapters()
 }
