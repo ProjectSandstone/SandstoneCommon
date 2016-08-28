@@ -64,7 +64,7 @@ class SandstoneDependencyResolver(override val pluginManager: PluginManager) : D
                     val pluginVersion = plugin.version
 
                     if (incompatible.isNotEmpty()) {
-                        if (pluginVersion.matches(Regex.fromLiteral(incompatible))) {
+                        if (pluginVersion.versionString.matches(Regex.fromLiteral(incompatible))) {
                             Sandstone.logger.exception(
                                     IncompatibleDependencyException("Incompatible plugin version detected. Plugin: $pluginContainer. Incompatible dependency plugin: $plugin."),
                                     "Incompatible plugin."
@@ -73,7 +73,7 @@ class SandstoneDependencyResolver(override val pluginManager: PluginManager) : D
                     }
 
                     if (version.isNotEmpty()) {
-                        if (!pluginVersion.matches(Regex.fromLiteral(version))) {
+                        if (!pluginVersion.versionString.matches(Regex.fromLiteral(version))) {
                             throw IncompatibleDependencyException("Incompatible plugin version detected. Plugin $pluginContainer only supports versions that matches pattern: $version. Found plugin: $plugin")
                         }
                     }

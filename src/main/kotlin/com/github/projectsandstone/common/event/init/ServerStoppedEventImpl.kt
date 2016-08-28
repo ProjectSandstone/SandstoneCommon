@@ -25,30 +25,14 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common
+package com.github.projectsandstone.common.event.init
 
-import com.github.projectsandstone.api.Game
-import com.github.projectsandstone.api.Platform
-import com.github.projectsandstone.api.Server
-import com.github.projectsandstone.api.event.EventManager
-import com.github.projectsandstone.api.plugin.PluginManager
-import com.github.projectsandstone.api.scheduler.Scheduler
-import com.github.projectsandstone.api.service.ServiceManager
-import com.github.projectsandstone.common.event.SandstoneEventManager
-import com.github.projectsandstone.common.plugin.SandstonePluginManager
-import com.github.projectsandstone.common.service.SandstoneServiceManager
-import java.nio.file.Path
+import com.github.projectsandstone.api.event.init.ServerStoppedEvent
+import com.github.projectsandstone.common.event.SandstoneBaseEvent
 
 /**
- * Created by jonathan on 15/08/16.
+ * Created by jonathan on 23/08/16.
  */
-abstract class AbstractGame(override val gamePath: Path,
-                            override val platform: Platform,
-                            override val eventManager: EventManager = SandstoneEventManager(),
-                            override val pluginManager: PluginManager = SandstonePluginManager(),
-                            override val serviceManager: ServiceManager = SandstoneServiceManager(),
-                            override val scheduler: Scheduler,
-                            override val savePath: Path,
-                            override val server: Server) : Game {
+class ServerStoppedEventImpl : SandstoneBaseEvent, ServerStoppedEvent {
 
 }

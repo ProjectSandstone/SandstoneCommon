@@ -29,6 +29,7 @@ package com.github.projectsandstone.common.event
 
 import com.github.jonathanxd.iutils.`object`.TypeInfo
 import com.github.jonathanxd.iutils.`object`.TypeUtil
+import com.github.jonathanxd.iutils.annotations.Named
 import com.github.projectsandstone.api.event.Event
 import com.github.projectsandstone.api.event.EventPriority
 import com.github.projectsandstone.api.event.MethodEventListener
@@ -50,9 +51,38 @@ open class SandstoneMethodListener(override val eventType: TypeInfo<Event>,
     override val method: MethodHandle = lookup.unreflect(this.method_).bindTo(this.instance)
     override val parameters: Array<TypeInfo<*>> = this.method_.genericParameterTypes.map { TypeUtil.toReference(it) }.toTypedArray()
 
+    internal val namedParameters: Array<com.github.jonathanxd.iutils.`object`.Named<TypeInfo<*>>> =
+            this.method_.parameters.map {
+                val typeInfo = TypeUtil.toReference(it.parameterizedType)
+
+                val name: String? = it.getDeclaredAnnotation(Named::class.java)?.value
+                        ?: it.getDeclaredAnnotation(javax.inject.Named::class.java)?.value
+                        ?: it.getDeclaredAnnotation(com.google.inject.name.Named::class.java)?.value
+
+                return@map com.github.jonathanxd.iutils.`object`.Named(name, typeInfo)
+
+            }.toTypedArray()
+
     override fun onEvent(event: Event, pluginContainer: PluginContainer) {
         // Process [parameters]
-        method.invokeWithArguments(event)
+        if(parameters.size == 1) {
+            method.invokeWithArguments(event)
+        } else if(parameters.size > 1) {
+            val args: MutableList<Any?> = mutableListOf(event)
+
+            this.namedParameters.forEachIndexed { i, named ->
+                if(i > 0) {
+                    val name = named.name
+                    val typeInfo = named.value
+
+                    args += event.getInfo().first(name, typeInfo)
+                }
+            }
+
+            method.invokeWithArguments(args)
+        } else {
+            throw IllegalStateException("Invalid Method: $method_. (No Parameters)")
+        }
     }
 
     override fun getPriority(): EventPriority {

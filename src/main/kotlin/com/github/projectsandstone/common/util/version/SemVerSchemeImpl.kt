@@ -25,30 +25,30 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common
+package com.github.projectsandstone.common.util.version
 
-import com.github.projectsandstone.api.Game
-import com.github.projectsandstone.api.Platform
-import com.github.projectsandstone.api.Server
-import com.github.projectsandstone.api.event.EventManager
-import com.github.projectsandstone.api.plugin.PluginManager
-import com.github.projectsandstone.api.scheduler.Scheduler
-import com.github.projectsandstone.api.service.ServiceManager
-import com.github.projectsandstone.common.event.SandstoneEventManager
-import com.github.projectsandstone.common.plugin.SandstonePluginManager
-import com.github.projectsandstone.common.service.SandstoneServiceManager
-import java.nio.file.Path
+import com.github.projectsandstone.api.util.version.Version
+import com.github.projectsandstone.api.util.version.VersionScheme
 
 /**
- * Created by jonathan on 15/08/16.
+ * Created by jonathan on 27/08/16.
  */
-abstract class AbstractGame(override val gamePath: Path,
-                            override val platform: Platform,
-                            override val eventManager: EventManager = SandstoneEventManager(),
-                            override val pluginManager: PluginManager = SandstonePluginManager(),
-                            override val serviceManager: ServiceManager = SandstoneServiceManager(),
-                            override val scheduler: Scheduler,
-                            override val savePath: Path,
-                            override val server: Server) : Game {
+object SemVerSchemeImpl : VersionScheme {
+    override fun isCompatible(version1: Version, version2: Version): Boolean {
+        val ver1 = com.github.zafarkhaja.semver.Version.valueOf(version1.versionString)
+        val ver2 = com.github.zafarkhaja.semver.Version.valueOf(version2.versionString)
 
+        // SemVer: patches is always backward/upward? compatible
+        // SemVer: feature addition is backward compatible, but not upward compatible
+        return ver1.majorVersion == ver2.majorVersion
+                && ver1.minorVersion <= ver2.minorVersion
+
+    }
+
+    override fun compare(o1: Version?, o2: Version?): Int {
+        val ver1 = com.github.zafarkhaja.semver.Version.valueOf(o1?.versionString)
+        val ver2 = com.github.zafarkhaja.semver.Version.valueOf(o2?.versionString)
+
+        return ver1.compareTo(ver2)
+    }
 }

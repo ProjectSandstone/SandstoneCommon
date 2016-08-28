@@ -71,6 +71,8 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
 
                     val instance = injector.getInstance(klass)
 
+                    plugin.definition!!.invalidate()
+                    plugin.definition = null
                     plugin.instance_ = instance
 
                     // Register listeners (GameStartEvent) etc.
@@ -143,6 +145,11 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
 
                         if (declaredAnnotation != null) {
                             val container = SandstonePluginContainer.fromAnnotation(classLoader, file, declaredAnnotation)
+
+                            val definition = SandstonePluginDefinition(container)
+
+                            container.definition = definition
+
                             container.state_ = PluginState.ABOUT_TO_LOAD
 
                             /*return */container

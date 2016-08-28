@@ -27,11 +27,13 @@
  */
 package com.github.projectsandstone.common
 
+import com.github.jonathanxd.iutils.conditions.Conditions
 import com.github.projectsandstone.api.Game
 import com.github.projectsandstone.api.Sandstone
 import com.github.projectsandstone.api.logging.Logger
 import com.github.projectsandstone.api.logging.LoggerFactory
-import com.github.projectsandstone.api.plugin.PluginContainer
+import com.github.projectsandstone.api.util.version.Schemes
+import com.github.projectsandstone.common.util.version.SemVerSchemeImpl
 import java.nio.file.Path
 
 /**
@@ -40,25 +42,37 @@ import java.nio.file.Path
 object SandstoneInit {
 
     @JvmStatic
-    fun initGame(game: Game) {
-        val field = Sandstone::class.java.getDeclaredField("game_")
-        field.isAccessible = true
-        field.set(Sandstone, game)
+    fun initConsts() {
+        this.init(Schemes::class.java, "semVerScheme_", SemVerSchemeImpl)
+    }
 
+    @JvmStatic
+    fun initGame(game: Game) {
+        this.init("game_", game)
     }
 
     @JvmStatic
     fun initLogger(logger: Logger) {
-        val field = Sandstone::class.java.getDeclaredField("logger_")
-        field.isAccessible = true
-        field.set(Sandstone, logger)
+        this.init("logger_", logger)
     }
 
     @JvmStatic
     fun initLoggerFactory(loggerFactory: LoggerFactory) {
-        val field = Sandstone::class.java.getDeclaredField("loggerFactory_")
+        this.init("loggerFactory_", loggerFactory)
+    }
+
+    internal fun init(clazz: Class<*>, fieldName: String, instance: Any) {
+        val field = clazz.getDeclaredField(fieldName)
+
         field.isAccessible = true
-        field.set(Sandstone, loggerFactory)
+
+        Conditions.checkNull(field.get(Sandstone), "Already initialized!")
+
+        field.set(Sandstone, instance)
+    }
+
+    internal fun init(fieldName: String, instance: Any) {
+        this.init(Sandstone::class.java, fieldName, instance)
     }
 
     /**

@@ -29,24 +29,45 @@ package com.github.projectsandstone.common.plugin
 
 import com.github.projectsandstone.api.logging.Logger
 import com.github.projectsandstone.api.plugin.*
+import com.github.projectsandstone.api.util.version.Version
+import com.github.projectsandstone.common.util.CommonVersionScheme
 import java.nio.file.Path
 
 /**
  * Created by jonathan on 17/08/16.
  */
 open class SandstonePluginContainer(override val file: Path?,
-                               override val id: String,
-                               override val name: String,
-                               override val version: String,
-                               override val description: String?,
-                               override val usePlatformInternals: Boolean,
-                               override val classLoader: PluginClassLoader,
-                               override val dependencies: Array<DependencyContainer>?,
-                               override val authors: Array<String>?) : PluginContainer {
+                                    var id_: String,
+                                    var name_: String,
+                                    var version_: Version,
+                                    var description_: String?,
+                                    var usePlatformInternals_: Boolean,
+                                    override val classLoader: PluginClassLoader,
+                                    override val dependencies: Array<DependencyContainer>?,
+                                    var authors_: Array<String>?) : PluginContainer {
 
+    internal var definition: SandstonePluginDefinition? = null
     internal var instance_: Any? = null
     internal lateinit var logger_: Logger
     internal lateinit var state_: PluginState
+
+    override val id: String
+        get() = this.id_
+
+    override val name: String
+        get() = this.name_
+
+    override val version: Version
+        get() = this.version_
+
+    override val description: String?
+        get() = this.description_
+
+    override val usePlatformInternals: Boolean
+        get() = this.usePlatformInternals_
+
+    override val authors: Array<String>?
+        get() = this.authors_
 
     override val instance: Any?
         get() = this.instance_
@@ -76,17 +97,17 @@ open class SandstonePluginContainer(override val file: Path?,
     companion object {
         fun fromAnnotation(pluginClassLoader: PluginClassLoader, file: Path, annotation: Plugin): SandstonePluginContainer {
             return SandstonePluginContainer(
-                    id = annotation.id,
-                    name = annotation.name.ifEmpty { annotation.id },
-                    version = annotation.version,
-                    description = annotation.description.nullIfEmpty(),
+                    id_ = annotation.id,
+                    name_ = annotation.name.ifEmpty { annotation.id },
+                    version_ = Version(annotation.version, CommonVersionScheme),
+                    description_ = annotation.description.nullIfEmpty(),
                     file = file,
-                    authors = annotation.authors.ifEmpty { emptyArray() },
+                    authors_ = annotation.authors.ifEmpty { emptyArray() },
                     dependencies = annotation.dependencies.ifEmpty { emptyArray() }.map {
                         SandstoneDependencyContainer(it.id, it.incompatibleVersions, it.isRequired, it.version)
                     }.toTypedArray(),
                     classLoader = pluginClassLoader,
-                    usePlatformInternals = annotation.usePlatformInternals
+                    usePlatformInternals_ = annotation.usePlatformInternals
 
             )
         }

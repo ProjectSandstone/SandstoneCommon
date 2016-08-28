@@ -25,8 +25,8 @@ version '1.0-SNAPSHOT'
 apply from: 'gradle/sandstone.gradle'
 
 dependencies {
-    compile 'com.github.ProjectSandstone:SandstoneAPI:0d926f06a3'
+    compile 'com.github.ProjectSandstone:SandstoneAPI:efd522c54c'
     compile 'com.github.JonathanxD:Adapter:3.1.1'
-
+    compile 'com.github.zafarkhaja:java-semver:0.9.0'
 }
 

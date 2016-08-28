@@ -29,6 +29,7 @@ package com.github.projectsandstone.common.event
 
 import com.github.jonathanxd.iutils.`object`.TypeInfo
 import com.github.jonathanxd.iutils.`object`.TypeUtil
+import com.github.projectsandstone.api.Sandstone
 import com.github.projectsandstone.api.event.*
 import com.github.projectsandstone.api.event.EventListener
 import com.github.projectsandstone.api.plugin.PluginContainer
@@ -39,20 +40,35 @@ import java.util.*
  * Created by jonathan on 18/08/16.
  */
 class SandstoneEventManager : EventManager {
-
     private val listeners: MutableSet<EventListenerContainer<*>> = TreeSet()
 
-    // TODO: dispatch(TypeInfo<*>)
-    // TODO: dispatch_async
-    // First dispatch plugins, then dispatch to normal event listeners. (plugin specific registration need to be created).
-    override fun <T : Event> dispatch(event: T, pluginContainer: PluginContainer, isBeforeModifications: Boolean) {
-        listeners.filter {
-            it.eventListener is PluginMethodListener && it.eventType.compareToAssignable(TypeInfo.aEnd(event.javaClass)) == 0
-        }.forEach { it.eventListener.helpOnEvent(event, pluginContainer) }
+    override fun <T : Event> dispatch(event: T, eventType: TypeInfo<T>, pluginContainer: PluginContainer, isBeforeModifications: Boolean) {
+
+        fun <T : Event> tryDispatch(eventListenerContainer: EventListenerContainer<*>,
+                                    event: T,
+                                    pluginContainer: PluginContainer,
+                                    isBeforeModifications: Boolean) {
+            try {
+                eventListenerContainer.eventListener.helpOnEvent(event, pluginContainer)
+            } catch (throwable: Throwable) {
+                throw RuntimeException("Cannot dispatch event $event (type: $eventType) to listener " +
+                        "${eventListenerContainer.eventListener} (of event type: ${eventListenerContainer.eventType}) of plugin " +
+                        "${eventListenerContainer.pluginContainer}. " +
+                        "(Source Plugin: $pluginContainer, isBeforeModifications: $isBeforeModifications)")
+            }
+        }
 
         listeners.filter {
-            it.eventListener !is PluginMethodListener && it.eventType.compareToAssignable(TypeInfo.aEnd(event.javaClass)) == 0
-        }.forEach { it.eventListener.helpOnEvent(event, pluginContainer) }
+            it.eventListener is PluginMethodListener && it.eventType.compareToAssignable(eventType) == 0
+        }.forEach {
+            tryDispatch(it, event, pluginContainer, isBeforeModifications)
+        }
+
+        listeners.filter {
+            it.eventListener !is PluginMethodListener && it.eventType.compareToAssignable(eventType) == 0
+        }.forEach {
+            tryDispatch(it, event, pluginContainer, isBeforeModifications)
+        }
     }
 
     override fun getListeners(): Set<Pair<TypeInfo<*>, EventListener<*>>> {
@@ -73,7 +89,8 @@ class SandstoneEventManager : EventManager {
         val find = this.findListener(plugin, eventType, eventListener)
 
         if (find == null) {
-            this.listeners.add(EventListenerContainer(plugin, eventType, eventListener))
+            val pluginContainer = Sandstone.game.pluginManager.getRequiredPlugin(plugin)
+            this.listeners.add(EventListenerContainer(pluginContainer, eventType, eventListener))
         }
     }
 
@@ -89,7 +106,7 @@ class SandstoneEventManager : EventManager {
     }
 
     override fun registerMethodListener(plugin: Any, instance: Any?, method: Method, eventPriority: EventPriority, ignoreCancelled: Boolean, isBeforeModifications: Boolean) {
-        if(instance != null && plugin == instance) {
+        if (instance != null && plugin == instance) {
             this.createPluginMethodListener(instance = instance,
                     method = method,
                     eventPriority = eventPriority,
@@ -109,7 +126,7 @@ class SandstoneEventManager : EventManager {
     }
 
     fun <T : Event> findListener(plugin: Any, eventType: TypeInfo<T>, eventListener: EventListener<T>) =
-            this.listeners.find { it.plugin == plugin && it.eventType.compareTo(eventType) == 0 && it.eventListener == eventListener }
+            this.listeners.find { it.pluginContainer.instance == plugin && it.eventType.compareTo(eventType) == 0 && it.eventListener == eventListener }
 
     @Suppress("UNCHECKED_CAST")
     private fun createMethodListener(instance: Any?,
@@ -128,10 +145,10 @@ class SandstoneEventManager : EventManager {
 
     @Suppress("UNCHECKED_CAST")
     private fun createPluginMethodListener(instance: Any?,
-                                     method: Method,
-                                     isBeforeModifications: Boolean = false,
-                                     eventPriority: EventPriority = EventPriority.NORMAL,
-                                     ignoreCancelled: Boolean = false): MethodEventListener {
+                                           method: Method,
+                                           isBeforeModifications: Boolean = false,
+                                           eventPriority: EventPriority = EventPriority.NORMAL,
+                                           ignoreCancelled: Boolean = false): MethodEventListener {
 
         return PluginMethodListener(eventType = TypeUtil.toReference(method.genericParameterTypes[0]) as TypeInfo<Event>,
                 instance = instance,
@@ -143,9 +160,9 @@ class SandstoneEventManager : EventManager {
 
 
     private fun createMethodListeners(plugin: Any,
-                                     instance: Any,
-                                     isBeforeModifications: Boolean = false,
-                                     eventPriority: EventPriority = EventPriority.NORMAL): List<MethodEventListener> {
+                                      instance: Any,
+                                      isBeforeModifications: Boolean = false,
+                                      eventPriority: EventPriority = EventPriority.NORMAL): List<MethodEventListener> {
 
         return instance.javaClass.declaredMethods.filter {
             it.getDeclaredAnnotation(Listener::class.java) != null
@@ -153,7 +170,7 @@ class SandstoneEventManager : EventManager {
                     && Event::class.java.isAssignableFrom(it.parameterTypes[0])
         }.map {
             val listenerAnnotation = it.getDeclaredAnnotation(Listener::class.java)
-            if(plugin == instance) {
+            if (plugin == instance) {
                 this.createPluginMethodListener(instance = instance,
                         isBeforeModifications = listenerAnnotation.beforeModifications,
                         method = it,
