@@ -39,7 +39,7 @@ class SandstoneRunnable(val plugin: Any, val name: String?, val runnable: Runnab
         try {
             runnable.run()
         } catch (t: Throwable) {
-            Sandstone.logger.exception(RuntimeException("An exception occurred during task execution. (Task Name: $name, Runnable: $runnable, plugin: $plugin)", t))
+            Sandstone.logger.exception(RuntimeException("An exception occurred during task execution. (Task Name: $name, Runnable: $runnable, plugin: $pluginContainer)", t), "")
         }
     }
 }
