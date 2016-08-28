@@ -27,37 +27,58 @@
  */
 package com.github.projectsandstone.common.service
 
+import com.github.jonathanxd.iutils.`object`.TypeInfo
 import com.github.projectsandstone.api.Sandstone
+import com.github.projectsandstone.api.event.service.ChangeServiceProviderEvent
 import com.github.projectsandstone.api.service.RegisteredProvider
 import com.github.projectsandstone.api.service.ServiceManager
+import com.github.projectsandstone.common.event.service.ChangeServiceProviderEventImpl
 import java.util.function.Consumer
 
 /**
  * Created by jonathan on 18/08/16.
  */
-class SandstoneServiceManager : ServiceManager {
+abstract class SandstoneServiceManager : ServiceManager {
 
     private val services = mutableMapOf<Class<*>, RegisteredProvider<*>>()
     private val serviceRegListeners = ServiceRegListeners()
 
+    protected abstract fun <T : Any> internalSetProvider(service: Class<T>, instance: T)
+
+    protected abstract fun <T : Any> internalProvide(service: Class<T>): T?
+
     override fun <T : Any> setProvider(plugin: Any, service: Class<T>, instance: T) {
 
-        if(this.services.containsKey(service)) {
-            // TODO: Call ProviderOverwriteEvent
-        }
+        val oldProvider = this.getRegisteredProvider(service)
+
+        /////////////////////////////////////////////////////
 
         val pluginContainer = Sandstone.game.pluginManager.getRequiredPlugin(plugin)
 
         val registeredProvider = SandstoneRegisteredProvider(pluginContainer, instance, service)
 
+        /////////////////////////////////////////////////////
+        val event = ChangeServiceProviderEventImpl(oldProvider = oldProvider, newProvider = registeredProvider, service = service)
+
+        Sandstone.eventManager.dispatch(event, TypeInfo.a(ChangeServiceProviderEvent::class.java).of(service).build(), pluginContainer)
+        /////////////////////////////////////////////////////
+
         this.serviceRegListeners.onRegister(plugin, service, instance, registeredProvider)
 
         this.services.put(service, registeredProvider)
 
+        this.internalSetProvider(service, instance)
     }
 
     override fun <T : Any> provide(service: Class<T>): T? {
-        return this.getRegisteredProvider(service)?.provider
+
+        val reg = this.getRegisteredProvider(service)
+
+        if(reg != null) {
+            return reg.provider
+        } else {
+            return this.internalProvide(service)
+        }
     }
 
     @Suppress("UNCHECKED_CAST")

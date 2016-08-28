@@ -73,20 +73,30 @@ class SandstoneEventManager : EventManager {
         }
 
         listeners.filter {
-            it.eventListener is PluginMethodListener
-                    && it.eventType.compareToAssignable(eventType) == 0
-                    && it.eventListener.isBeforeModifications() == isBeforeModifications
+            this.check(container = it, isPlugin = true, eventType = eventType, isBeforeModifications = isBeforeModifications)
         }.forEach {
             tryDispatch(it, event, pluginContainer, isBeforeModifications)
         }
 
         listeners.filter {
-            it.eventListener !is PluginMethodListener
-                    && it.eventType.compareToAssignable(eventType) == 0
-                    && it.eventListener.isBeforeModifications() == isBeforeModifications
+            this.check(container = it, isPlugin = false, eventType = eventType, isBeforeModifications = isBeforeModifications)
         }.forEach {
             tryDispatch(it, event, pluginContainer, isBeforeModifications)
         }
+    }
+
+    private fun <T : Event> check(container: EventListenerContainer<*>, isPlugin: Boolean, eventType: TypeInfo<T>, isBeforeModifications: Boolean): Boolean {
+
+        fun checkType(): Boolean {
+            return container.eventType.compareToAssignable(eventType) == 0
+                    ||
+                    (container.eventType.related.size == 0
+                            && container.eventType.aClass.isAssignableFrom(eventType.aClass))
+        }
+
+        return (container.eventListener is PluginMethodListener) == isPlugin
+                && checkType()
+                && container.eventListener.isBeforeModifications() == isBeforeModifications
     }
 
     override fun <T : Event> dispatchAsync(event: T, eventType: TypeInfo<T>, pluginContainer: PluginContainer, isBeforeModifications: Boolean) {

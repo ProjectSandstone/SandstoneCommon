@@ -25,30 +25,29 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common
+package com.github.projectsandstone.common.event.service
 
-import com.github.projectsandstone.api.Game
-import com.github.projectsandstone.api.Platform
-import com.github.projectsandstone.api.Server
-import com.github.projectsandstone.api.event.EventManager
-import com.github.projectsandstone.api.plugin.PluginManager
-import com.github.projectsandstone.api.scheduler.Scheduler
-import com.github.projectsandstone.api.service.ServiceManager
-import com.github.projectsandstone.common.event.SandstoneEventManager
-import com.github.projectsandstone.common.plugin.SandstonePluginManager
-import com.github.projectsandstone.common.service.SandstoneServiceManager
-import java.nio.file.Path
+import com.github.projectsandstone.api.event.info.Info
+import com.github.projectsandstone.api.event.service.ChangeServiceProviderEvent
+import com.github.projectsandstone.api.service.RegisteredProvider
 
 /**
- * Created by jonathan on 15/08/16.
+ * Created by jonathan on 28/08/16.
  */
-abstract class AbstractGame(override val gamePath: Path,
-                            override val platform: Platform,
-                            override val eventManager: EventManager = SandstoneEventManager(),
-                            override val pluginManager: PluginManager = SandstonePluginManager(),
-                            override val serviceManager: ServiceManager,
-                            override val scheduler: Scheduler,
-                            override val savePath: Path,
-                            override val server: Server) : Game {
+class ChangeServiceProviderEventImpl<T : Any>(override val newProvider: RegisteredProvider<T>,
+                                              override val oldProvider: RegisteredProvider<T>?,
+                                              override val service: Class<T>) : ChangeServiceProviderEvent<T> {
 
+    private val info: Info
+
+    init {
+        info = Info(mutableListOf())
+        info.set("newProvider", RegisteredProvider::class.java, newProvider)
+        info.set("oldProvider", RegisteredProvider::class.java, newProvider)
+        info.set("service", Class::class.java, service)
+    }
+
+    override fun getInfo(): Info {
+        return info
+    }
 }
