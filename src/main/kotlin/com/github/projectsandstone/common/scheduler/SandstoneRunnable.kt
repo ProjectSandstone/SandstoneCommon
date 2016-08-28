@@ -27,15 +27,19 @@
  */
 package com.github.projectsandstone.common.scheduler
 
+import com.github.projectsandstone.api.Sandstone
+
 /**
  * Created by jonathan on 28/08/16.
  */
-class SandstoneRunnable(val name: String?, val runnable: Runnable) : Runnable {
+class SandstoneRunnable(val plugin: Any, val name: String?, val runnable: Runnable) : Runnable {
+    val pluginContainer = Sandstone.game.pluginManager.getRequiredPlugin(plugin)
+
     override fun run() {
         try {
             runnable.run()
         } catch (t: Throwable) {
-            throw RuntimeException("An exception occurred during task execution. (Task Name: $name, Runnable: $runnable)")
+            Sandstone.logger.exception(RuntimeException("An exception occurred during task execution. (Task Name: $name, Runnable: $runnable, plugin: $plugin)", t))
         }
     }
 }

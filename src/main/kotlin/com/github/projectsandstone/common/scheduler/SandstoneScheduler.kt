@@ -44,7 +44,7 @@ abstract class SandstoneScheduler : Scheduler {
         return com.github.projectsandstone.common.scheduler.SandstoneExecutorService(this, plugin, isAsync = true)
     }
 
-    override fun createTask(name: String?, delay: Duration, interval: Duration, isAsync: Boolean, runnable: Runnable): Task {
-        return SandstoneTask(name, delay, interval, isAsync, runnable)
+    override fun createTask(plugin: Any, name: String?, delay: Duration, interval: Duration, isAsync: Boolean, runnable: Runnable): Task {
+        return SandstoneTask(plugin, name, delay, interval, isAsync, runnable)
     }
 }

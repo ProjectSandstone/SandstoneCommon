@@ -27,17 +27,23 @@
  */
 package com.github.projectsandstone.common.scheduler
 
+import com.github.projectsandstone.api.Sandstone
 import com.github.projectsandstone.api.scheduler.Task
 import java.time.Duration
 
 /**
  * Created by jonathan on 27/08/16.
  */
-data class SandstoneTask(override val name: String?,
+data class SandstoneTask(override val plugin: Any,
+                         override val name: String?,
                          override val delay: Duration,
                          override val interval: Duration,
                          override val isAsync: Boolean,
                          val runnable_: Runnable) : Task {
 
-    override val runnable: Runnable = SandstoneRunnable(name, runnable_)
+    init {
+        Sandstone.game.pluginManager.getRequiredPlugin(plugin)
+    }
+
+    override val runnable: Runnable = SandstoneRunnable(plugin, name, runnable_)
 }

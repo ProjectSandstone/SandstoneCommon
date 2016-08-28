@@ -51,9 +51,13 @@ class SandstoneExecutorService(val scheduler: Scheduler, val plugin: Any, val is
 
         val callableTask: CallableTask<V> = CallableTask(callable)
 
-        val task = scheduler.createTask(delay = Duration.ofMillis(delayMillis), isAsync = isAsync, runnable = callableTask)
+        val task = scheduler.createTask(
+                plugin = plugin,
+                delay = Duration.ofMillis(delayMillis),
+                isAsync = isAsync,
+                runnable = callableTask)
 
-        val submitted = scheduler.submit(plugin, task)
+        val submitted = scheduler.submit(task)
 
         return ScheduledFutureTaskImpl(task, submitted, callableTask)
     }
@@ -61,7 +65,7 @@ class SandstoneExecutorService(val scheduler: Scheduler, val plugin: Any, val is
     override fun isTerminated(): Boolean = false
 
     override fun execute(command: Runnable) {
-        scheduler.submit(plugin, scheduler.createTask(delay = Duration.ZERO, isAsync = false, runnable = command))
+        scheduler.submit(scheduler.createTask(plugin = plugin, delay = Duration.ZERO, isAsync = false, runnable = command))
     }
 
     override fun shutdown() {
@@ -80,12 +84,14 @@ class SandstoneExecutorService(val scheduler: Scheduler, val plugin: Any, val is
 
         val callableTask: CallableTask<*> = CallableTask(Executors.callable(command))
 
-        val task = scheduler.createTask(delay = Duration.ofMillis(delay),
+        val task = scheduler.createTask(
+                plugin = plugin,
+                delay = Duration.ofMillis(delay),
                 interval = Duration.ofMillis(periodMillis),
                 isAsync = isAsync,
                 runnable = callableTask)
 
-        val submitted = scheduler.submit(plugin, task)
+        val submitted = scheduler.submit(task)
 
         return ScheduledFutureTaskImpl(task, submitted, callableTask)
     }
