@@ -59,13 +59,17 @@ class SandstoneEventManager : EventManager {
         }
 
         listeners.filter {
-            it.eventListener is PluginMethodListener && it.eventType.compareToAssignable(eventType) == 0
+            it.eventListener is PluginMethodListener
+                    && it.eventType.compareToAssignable(eventType) == 0
+                    && it.eventListener.isBeforeModifications() == isBeforeModifications
         }.forEach {
             tryDispatch(it, event, pluginContainer, isBeforeModifications)
         }
 
         listeners.filter {
-            it.eventListener !is PluginMethodListener && it.eventType.compareToAssignable(eventType) == 0
+            it.eventListener !is PluginMethodListener
+                    && it.eventType.compareToAssignable(eventType) == 0
+                    && it.eventListener.isBeforeModifications() == isBeforeModifications
         }.forEach {
             tryDispatch(it, event, pluginContainer, isBeforeModifications)
         }
@@ -186,6 +190,7 @@ class SandstoneEventManager : EventManager {
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     fun <T : Event> EventListener<T>.helpOnEvent(event: Any, pluginContainer: PluginContainer) {
         this.onEvent(event as T, pluginContainer)
     }
