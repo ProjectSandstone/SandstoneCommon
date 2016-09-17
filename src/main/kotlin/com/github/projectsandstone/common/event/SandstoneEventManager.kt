@@ -193,9 +193,7 @@ class SandstoneEventManager : EventManager {
 
 
     private fun createMethodListeners(plugin: Any,
-                                      instance: Any,
-                                      isBeforeModifications: Boolean = false,
-                                      eventPriority: EventPriority = EventPriority.NORMAL): List<MethodEventListener> {
+                                      instance: Any): List<MethodEventListener> {
 
         return instance.javaClass.declaredMethods.filter {
             it.getDeclaredAnnotation(Listener::class.java) != null
