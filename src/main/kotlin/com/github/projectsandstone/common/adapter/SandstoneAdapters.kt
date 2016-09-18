@@ -36,6 +36,7 @@ import com.github.jonathanxd.iutils.containers.MutableContainer
 import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 
 /**
@@ -77,6 +78,9 @@ class SandstoneAdapters {
 
             this.store(type, instance, container.value, get)
 
+            if(isDebug)
+                save(adaptersDir)
+
             return get
         } else {
             return null
@@ -117,6 +121,17 @@ class SandstoneAdapters {
             Files.write(resolvedClass, class_, StandardOpenOption.CREATE)
             Files.write(resolvedJava, source_, StandardOpenOption.CREATE)
 
+        }
+    }
+
+    companion object {
+        val adaptersDir = Paths.get(".", "Sandstone", "Adapters")
+        val isDebug = getBooleanProperty("sandstone.adapters.debug")
+
+        fun getBooleanProperty(name: String): Boolean {
+            val prop = System.getProperties()[name]
+
+            return if (prop == null) false else prop == "true"
         }
     }
 }
