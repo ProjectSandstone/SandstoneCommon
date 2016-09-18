@@ -27,10 +27,19 @@
  */
 package com.github.projectsandstone.common.adapter
 
+import com.github.jonathanxd.adapter.AdaptedClassInfo
 import com.github.jonathanxd.adapter.AdapterEnvironment
 import com.github.jonathanxd.adapter.AdapterFactory
 import com.github.jonathanxd.adapter.adapter.AdapterSpecificationSpec
 import com.github.jonathanxd.iutils.`object`.Bi
+import com.github.jonathanxd.iutils.containers.Container
+import com.github.jonathanxd.iutils.containers.MutableContainer
+import java.nio.charset.Charset
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.nio.file.StandardOpenOption
+import java.util.function.Consumer
 
 /**
  * Created by jonathan on 28/08/16.
@@ -45,19 +54,30 @@ class SandstoneAdapters {
      *
      * Cached adapters is good because avoid class generation.
      */
-    private val map: MutableMap<Bi<Class<*>, Any>, Any> = mutableMapOf()
+    private val map: MutableMap<Bi<Class<*>, Any>, Bi<AdaptedClassInfo, Any>> = mutableMapOf()
 
     fun registerAdapterSpecification(adapterSpecificationSpec: AdapterSpecificationSpec) {
         this.adapterEnvironment.registerAdapterSpecification(adapterSpecificationSpec)
     }
 
     fun adapt(type: Class<*>, instance: Any) : Any? {
-        val opt = this.adapterEnvironment.adapt<Any>(type, instance)
+
+        val bi = Bi(type, instance)
+
+        if(this.map.containsKey(bi)) {
+            return this.map[bi]!!._2()
+        }
+
+        val container = MutableContainer<AdaptedClassInfo>()
+
+        val opt = this.adapterEnvironment.adapt<Any>(type, instance, { info ->
+            container.set(info)
+        })
 
         if(opt.isPresent) {
             val get = opt.get()
 
-            this.store(type, instance, get)
+            this.store(type, instance, container.value, get)
 
             return get
         } else {
@@ -65,7 +85,40 @@ class SandstoneAdapters {
         }
     }
 
-    fun store(type: Class<*>, instance: Any, generated: Any) = this.map.put(Bi(type, instance), generated)
+    fun store(type: Class<*>, instance: Any, info: AdaptedClassInfo, generated: Any) = this.map.put(Bi(type, instance), Bi(info, generated))
 
     fun remove(type: Class<*>, instance: Any) = this.map.remove(Bi(type, instance))
+
+    /**
+     * Save adapters
+     */
+    fun save(path: Path) {
+        Files.deleteIfExists(path)
+
+        this.map.forEach {
+            val key = it.key
+            val value = it.value
+
+            val generatedClass = value._1().generatedClass
+
+            val class_ = generatedClass.bytes
+            val source_ = generatedClass.source.toByteArray(charset = Charset.forName("UTF-8"))
+
+
+            val saveClass = "class/${key._1().canonicalName.replace('.', '/')}.class"
+            val saveJava = "java/${key._1().canonicalName.replace('.', '/')}.java"
+
+            val resolvedClass = path.resolve(saveClass)
+            val resolvedJava = path.resolve(saveJava)
+
+            Files.createDirectories(resolvedClass.parent)
+            Files.createDirectories(resolvedJava.parent)
+
+
+
+            Files.write(resolvedClass, class_, StandardOpenOption.CREATE)
+            Files.write(resolvedJava, source_, StandardOpenOption.CREATE)
+
+        }
+    }
 }
