@@ -95,18 +95,17 @@ class SandstoneAdapters {
      * Save adapters
      */
     fun save(path: Path) {
-        this.map.forEach {
-            val key = it.key
-            val value = it.value
+        this.adapterEnvironment.adaptedClasses.forEach {
 
-            val generatedClass = value._1().generatedClass
+            val adapterClass = it.adapterClass
+            val generatedClass = it.generatedClass
 
             val class_ = generatedClass.bytes
             val source_ = generatedClass.source.toByteArray(charset = Charset.forName("UTF-8"))
 
 
-            val saveClass = "class/${key._1().canonicalName.replace('.', '/')}.class"
-            val saveJava = "java/${key._1().canonicalName.replace('.', '/')}.java"
+            val saveClass = "class/${adapterClass.canonicalName.replace('.', '/')}.class"
+            val saveJava = "java/${adapterClass.canonicalName.replace('.', '/')}.java"
 
             val resolvedClass = path.resolve(saveClass)
             val resolvedJava = path.resolve(saveJava)
