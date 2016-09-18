@@ -95,8 +95,6 @@ class SandstoneAdapters {
      * Save adapters
      */
     fun save(path: Path) {
-        Files.deleteIfExists(path)
-
         this.map.forEach {
             val key = it.key
             val value = it.value
@@ -113,10 +111,13 @@ class SandstoneAdapters {
             val resolvedClass = path.resolve(saveClass)
             val resolvedJava = path.resolve(saveJava)
 
+            try {
+                Files.deleteIfExists(resolvedClass)
+                Files.deleteIfExists(resolvedJava)
+            } catch (ignored: Exception) {}
+
             Files.createDirectories(resolvedClass.parent)
             Files.createDirectories(resolvedJava.parent)
-
-
 
             Files.write(resolvedClass, class_, StandardOpenOption.CREATE)
             Files.write(resolvedJava, source_, StandardOpenOption.CREATE)
