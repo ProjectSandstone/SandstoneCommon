@@ -32,14 +32,11 @@ import com.github.jonathanxd.adapter.AdapterEnvironment
 import com.github.jonathanxd.adapter.AdapterFactory
 import com.github.jonathanxd.adapter.adapter.AdapterSpecificationSpec
 import com.github.jonathanxd.iutils.`object`.Bi
-import com.github.jonathanxd.iutils.containers.Container
 import com.github.jonathanxd.iutils.containers.MutableContainer
 import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
-import java.util.function.Consumer
 
 /**
  * Created by jonathan on 28/08/16.
@@ -58,13 +55,14 @@ class SandstoneAdapters {
 
     fun registerAdapterSpecification(adapterSpecificationSpec: AdapterSpecificationSpec) {
         this.adapterEnvironment.registerAdapterSpecification(adapterSpecificationSpec)
+        this.adapterEnvironment.adaptToInfo(adapterSpecificationSpec.specificationProviders)
     }
 
-    fun adapt(type: Class<*>, instance: Any) : Any? {
+    fun adapt(type: Class<*>, instance: Any): Any? {
 
         val bi = Bi(type, instance)
 
-        if(this.map.containsKey(bi)) {
+        if (this.map.containsKey(bi)) {
             return this.map[bi]!!._2()
         }
 
@@ -74,7 +72,7 @@ class SandstoneAdapters {
             container.set(info)
         })
 
-        if(opt.isPresent) {
+        if (opt.isPresent) {
             val get = opt.get()
 
             this.store(type, instance, container.value, get)
