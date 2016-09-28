@@ -42,13 +42,7 @@ import java.nio.file.Path
 /**
  * Created by jonathan on 15/08/16.
  */
-abstract class AbstractGame(override val gamePath: Path,
-                            override val platform: Platform,
-                            override val eventManager: EventManager = SandstoneEventManager(),
-                            override val pluginManager: PluginManager = SandstonePluginManager(),
-                            override val serviceManager: ServiceManager,
-                            override val scheduler: Scheduler,
-                            override val savePath: Path,
-                            override val server: Server) : Game {
+abstract class AbstractGame(override val eventManager: EventManager = SandstoneEventManager(),
+                            override val pluginManager: PluginManager = SandstonePluginManager()) : Game {
 
 }
