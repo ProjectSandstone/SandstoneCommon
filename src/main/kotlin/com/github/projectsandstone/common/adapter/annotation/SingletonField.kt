@@ -25,36 +25,6 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.test
+package com.github.projectsandstone.common.adapter.annotation
 
-import com.github.projectsandstone.api.Sandstone
-import com.github.projectsandstone.common.test.platform.SandstoneTestMain
-import java.util.*
-
-fun main(args: Array<String>) {
-    SandstoneTestMain.main(args)
-
-    val resourceAsStream = SandstoneTestMain.javaClass.classLoader.getResourceAsStream("plugins.properties")
-
-    val properties = Properties()
-
-    properties.load(resourceAsStream)
-
-    val keys = properties.keys.toString()
-
-    Sandstone.logger.info("Loading plugins: $keys...")
-
-    /*properties.values.forEach {
-        Sandstone.pluginManager.loadPlugins(arrayOf(it as String))
-    }*/
-
-
-
-    Sandstone.pluginManager.loadPlugins(properties.values.map { it as String }.toTypedArray())
-
-    Sandstone.pluginManager.loadAllPlugins()
-
-    SandstoneTestMain.init()
-    SandstoneTestMain.stop()
-
-}
+annotation class SingletonField(val value: String)

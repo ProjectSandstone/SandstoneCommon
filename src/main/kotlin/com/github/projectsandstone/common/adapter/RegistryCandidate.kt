@@ -25,36 +25,15 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.test
+package com.github.projectsandstone.common.adapter
 
-import com.github.projectsandstone.api.Sandstone
-import com.github.projectsandstone.common.test.platform.SandstoneTestMain
-import java.util.*
+import com.github.jonathanxd.adapter.spec.Specification
+import com.github.projectsandstone.common.adapter.annotation.RegistryType
 
-fun main(args: Array<String>) {
-    SandstoneTestMain.main(args)
+interface RegistryCandidate<out T : Specification> {
 
-    val resourceAsStream = SandstoneTestMain.javaClass.classLoader.getResourceAsStream("plugins.properties")
-
-    val properties = Properties()
-
-    properties.load(resourceAsStream)
-
-    val keys = properties.keys.toString()
-
-    Sandstone.logger.info("Loading plugins: $keys...")
-
-    /*properties.values.forEach {
-        Sandstone.pluginManager.loadPlugins(arrayOf(it as String))
-    }*/
-
-
-
-    Sandstone.pluginManager.loadPlugins(properties.values.map { it as String }.toTypedArray())
-
-    Sandstone.pluginManager.loadAllPlugins()
-
-    SandstoneTestMain.init()
-    SandstoneTestMain.stop()
+    val id: String
+    val spec: T
+    val registryType: RegistryType<T>
 
 }

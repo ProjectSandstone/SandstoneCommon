@@ -44,7 +44,8 @@ open class SandstonePluginContainer(override val file: Path?,
                                     var usePlatformInternals_: Boolean,
                                     override val classLoader: PluginClassLoader,
                                     override val dependencies: Array<DependencyContainer>?,
-                                    var authors_: Array<String>?) : PluginContainer {
+                                    var authors_: Array<String>?,
+                                    override val mainClass: String) : PluginContainer {
 
     internal var definition: SandstonePluginDefinition? = null
     internal var instance_: Any? = null
@@ -87,7 +88,7 @@ open class SandstonePluginContainer(override val file: Path?,
     }
 
     override fun hashCode(): Int {
-        return super.hashCode()
+        return this.id.hashCode()
     }
 
     override fun toString(): String {
@@ -95,7 +96,7 @@ open class SandstonePluginContainer(override val file: Path?,
     }
 
     companion object {
-        fun fromAnnotation(pluginClassLoader: PluginClassLoader, file: Path?, annotation: Plugin): SandstonePluginContainer {
+        fun fromAnnotation(pluginClassLoader: PluginClassLoader, file: Path?, mainClass: String, annotation: Plugin): SandstonePluginContainer {
             return SandstonePluginContainer(
                     id_ = annotation.id,
                     name_ = annotation.name.ifEmpty { annotation.id },
@@ -107,7 +108,8 @@ open class SandstonePluginContainer(override val file: Path?,
                         SandstoneDependencyContainer(it.id, it.incompatibleVersions, it.isRequired, it.version)
                     }.toTypedArray(),
                     classLoader = pluginClassLoader,
-                    usePlatformInternals_ = annotation.usePlatformInternals
+                    usePlatformInternals_ = annotation.usePlatformInternals,
+                    mainClass = mainClass
 
             )
         }

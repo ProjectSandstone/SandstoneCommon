@@ -94,7 +94,6 @@ class ManagerPlugin @Inject constructor(val game: Game, val logger: Logger) {
         val oldProviderStr = event.oldProvider?.provider?.javaClass?.toString() ?: "null"
         val newProviderStr = event.newProvider.provider.javaClass.toString()
         println("$tag -> Provider of '${event.service}' changed from '${oldProviderStr}' to '${newProviderStr}'.")
-        throw IllegalStateException()
     }
 
 }

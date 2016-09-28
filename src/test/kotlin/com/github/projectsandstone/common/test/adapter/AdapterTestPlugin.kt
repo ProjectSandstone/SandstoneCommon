@@ -25,36 +25,23 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.test
+package com.github.projectsandstone.common.test.adapter
 
-import com.github.projectsandstone.api.Sandstone
-import com.github.projectsandstone.common.test.platform.SandstoneTestMain
-import java.util.*
+import com.github.projectsandstone.api.event.Listener
+import com.github.projectsandstone.api.event.init.PreInitializationEvent
+import com.github.projectsandstone.api.logging.Logger
+import com.github.projectsandstone.api.plugin.Plugin
+import com.github.projectsandstone.common.adapter.Adapters
+import javax.inject.Inject
 
-fun main(args: Array<String>) {
-    SandstoneTestMain.main(args)
+@Plugin(id = "com.github.projectsandstone.common.test.AdapterTestPlugin", name = "Adapter Test Plugin", version = "1.0.0")
+class AdapterTestPlugin @Inject constructor(val logger: Logger) {
 
-    val resourceAsStream = SandstoneTestMain.javaClass.classLoader.getResourceAsStream("plugins.properties")
+    @Listener
+    fun preInit(event: PreInitializationEvent) {
+        Adapters.adapters.registerAll(this.javaClass.classLoader, "converters")
 
-    val properties = Properties()
-
-    properties.load(resourceAsStream)
-
-    val keys = properties.keys.toString()
-
-    Sandstone.logger.info("Loading plugins: $keys...")
-
-    /*properties.values.forEach {
-        Sandstone.pluginManager.loadPlugins(arrayOf(it as String))
-    }*/
-
-
-
-    Sandstone.pluginManager.loadPlugins(properties.values.map { it as String }.toTypedArray())
-
-    Sandstone.pluginManager.loadAllPlugins()
-
-    SandstoneTestMain.init()
-    SandstoneTestMain.stop()
+        logger.info("Converter = ${Adapters.adapters.adapterEnvironment.getConverter("CONVERTER_9")}")
+    }
 
 }

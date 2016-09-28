@@ -50,6 +50,11 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
             return
         }
 
+        if(plugin.state_ != PluginState.ABOUT_TO_LOAD) {
+            Sandstone.logger.error("Cannot load plugin container: $plugin. Already loaded!")
+            return
+        }
+
         val pluginClassLoader = plugin.classLoader
 
         if (pluginClassLoader !is ClassLoader) {
@@ -60,30 +65,30 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
         plugin.logger_ = Sandstone.loggerFactory.createLogger(plugin)
         plugin.state_ = PluginState.LOADING
 
-        pluginClassLoader.classes.forEach {
+        val clName = plugin.mainClass
 
-            if (plugin.state_ != PluginState.FAILED) {
+        if (plugin.state_ != PluginState.FAILED) {
 
-                try {
-                    val klass = pluginClassLoader.loadClass(it)
+            try {
+                val klass = pluginClassLoader.loadClass(clName)
 
-                    val injector = SandstoneModule.injector.createChildInjector(SandstonePluginModule(pluginManager, plugin, klass))
+                val injector = SandstoneModule.injector.createChildInjector(SandstonePluginModule(pluginManager, plugin, klass))
 
-                    val instance = injector.getInstance(klass)
+                val instance = injector.getInstance(klass)
 
-                    plugin.definition!!.invalidate()
-                    plugin.definition = null
-                    plugin.instance_ = instance
+                plugin.definition!!.invalidate()
+                plugin.definition = null
+                plugin.instance_ = instance
 
-                    // Register listeners (GameStartEvent) etc.
-                    // Plugin Listeners WILL RUN BEFORE all listeners, in dependency order.
-                    Sandstone.game.eventManager.registerListeners(instance, instance)
-                } catch (exception: Exception) {
-                    plugin.state_ = PluginState.FAILED
-                    Sandstone.logger.exception(exception, "Failed to load plugin: $plugin!")
-                }
+                // Register listeners (GameStartEvent) etc.
+                // Plugin Listeners WILL RUN BEFORE all listeners, in dependency order.
+                Sandstone.game.eventManager.registerListeners(instance, instance)
+            } catch (exception: Exception) {
+                plugin.state_ = PluginState.FAILED
+                Sandstone.logger.exception(exception, "Failed to load plugin: $plugin!")
             }
         }
+
 
         if (plugin.state_ != PluginState.FAILED) {
             plugin.state_ = PluginState.LOADED
@@ -157,7 +162,11 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
                     val declaredAnnotation = it.getDeclaredAnnotation(Plugin::class.java)
 
                     if (declaredAnnotation != null) {
-                        val container = SandstonePluginContainer.fromAnnotation(classLoader, file, declaredAnnotation)
+                        val container = SandstonePluginContainer.fromAnnotation(
+                                classLoader,
+                                file,
+                                it.canonicalName,
+                                declaredAnnotation)
 
                         val definition = SandstonePluginDefinition(container)
 

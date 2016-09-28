@@ -25,36 +25,26 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.test
+package com.github.projectsandstone.common.test.adapter
 
-import com.github.projectsandstone.api.Sandstone
-import com.github.projectsandstone.common.test.platform.SandstoneTestMain
-import java.util.*
+import com.github.jonathanxd.adapter.info.CallInfo
+import com.github.jonathanxd.adapter.spec.ConverterSpec
+import com.github.projectsandstone.common.adapter.RegistryCandidate
+import com.github.projectsandstone.common.adapter.annotation.RegistryType
+import com.github.projectsandstone.common.adapter.annotation.RegistryTypes
 
-fun main(args: Array<String>) {
-    SandstoneTestMain.main(args)
+object MyConverter : RegistryCandidate<ConverterSpec> {
+    override val id: String = "CONVERTER_9"
 
-    val resourceAsStream = SandstoneTestMain.javaClass.classLoader.getResourceAsStream("plugins.properties")
+    override val spec: ConverterSpec = ConverterSpec(MyConverter::class.java, "convert", Int::class.javaPrimitiveType, arrayOf(String::class.java))
 
-    val properties = Properties()
-
-    properties.load(resourceAsStream)
-
-    val keys = properties.keys.toString()
-
-    Sandstone.logger.info("Loading plugins: $keys...")
-
-    /*properties.values.forEach {
-        Sandstone.pluginManager.loadPlugins(arrayOf(it as String))
-    }*/
+    override val registryType: RegistryType<ConverterSpec> = RegistryTypes.Converter(
+            Int::class.javaPrimitiveType!!,
+            String::class.java)
 
 
-
-    Sandstone.pluginManager.loadPlugins(properties.values.map { it as String }.toTypedArray())
-
-    Sandstone.pluginManager.loadAllPlugins()
-
-    SandstoneTestMain.init()
-    SandstoneTestMain.stop()
-
+    @JvmStatic
+    fun convert(callInfo: CallInfo, input: String): Int {
+        return input.toInt()
+    }
 }

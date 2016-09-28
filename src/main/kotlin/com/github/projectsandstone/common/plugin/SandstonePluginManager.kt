@@ -75,7 +75,10 @@ class SandstonePluginManager : PluginManager {
     override fun loadPlugin(pluginContainer: PluginContainer): Boolean {
 
         try {
-            this.pluginSet.add(pluginContainer)
+
+            if(!this.pluginSet.any{pluginContainer.equals(it)}) {
+                this.pluginSet.add(pluginContainer)
+            }
 
             this.pluginLoader.load(pluginContainer)
 
