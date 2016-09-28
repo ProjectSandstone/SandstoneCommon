@@ -29,9 +29,9 @@ package com.github.projectsandstone.common.plugin
 
 import com.github.projectsandstone.api.Sandstone
 import com.github.projectsandstone.api.plugin.*
-import com.github.projectsandstone.common.Constants
 import com.github.projectsandstone.common.asm.ASM
 import com.github.projectsandstone.common.asm.SimpleDesc
+import com.github.projectsandstone.common.guice.SandstoneModule
 import com.github.projectsandstone.common.guice.SandstonePluginModule
 import java.net.URL
 import java.nio.file.Path
@@ -62,12 +62,12 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
 
         pluginClassLoader.classes.forEach {
 
-            if(plugin.state_ != PluginState.FAILED) {
+            if (plugin.state_ != PluginState.FAILED) {
 
                 try {
                     val klass = pluginClassLoader.loadClass(it)
 
-                    val injector = Constants.injector.createChildInjector(SandstonePluginModule(pluginManager, plugin, klass))
+                    val injector = SandstoneModule.injector.createChildInjector(SandstonePluginModule(pluginManager, plugin, klass))
 
                     val instance = injector.getInstance(klass)
 
@@ -85,9 +85,13 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
             }
         }
 
-        if(plugin.state_ != PluginState.FAILED) {
+        if (plugin.state_ != PluginState.FAILED) {
             plugin.state_ = PluginState.LOADED
         }
+    }
+
+    override fun loadClasses(classes: Array<String>): List<PluginContainer> {
+        return this.loadClasses(classes.toList(), null, false)
     }
 
     override fun loadFile(file: Path): List<PluginContainer> {
@@ -103,7 +107,7 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
         while (enumeration.hasMoreElements()) {
             val next = enumeration.nextElement()
 
-            if(!next.name.endsWith(".class"))
+            if (!next.name.endsWith(".class"))
                 continue
 
             val stream = jarFile.getInputStream(next)
@@ -116,7 +120,7 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
 
                 var name = next.name
 
-                name = name.replace('/', '.').substring(0, name.length-CLASS_LENGTH)
+                name = name.replace('/', '.').substring(0, name.length - CLASS_LENGTH)
 
                 mutableClasses.add(name)
             }
@@ -125,44 +129,49 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
 
         val classes = mutableClasses.toList()
 
-        if (classes.size != 0) {
-            val urls = arrayOf(URL("jar:file:$filePathAsFile!/"))
+        return this.loadClasses(classes, file, simpleDesc?.usePlatformInternals ?: false)
+    }
 
-            val classLoader = SandstoneClassLoader(
-                    urls = urls,
-                    file = file,
-                    parent = this.javaClass.classLoader,
-                    useInternal = simpleDesc!!.usePlatformInternals,
-                    classes = classes)
 
-            val containers = mutableListOf<PluginContainer>()
+    private fun loadClasses(classes: List<String>, file: Path? = null, useInternal: Boolean): List<PluginContainer> {
 
-            containers +=
-                    classes.map {
-                        classLoader.loadClass(it)
-                    }.map {
-                        val declaredAnnotation = it.getDeclaredAnnotation(Plugin::class.java)
-
-                        if (declaredAnnotation != null) {
-                            val container = SandstonePluginContainer.fromAnnotation(classLoader, file, declaredAnnotation)
-
-                            val definition = SandstonePluginDefinition(container)
-
-                            container.definition = definition
-
-                            container.state_ = PluginState.ABOUT_TO_LOAD
-
-                            /*return */container
-                        } else {
-                            null
-                        }
-                    }.filterNotNull()
-
-            return containers.toList()
+        if (classes.isEmpty()) {
+            throw IllegalArgumentException("Empty class collection!")
         }
 
-        return emptyList()
+        val urls = arrayOf<URL>()
+
+        val classLoader = SandstoneClassLoader(
+                urls = urls,
+                file = file,
+                parent = this.javaClass.classLoader,
+                useInternal = useInternal,
+                classes = classes)
+
+        val containers = mutableListOf<PluginContainer>()
+
+        containers +=
+                classes.map {
+                    classLoader.loadClass(it)
+                }.map {
+                    val declaredAnnotation = it.getDeclaredAnnotation(Plugin::class.java)
+
+                    if (declaredAnnotation != null) {
+                        val container = SandstonePluginContainer.fromAnnotation(classLoader, file, declaredAnnotation)
+
+                        val definition = SandstonePluginDefinition(container)
+
+                        container.definition = definition
+
+                        container.state_ = PluginState.ABOUT_TO_LOAD
+
+                        /*return@map */container
+                    } else {
+                        null
+                    }
+                }.filterNotNull()
+
+        return containers.toList()
     }
 
 }
-

@@ -25,14 +25,34 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.event.init
+package com.github.projectsandstone.common.test.platform
 
-import com.github.projectsandstone.api.event.init.PostInitializationEvent
-import com.github.projectsandstone.common.event.SandstoneBaseEvent
+import com.github.projectsandstone.api.Game
+import com.github.projectsandstone.api.Platform
+import com.github.projectsandstone.api.Server
+import com.github.projectsandstone.api.event.EventManager
+import com.github.projectsandstone.api.plugin.PluginManager
+import com.github.projectsandstone.api.scheduler.Scheduler
+import com.github.projectsandstone.api.service.ServiceManager
+import com.github.projectsandstone.common.event.SandstoneEventManager
+import com.github.projectsandstone.common.plugin.SandstonePluginManager
+import java.nio.file.Path
+import java.nio.file.Paths
 
-/**
- * Created by jonathan on 23/08/16.
- */
-class PostInitializationEventImpl : SandstoneBaseEvent, PostInitializationEvent {
+class TestGame : Game {
+    override val eventManager: EventManager = SandstoneEventManager()
 
+    override val gamePath: Path = Paths.get("/")
+
+    override val platform: Platform = TestPlatform()
+
+    override val pluginManager: PluginManager = SandstonePluginManager()
+
+    override val savePath: Path = Paths.get("/")
+
+    override val scheduler: Scheduler = TestScheduler()
+
+    override val server: Server = TestServer()
+
+    override val serviceManager: ServiceManager = TestServiceManager()
 }

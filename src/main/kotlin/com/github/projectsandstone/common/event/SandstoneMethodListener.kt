@@ -48,7 +48,13 @@ open class SandstoneMethodListener(override val eventType: TypeInfo<Event>,
                               val method_: Method,
                               val priority_: EventPriority) : MethodEventListener {
 
-    override val method: MethodHandle = lookup.unreflect(this.method_).bindTo(this.instance)
+    private val backingMethod_: MethodHandle by lazy {
+        lookup.unreflect(this.method_).bindTo(this.instance)
+    }
+
+    override val method: MethodHandle
+        get() = backingMethod_
+
     override val parameters: Array<TypeInfo<*>> = this.method_.genericParameterTypes.map { TypeUtil.toReference(it) }.toTypedArray()
 
     internal val namedParameters: Array<com.github.jonathanxd.iutils.`object`.Named<TypeInfo<*>>> =
@@ -64,6 +70,9 @@ open class SandstoneMethodListener(override val eventType: TypeInfo<Event>,
             }.toTypedArray()
 
     override fun onEvent(event: Event, pluginContainer: PluginContainer) {
+
+
+
         // Process [parameters]
         if(parameters.size == 1) {
             method.invokeWithArguments(event)
@@ -75,7 +84,7 @@ open class SandstoneMethodListener(override val eventType: TypeInfo<Event>,
                     val name = named.name
                     val typeInfo = named.value
 
-                    args += event.getInfo().first(name, typeInfo)
+                    args += event.getProperty(typeInfo.aClass, name)
                 }
             }
 

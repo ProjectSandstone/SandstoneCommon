@@ -34,11 +34,14 @@ import com.github.projectsandstone.api.event.EventManager
 import com.github.projectsandstone.api.plugin.PluginManager
 import com.github.projectsandstone.api.service.ServiceManager
 import com.google.inject.AbstractModule
+import com.google.inject.Guice
 
 /**
  * Created by jonathan on 17/08/16.
  */
 object SandstoneModule : AbstractModule() {
+    val injector = Guice.createInjector(SandstoneModule)
+
     override fun configure() {
         bind(Game::class.java).toInstance(Sandstone.game)
         bind(Platform::class.java).toInstance(Sandstone.game.platform)

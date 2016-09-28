@@ -25,14 +25,21 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.event.init
+package com.github.projectsandstone.common.test.platform
 
-import com.github.projectsandstone.api.event.init.InitializationEvent
-import com.github.projectsandstone.common.event.SandstoneBaseEvent
+import com.github.projectsandstone.api.Server
+import com.github.projectsandstone.api.world.World
 
-/**
- * Created by jonathan on 23/08/16.
- */
-class InitializationEventImpl : SandstoneBaseEvent, InitializationEvent {
+class TestServer : Server {
+    override val ip: String = "0.0.0.0"
 
+    override val maxPlayers: Int = 0
+
+    override val motd: String = "Test Server"
+
+    override val port: Int = 25565
+
+    override val serverName: String = "Test Server"
+
+    override val worlds: List<World> = emptyList()
 }

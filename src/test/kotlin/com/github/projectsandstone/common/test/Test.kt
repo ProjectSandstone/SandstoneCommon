@@ -25,34 +25,30 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.guice
+package com.github.projectsandstone.common.test
 
-import com.github.projectsandstone.api.logging.Logger
-import com.github.projectsandstone.api.plugin.PluginContainer
-import com.github.projectsandstone.api.plugin.PluginDefinition
-import com.github.projectsandstone.api.plugin.PluginManager
-import com.github.projectsandstone.common.plugin.SandstonePluginContainer
-import com.google.inject.AbstractModule
-import com.google.inject.Scopes
-import com.google.inject.name.Names
+import com.github.projectsandstone.api.Sandstone
+import com.github.projectsandstone.common.test.platform.SandstoneTestMain
+import java.util.*
 
-/**
- * Created by jonathan on 17/08/16.
- */
-class SandstonePluginModule(val pluginManager: PluginManager, val pluginContainer: SandstonePluginContainer, val pluginClass: Class<*>) : AbstractModule() {
-    override fun configure() {
+fun main(args: Array<String>) {
+    SandstoneTestMain.main(args)
 
-        bind(PluginContainer::class.java).toInstance(this.pluginContainer)
-        bind(PluginDefinition::class.java).toInstance(this.pluginContainer.definition!!)
-        bind(Logger::class.java).toInstance(pluginContainer.logger)
-        bind(this.pluginClass).`in`(Scopes.SINGLETON)
+    val resourceAsStream = SandstoneTestMain.javaClass.classLoader.getResourceAsStream("plugins.properties")
 
-        // Bindings to @Named
+    val properties = Properties()
 
-        pluginManager.getPlugins().forEach {
-            bind(PluginContainer::class.java).annotatedWith(Names.named(it.id)).toInstance(it)
-        }
+    properties.load(resourceAsStream)
 
-    }
+    val keys = properties.keys.toString()
+
+    Sandstone.logger.info("Loading plugins: $keys...")
+
+    Sandstone.pluginManager.loadPlugins(properties.values.map { it as String }.toTypedArray())
+
+    Sandstone.pluginManager.loadAllPlugins()
+
+    SandstoneTestMain.init()
+    SandstoneTestMain.stop()
 
 }

@@ -95,7 +95,7 @@ open class SandstonePluginContainer(override val file: Path?,
     }
 
     companion object {
-        fun fromAnnotation(pluginClassLoader: PluginClassLoader, file: Path, annotation: Plugin): SandstonePluginContainer {
+        fun fromAnnotation(pluginClassLoader: PluginClassLoader, file: Path?, annotation: Plugin): SandstonePluginContainer {
             return SandstonePluginContainer(
                     id_ = annotation.id,
                     name_ = annotation.name.ifEmpty { annotation.id },

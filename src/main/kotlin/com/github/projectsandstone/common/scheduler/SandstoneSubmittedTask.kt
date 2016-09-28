@@ -25,14 +25,30 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.event.init
+package com.github.projectsandstone.common.scheduler
 
-import com.github.projectsandstone.api.event.init.ServerStoppedEvent
-import com.github.projectsandstone.common.event.SandstoneBaseEvent
+import com.github.projectsandstone.api.scheduler.SubmittedTask
+import com.github.projectsandstone.api.scheduler.Task
 
-/**
- * Created by jonathan on 23/08/16.
- */
-class ServerStoppedEventImpl : SandstoneBaseEvent, ServerStoppedEvent {
+class SandstoneSubmittedTask(override val task: Task,
+                             val canceller: (SubmittedTask) -> Unit,
+                             val runningFetcher: (SubmittedTask) -> Boolean,
+                             val submittedFetcher: (SubmittedTask) -> Boolean,
+                             val waitFinish: (SubmittedTask) -> Unit) : SubmittedTask {
+    override fun cancel() {
+        canceller(this)
+    }
+
+    override fun isRunning(): Boolean {
+        return runningFetcher(this)
+    }
+
+    override fun isSubmitted(): Boolean {
+        return submittedFetcher(this)
+    }
+
+    override fun waitFinish() {
+        waitFinish(this)
+    }
 
 }

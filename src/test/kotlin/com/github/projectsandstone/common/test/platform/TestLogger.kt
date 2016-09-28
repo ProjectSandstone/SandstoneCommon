@@ -25,34 +25,48 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.guice
+package com.github.projectsandstone.common.test.platform
 
+import com.github.projectsandstone.api.logging.LogLevel
 import com.github.projectsandstone.api.logging.Logger
-import com.github.projectsandstone.api.plugin.PluginContainer
-import com.github.projectsandstone.api.plugin.PluginDefinition
-import com.github.projectsandstone.api.plugin.PluginManager
-import com.github.projectsandstone.common.plugin.SandstonePluginContainer
-import com.google.inject.AbstractModule
-import com.google.inject.Scopes
-import com.google.inject.name.Names
 
-/**
- * Created by jonathan on 17/08/16.
- */
-class SandstonePluginModule(val pluginManager: PluginManager, val pluginContainer: SandstonePluginContainer, val pluginClass: Class<*>) : AbstractModule() {
-    override fun configure() {
+class TestLogger(val name: String?) : Logger {
 
-        bind(PluginContainer::class.java).toInstance(this.pluginContainer)
-        bind(PluginDefinition::class.java).toInstance(this.pluginContainer.definition!!)
-        bind(Logger::class.java).toInstance(pluginContainer.logger)
-        bind(this.pluginClass).`in`(Scopes.SINGLETON)
+    override fun log(level: LogLevel, message: String) {
+        val printer = getPrinter(level)
 
-        // Bindings to @Named
-
-        pluginManager.getPlugins().forEach {
-            bind(PluginContainer::class.java).annotatedWith(Names.named(it.id)).toInstance(it)
+        if (name != null) {
+            printer.println("[$name] $message")
+        } else {
+            printer.println(message)
         }
+    }
 
+    override fun log(level: LogLevel, exception: Exception) {
+        this.log(level, "Exception:")
+        exception.printStackTrace(getPrinter(level))
+    }
+
+    override fun log(level: LogLevel, exception: Exception, message: String) {
+        this.log(level, "Exception:")
+
+        this.log(level, message)
+        exception.printStackTrace(getPrinter(level))
+    }
+
+    override fun log(level: LogLevel, exception: Exception, format: String, vararg objects: Any) {
+        this.log(level, "Exception:")
+
+        this.log(level, String.format(format, *objects))
+        exception.printStackTrace(getPrinter(level))
+    }
+
+    override fun log(level: LogLevel, format: String, vararg objects: Any) {
+        this.log(level, String.format(format, *objects))
+    }
+
+    companion object {
+        private fun getPrinter(level: LogLevel) = if (level != LogLevel.ERROR && level != LogLevel.EXCEPTION) System.out else System.err
     }
 
 }

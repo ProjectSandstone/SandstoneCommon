@@ -25,14 +25,33 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.event.init
+package com.github.projectsandstone.common.util.event
 
-import com.github.projectsandstone.api.event.init.ServerStartedEvent
-import com.github.projectsandstone.common.event.SandstoneBaseEvent
+import com.github.jonathanxd.iutils.`object`.TypeInfo
+import com.github.jonathanxd.iutils.`object`.TypeUtil
+import com.github.projectsandstone.api.event.Event
+import com.github.projectsandstone.common.util.pair.pairFromArrays
+import java.lang.reflect.Type
 
-/**
- * Created by jonathan on 23/08/16.
- */
-class ServerStartedEventImpl : SandstoneBaseEvent, ServerStartedEvent {
+fun <T: Event> getEventTypes(event: T) : List<TypeInfo<*>> {
+    val jClass = event.javaClass
+    val superClass: Pair<Class<*>?, Type> = jClass.superclass to jClass.genericSuperclass
+    val interfaces: Array<Pair<Class<*>, Type>> = pairFromArrays(jClass.interfaces, jClass.genericInterfaces)
 
+    val types = mutableListOf<TypeInfo<*>>()
+
+    if(superClass.first != null && Event::class.java.isAssignableFrom(superClass.first)) {
+        types += TypeUtil.toReference(superClass.second)!!
+    }
+
+    for((itf, type) in interfaces) {
+        if(Event::class.java.isAssignableFrom(itf)) {
+            types += TypeUtil.toReference(type)!!
+        }
+    }
+
+    return types
 }
+
+fun <T: Event> getEventType(event: T) : TypeInfo<*> =
+        TypeUtil.toReference(event.javaClass)

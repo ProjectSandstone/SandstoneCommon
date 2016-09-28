@@ -44,7 +44,7 @@ class SandstoneClassLoader(
         /**
          * Plugin file
          */
-        override val file: Path,
+        override val file: Path?,
 
         /**
          * Plugin inform about the use of internal classes
@@ -105,5 +105,5 @@ class SandstoneClassLoader(
         this.pluginContainers_ += pluginContainer
     }
 
-    fun getPluginName(): String = if(!this.isInitialized) file.fileName.toString() else pluginContainers_[0].name
+    fun getPluginName(): String = if(!this.isInitialized) file?.fileName.toString() else pluginContainers_[0].name
 }

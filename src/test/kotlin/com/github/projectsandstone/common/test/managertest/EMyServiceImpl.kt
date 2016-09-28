@@ -25,29 +25,7 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.event.service
+package com.github.projectsandstone.common.test.managertest
 
-import com.github.projectsandstone.api.event.info.Info
-import com.github.projectsandstone.api.event.service.ChangeServiceProviderEvent
-import com.github.projectsandstone.api.service.RegisteredProvider
-
-/**
- * Created by jonathan on 28/08/16.
- */
-class ChangeServiceProviderEventImpl<T : Any>(override val newProvider: RegisteredProvider<T>,
-                                              override val oldProvider: RegisteredProvider<T>?,
-                                              override val service: Class<T>) : ChangeServiceProviderEvent<T> {
-
-    private val info: Info
-
-    init {
-        info = Info(mutableListOf())
-        info.set("newProvider", RegisteredProvider::class.java, newProvider)
-        info.set("oldProvider", RegisteredProvider::class.java, newProvider)
-        info.set("service", Class::class.java, service)
-    }
-
-    override fun getInfo(): Info {
-        return info
-    }
+class EMyServiceImpl(override val id: Int) : MyService {
 }

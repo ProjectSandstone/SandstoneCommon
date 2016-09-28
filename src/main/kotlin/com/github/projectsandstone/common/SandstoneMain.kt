@@ -25,14 +25,20 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.event.init
+package com.github.projectsandstone.common
 
-import com.github.projectsandstone.api.event.init.PreInitializationEvent
-import com.github.projectsandstone.common.event.SandstoneBaseEvent
+import javax.swing.JOptionPane
 
-/**
- * Created by jonathan on 23/08/16.
- */
-class PreInitializationEventImpl : SandstoneBaseEvent, PreInitializationEvent {
+fun main(args: Array<String>) {
+
+    val message = "===========================================================\n" +
+            "This is a Common Implementation of SandstoneAPI...\n" +
+            "If you want to run a Server, download an implementation.\n" +
+            "Read more at: https://projectsandstone.github.io/\n" +
+            "===========================================================\n"
+
+    System.err.println(message)
+
+    JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE)
 
 }

@@ -25,34 +25,22 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.guice
+package com.github.projectsandstone.common.test.platform
 
-import com.github.projectsandstone.api.logging.Logger
-import com.github.projectsandstone.api.plugin.PluginContainer
-import com.github.projectsandstone.api.plugin.PluginDefinition
-import com.github.projectsandstone.api.plugin.PluginManager
-import com.github.projectsandstone.common.plugin.SandstonePluginContainer
-import com.google.inject.AbstractModule
-import com.google.inject.Scopes
-import com.google.inject.name.Names
+import com.github.projectsandstone.api.Platform
+import com.github.projectsandstone.api.util.version.Version
+import com.github.projectsandstone.common.util.CommonVersionScheme
 
-/**
- * Created by jonathan on 17/08/16.
- */
-class SandstonePluginModule(val pluginManager: PluginManager, val pluginContainer: SandstonePluginContainer, val pluginClass: Class<*>) : AbstractModule() {
-    override fun configure() {
+class TestPlatform : Platform {
+    override val minecraftVersion: Version = Version("1.10.2", CommonVersionScheme)
 
-        bind(PluginContainer::class.java).toInstance(this.pluginContainer)
-        bind(PluginDefinition::class.java).toInstance(this.pluginContainer.definition!!)
-        bind(Logger::class.java).toInstance(pluginContainer.logger)
-        bind(this.pluginClass).`in`(Scopes.SINGLETON)
+    override val platformFullName: String = "Test Environment"
 
-        // Bindings to @Named
+    override val platformName: String = "testenv"
 
-        pluginManager.getPlugins().forEach {
-            bind(PluginContainer::class.java).annotatedWith(Names.named(it.id)).toInstance(it)
-        }
+    override val platformVersion: Version = Version("BETA", CommonVersionScheme)
 
+    override fun isInternalClass(name: String?): Boolean {
+        return false
     }
-
 }

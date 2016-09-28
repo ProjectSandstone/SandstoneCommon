@@ -27,13 +27,10 @@
  */
 package com.github.projectsandstone.common.service
 
-import com.github.jonathanxd.iutils.`object`.TypeInfo
 import com.github.projectsandstone.api.Sandstone
-import com.github.projectsandstone.api.event.service.ChangeServiceProviderEvent
+import com.github.projectsandstone.api.event.SandstoneEventFactory
 import com.github.projectsandstone.api.service.RegisteredProvider
 import com.github.projectsandstone.api.service.ServiceManager
-import com.github.projectsandstone.common.event.service.ChangeServiceProviderEventImpl
-import java.util.function.Consumer
 
 /**
  * Created by jonathan on 18/08/16.
@@ -58,9 +55,9 @@ abstract class SandstoneServiceManager : ServiceManager {
         val registeredProvider = SandstoneRegisteredProvider(pluginContainer, instance, service)
 
         /////////////////////////////////////////////////////
-        val event = ChangeServiceProviderEventImpl(oldProvider = oldProvider, newProvider = registeredProvider, service = service)
+        val event = SandstoneEventFactory.createChangeServiceProviderEvent(oldProvider = oldProvider, newProvider = registeredProvider, service = service)
 
-        Sandstone.eventManager.dispatch(event, TypeInfo.a(ChangeServiceProviderEvent::class.java).of(service).build(), pluginContainer)
+        Sandstone.eventManager.dispatch(event, pluginContainer)
         /////////////////////////////////////////////////////
 
         this.serviceRegListeners.onRegister(plugin, service, instance, registeredProvider)
@@ -74,7 +71,7 @@ abstract class SandstoneServiceManager : ServiceManager {
 
         val reg = this.getRegisteredProvider(service)
 
-        if(reg != null) {
+        if (reg != null) {
             return reg.provider
         } else {
             return this.internalProvide(service)
@@ -83,11 +80,11 @@ abstract class SandstoneServiceManager : ServiceManager {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : Any> getRegisteredProvider(service: Class<T>): RegisteredProvider<T>? {
-        return if(this.services.containsKey(service)) this.services[service] as RegisteredProvider<T> else null
+        return if (this.services.containsKey(service)) this.services[service] as RegisteredProvider<T> else null
     }
 
     override fun <T : Any> watch(function: (RegisteredProvider<T>) -> Boolean) {
-        this.serviceRegListeners.add({plugin, klass, instance -> true}, function)
+        this.serviceRegListeners.add({ plugin, klass, instance -> true }, function)
     }
 
     override fun <T : Any> watch(predicate: (Any, Class<T>, T) -> Boolean, function: (RegisteredProvider<T>) -> Boolean) {
@@ -98,10 +95,10 @@ abstract class SandstoneServiceManager : ServiceManager {
         private val listeners = mutableListOf<RegistryConsumer>()
 
         fun <T : Any> add(predicate: (Any, Class<T>, T) -> Boolean, function: (RegisteredProvider<T>) -> Boolean) {
-            this.listeners.add(object: RegistryConsumer{
+            this.listeners.add(object : RegistryConsumer {
                 @Suppress("UNCHECKED_CAST")
                 override fun consume(plugin: Any, service: Class<*>, instance: Any, registeredProvider: RegisteredProvider<*>): Boolean {
-                    if(!predicate.invoke(plugin, service as Class<T>, instance as T)) {
+                    if (!predicate.invoke(plugin, service as Class<T>, instance as T)) {
                         return true
                     }
 
@@ -114,9 +111,9 @@ abstract class SandstoneServiceManager : ServiceManager {
 
             val iterator = this.listeners.iterator()
 
-            while(iterator.hasNext()) {
+            while (iterator.hasNext()) {
                 val registryConsumer = iterator.next()
-                if(!registryConsumer.consume(plugin, service, instance, registeredProvider)) {
+                if (!registryConsumer.consume(plugin, service, instance, registeredProvider)) {
                     iterator.remove()
                 }
             }
@@ -124,6 +121,6 @@ abstract class SandstoneServiceManager : ServiceManager {
     }
 
     private interface RegistryConsumer {
-        fun consume(plugin: Any, service: Class<*>, instance: Any, registeredProvider: RegisteredProvider<*>) : Boolean
+        fun consume(plugin: Any, service: Class<*>, instance: Any, registeredProvider: RegisteredProvider<*>): Boolean
     }
 }

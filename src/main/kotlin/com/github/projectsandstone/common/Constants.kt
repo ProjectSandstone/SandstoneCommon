@@ -27,16 +27,20 @@
  */
 package com.github.projectsandstone.common
 
-import com.github.projectsandstone.common.adapter.SandstoneAdapters
-import com.github.projectsandstone.common.guice.SandstoneModule
-import com.google.inject.Guice
 import java.util.concurrent.Executors
+import java.util.concurrent.ThreadFactory
 
 /**
  * Created by jonathan on 17/08/16.
  */
 object Constants {
 
-    val cachedThreadPool = Executors.newCachedThreadPool()
-    val injector = Guice.createInjector(SandstoneModule)
+    val daemonThreadFactory: ThreadFactory = ThreadFactory {
+        val tr = Executors.defaultThreadFactory().newThread(it)
+        tr.isDaemon = true
+        tr
+    }
+
+    val cachedThreadPool = Executors.newCachedThreadPool(daemonThreadFactory)
+
 }

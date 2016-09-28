@@ -47,6 +47,19 @@ class SandstonePluginManager : PluginManager {
     override val pluginLoader: PluginLoader
         get() = this.pluginLoader_
 
+    override fun loadPlugins(classes: Array<String>): List<PluginContainer> {
+
+        val containers = this.pluginLoader.loadClasses(classes)
+
+        containers.forEach {
+            this.dependencyResolver.checkDependencies(it)
+        }
+
+        pluginSet += containers
+
+        return containers
+    }
+
     override fun loadPlugin(file: Path): List<PluginContainer> {
         val containers = this.pluginLoader.loadFile(file)
 
@@ -62,6 +75,8 @@ class SandstonePluginManager : PluginManager {
     override fun loadPlugin(pluginContainer: PluginContainer): Boolean {
 
         try {
+            this.pluginSet.add(pluginContainer)
+
             this.pluginLoader.load(pluginContainer)
 
             if(pluginContainer.state == PluginState.FAILED) {

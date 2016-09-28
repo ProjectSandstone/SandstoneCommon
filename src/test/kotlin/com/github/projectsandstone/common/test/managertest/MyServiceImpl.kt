@@ -25,14 +25,7 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.event
+package com.github.projectsandstone.common.test.managertest
 
-import com.github.projectsandstone.api.event.Event
-import com.github.projectsandstone.api.event.info.Info
-
-/**
- * Created by jonathan on 23/08/16.
- */
-interface SandstoneBaseEvent : Event {
-    override fun getInfo(): Info = Info(emptyList())
+open class MyServiceImpl(override val id: Int) : MyService {
 }

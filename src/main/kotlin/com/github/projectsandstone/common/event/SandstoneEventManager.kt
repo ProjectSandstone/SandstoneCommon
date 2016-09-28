@@ -33,7 +33,12 @@ import com.github.projectsandstone.api.Sandstone
 import com.github.projectsandstone.api.event.*
 import com.github.projectsandstone.api.event.EventListener
 import com.github.projectsandstone.api.plugin.PluginContainer
+import com.github.projectsandstone.common.Constants
+import com.github.projectsandstone.common.util.event.getEventType
+import com.github.projectsandstone.common.util.event.getEventTypes
+import com.github.projectsandstone.common.util.pair.pairFromArrays
 import java.lang.reflect.Method
+import java.lang.reflect.Type
 import java.util.*
 import java.util.concurrent.Executors
 
@@ -42,14 +47,17 @@ import java.util.concurrent.Executors
  */
 class SandstoneEventManager : EventManager {
     private val listeners: MutableSet<EventListenerContainer<*>> = TreeSet()
-    private val executor = Executors.newCachedThreadPool()
+    private val executor = Executors.newCachedThreadPool(Constants.daemonThreadFactory)
 
-    override fun <T : Event> dispatch(event: T, eventType: TypeInfo<T>, pluginContainer: PluginContainer, isBeforeModifications: Boolean) {
-
-        this.dispatch_(event, eventType, pluginContainer, isBeforeModifications, isAsync = false)
+    override fun <T : Event> dispatch(event: T, pluginContainer: PluginContainer, isBeforeModifications: Boolean) {
+        this.dispatch_(event, pluginContainer, isBeforeModifications, isAsync = false)
     }
 
-    private fun <T : Event> dispatch_(event: T, eventType: TypeInfo<T>, pluginContainer: PluginContainer, isBeforeModifications: Boolean, isAsync: Boolean) {
+
+
+    private fun <T : Event> dispatch_(event: T, pluginContainer: PluginContainer, isBeforeModifications: Boolean, isAsync: Boolean) {
+
+        val eventType = getEventType(event)
 
         fun <T : Event> tryDispatch(eventListenerContainer: EventListenerContainer<*>,
                                     event: T,
@@ -74,22 +82,22 @@ class SandstoneEventManager : EventManager {
         }
 
         listeners.filter {
-            this.check(container = it, isPlugin = true, eventType = eventType, isBeforeModifications = isBeforeModifications)
+            this.check<T>(container = it, isPlugin = true, eventType = eventType, isBeforeModifications = isBeforeModifications)
         }.forEach {
             tryDispatch(it, event, pluginContainer, isBeforeModifications)
         }
 
         listeners.filter {
-            this.check(container = it, isPlugin = false, eventType = eventType, isBeforeModifications = isBeforeModifications)
+            this.check<T>(container = it, isPlugin = false, eventType = eventType, isBeforeModifications = isBeforeModifications)
         }.forEach {
             tryDispatch(it, event, pluginContainer, isBeforeModifications)
         }
     }
 
-    private fun <T : Event> check(container: EventListenerContainer<*>, isPlugin: Boolean, eventType: TypeInfo<T>, isBeforeModifications: Boolean): Boolean {
+    private fun <T : Event> check(container: EventListenerContainer<*>, isPlugin: Boolean, eventType: TypeInfo<*>, isBeforeModifications: Boolean): Boolean {
 
         fun checkType(): Boolean {
-            return container.eventType.compareToAssignable(eventType) == 0
+            return container.eventType.isAssignableFrom(eventType)
                     ||
                     (container.eventType.related.size == 0
                             && container.eventType.aClass.isAssignableFrom(eventType.aClass))
@@ -100,8 +108,8 @@ class SandstoneEventManager : EventManager {
                 && container.eventListener.isBeforeModifications() == isBeforeModifications
     }
 
-    override fun <T : Event> dispatchAsync(event: T, eventType: TypeInfo<T>, pluginContainer: PluginContainer, isBeforeModifications: Boolean) {
-        this.dispatch_(event, eventType, pluginContainer, isBeforeModifications, isAsync = true)
+    override fun <T : Event> dispatchAsync(event: T, pluginContainer: PluginContainer, isBeforeModifications: Boolean) {
+        this.dispatch_(event, pluginContainer, isBeforeModifications, isAsync = true)
     }
 
     override fun getListeners(): Set<Pair<TypeInfo<*>, EventListener<*>>> {

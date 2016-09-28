@@ -25,34 +25,10 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.guice
+package com.github.projectsandstone.common.test.managertest
 
-import com.github.projectsandstone.api.logging.Logger
-import com.github.projectsandstone.api.plugin.PluginContainer
-import com.github.projectsandstone.api.plugin.PluginDefinition
-import com.github.projectsandstone.api.plugin.PluginManager
-import com.github.projectsandstone.common.plugin.SandstonePluginContainer
-import com.google.inject.AbstractModule
-import com.google.inject.Scopes
-import com.google.inject.name.Names
+interface MyService {
 
-/**
- * Created by jonathan on 17/08/16.
- */
-class SandstonePluginModule(val pluginManager: PluginManager, val pluginContainer: SandstonePluginContainer, val pluginClass: Class<*>) : AbstractModule() {
-    override fun configure() {
-
-        bind(PluginContainer::class.java).toInstance(this.pluginContainer)
-        bind(PluginDefinition::class.java).toInstance(this.pluginContainer.definition!!)
-        bind(Logger::class.java).toInstance(pluginContainer.logger)
-        bind(this.pluginClass).`in`(Scopes.SINGLETON)
-
-        // Bindings to @Named
-
-        pluginManager.getPlugins().forEach {
-            bind(PluginContainer::class.java).annotatedWith(Names.named(it.id)).toInstance(it)
-        }
-
-    }
+    val id: Int
 
 }

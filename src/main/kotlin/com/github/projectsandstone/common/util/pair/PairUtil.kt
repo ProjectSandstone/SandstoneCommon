@@ -25,14 +25,14 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.event.init
+package com.github.projectsandstone.common.util.pair
 
-import com.github.projectsandstone.api.event.init.ServerStartingEvent
-import com.github.projectsandstone.common.event.SandstoneBaseEvent
+fun <A, B> pairFromArrays(arrA: Array<A>, arrB: Array<B>): Array<Pair<A, B>> {
 
-/**
- * Created by jonathan on 23/08/16.
- */
-class ServerStartingEventImpl : SandstoneBaseEvent, ServerStartingEvent {
+    if (arrA.size != arrB.size)
+        throw IllegalArgumentException("Array size must be equals.")
 
+    return arrA.mapIndexed { i, a ->
+        Pair(a, arrB[i])
+    }.toTypedArray()
 }
