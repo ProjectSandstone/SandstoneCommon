@@ -47,6 +47,11 @@ object SandstoneInit {
     }
 
     @JvmStatic
+    fun initPath(path: Path) {
+        this.init("sandstonePath_", path)
+    }
+
+    @JvmStatic
     fun initGame(game: Game) {
         this.init("game_", game)
     }
