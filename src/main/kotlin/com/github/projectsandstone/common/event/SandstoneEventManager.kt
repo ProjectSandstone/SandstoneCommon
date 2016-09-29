@@ -121,7 +121,7 @@ class SandstoneEventManager : EventManager {
     @Suppress("UNCHECKED_CAST")
     override fun <T : Event> getListeners(eventType: TypeInfo<T>): Set<Pair<TypeInfo<T>, EventListener<T>>> {
         return this.listeners
-                .filter { it.eventType.compareToAssignable(eventType) == 0 }
+                .filter { eventType.isAssignableFrom(it.eventType) }
                 .map { Pair(it.eventType, it.eventListener) }
                 .toSet() as Set<Pair<TypeInfo<T>, EventListener<T>>>
     }

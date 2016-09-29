@@ -27,6 +27,8 @@
  */
 package com.github.projectsandstone.common.service
 
+import com.github.jonathanxd.codeproxy.CodeProxy
+import com.github.jonathanxd.iutils.map.WeakValueHashMap
 import com.github.projectsandstone.api.Sandstone
 import com.github.projectsandstone.api.event.SandstoneEventFactory
 import com.github.projectsandstone.api.service.RegisteredProvider
@@ -39,6 +41,7 @@ abstract class SandstoneServiceManager : ServiceManager {
 
     private val services = mutableMapOf<Class<*>, RegisteredProvider<*>>()
     private val serviceRegListeners = ServiceRegListeners()
+    private val proxyCache = WeakValueHashMap<Class<*>, Any>()
 
     protected abstract fun <T : Any> internalSetProvider(service: Class<T>, instance: T)
 
@@ -76,6 +79,22 @@ abstract class SandstoneServiceManager : ServiceManager {
         } else {
             return this.internalProvide(service)
         }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : Any> provideProxy(service: Class<T>): T {
+
+        if(this.proxyCache.containsKey(service))
+            return this.proxyCache[service] as T
+
+        val superClass = if(!service.isInterface) service else Any::class.java
+        val interfaces = if(service.isInterface) arrayOf(service) else emptyArray()
+
+        val instance = CodeProxy.newProxyInstance(service.classLoader, superClass, interfaces, ProxyServiceIHandler(this, service)) as T
+
+        this.proxyCache.put(service, instance)
+
+        return instance
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -124,3 +143,4 @@ abstract class SandstoneServiceManager : ServiceManager {
         fun consume(plugin: Any, service: Class<*>, instance: Any, registeredProvider: RegisteredProvider<*>): Boolean
     }
 }
+//CodeProxy.newProxyInstance(service.classLoader, )
