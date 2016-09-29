@@ -33,6 +33,7 @@ import com.github.projectsandstone.api.Sandstone
 import com.github.projectsandstone.api.event.SandstoneEventFactory
 import com.github.projectsandstone.api.service.RegisteredProvider
 import com.github.projectsandstone.api.service.ServiceManager
+import java.lang.reflect.Modifier
 
 /**
  * Created by jonathan on 18/08/16.
@@ -83,6 +84,12 @@ abstract class SandstoneServiceManager : ServiceManager {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : Any> provideProxy(service: Class<T>): T {
+
+        if(Modifier.isFinal(service.modifiers))
+            throw IllegalArgumentException("Cannot provide final class as Proxy, use provideLazy() instead.")
+
+        if(Modifier.isPrivate(service.modifiers))
+            throw IllegalArgumentException("Cannot provide private class as Proxy, use provideLazy() instead.")
 
         if(this.proxyCache.containsKey(service))
             return this.proxyCache[service] as T
