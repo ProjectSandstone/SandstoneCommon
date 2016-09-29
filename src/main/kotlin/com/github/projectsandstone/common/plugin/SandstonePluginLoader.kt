@@ -96,7 +96,7 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
     }
 
     override fun loadClasses(classes: Array<String>): List<PluginContainer> {
-        return this.loadClasses(classes.toList(), null, false)
+        return this.loadClasses(classes.toList(), null, emptyArray(), false)
     }
 
     override fun loadFile(file: Path): List<PluginContainer> {
@@ -133,18 +133,17 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
         }
 
         val classes = mutableClasses.toList()
+        val urls = arrayOf(URL("jar:file:$filePathAsFile!/"))
 
-        return this.loadClasses(classes, file, simpleDesc?.usePlatformInternals ?: false)
+        return this.loadClasses(classes, file, urls, simpleDesc?.usePlatformInternals ?: false)
     }
 
 
-    private fun loadClasses(classes: List<String>, file: Path? = null, useInternal: Boolean): List<PluginContainer> {
+    private fun loadClasses(classes: List<String>, file: Path? = null, urls: Array<URL> = emptyArray(), useInternal: Boolean): List<PluginContainer> {
 
         if (classes.isEmpty()) {
             throw IllegalArgumentException("Empty class collection!")
         }
-
-        val urls = arrayOf<URL>()
 
         val classLoader = SandstoneClassLoader(
                 urls = urls,
