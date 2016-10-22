@@ -31,12 +31,10 @@ import com.github.jonathanxd.adapter.AdaptedClassInfo
 import com.github.jonathanxd.adapter.AdapterEnvironment
 import com.github.jonathanxd.adapter.AdapterFactory
 import com.github.jonathanxd.adapter.adapter.AdapterSpecificationSpec
-import com.github.jonathanxd.adapter.spec.ConverterSpec
-import com.github.jonathanxd.iutils.`object`.Bi
+import com.github.jonathanxd.adapter.spec.Specification
 import com.github.jonathanxd.iutils.containers.MutableContainer
-import com.github.projectsandstone.api.util.toType
-import com.github.projectsandstone.common.adapter.annotation.RegistryTypes
 import com.github.projectsandstone.common.adapter.annotation.SingletonField
+import com.github.projectsandstone.common.util.extension.registerSpecificationHelper
 import java.lang.reflect.Modifier
 import java.nio.charset.Charset
 import java.nio.file.Files
@@ -57,7 +55,7 @@ class SandstoneAdapters {
      *
      * Cached adapters is good because avoid class generation.
      */
-    private val map: MutableMap<Bi<Class<*>, Any>, Bi<AdaptedClassInfo, Any>> = mutableMapOf()
+    private val map: MutableMap<Pair<Class<*>, Any>, Pair<AdaptedClassInfo, Any>> = mutableMapOf()
 
     fun registerAdapterSpecification(adapterSpecificationSpec: AdapterSpecificationSpec) {
         this.adapterEnvironment.registerAdapterSpecification(adapterSpecificationSpec)
@@ -93,38 +91,23 @@ class SandstoneAdapters {
             if (!Modifier.isStatic(field.modifiers))
                 throw IllegalArgumentException("The field $fieldName of class $it must be static.")
 
-            val instance = field.get(null)
-
-            if (instance !is RegistryCandidate<*>)
-                throw IllegalArgumentException("Class $it is not a RegistryCandidate<*>")
+            val instance = field.get(null) as? RegistryCandidate<*> ?:
+                    throw IllegalArgumentException("Class $it is not a RegistryCandidate<*>")
 
             val id = instance.id
             val spec = instance.spec
             val type = instance.registryType
 
-            when (type) {
-                is RegistryTypes.Converter -> {
-                    this.adapterEnvironment.registerConverter(
-                            id,
-                            type.from.toType(),
-                            type.to.toType(),
-                            spec as ConverterSpec
-                    )
-                }
-                is RegistryTypes.Other -> {
-                    this.adapterEnvironment.registerSpecification(id,
-                            spec)
-                }
-            }
+            this.adapterEnvironment.registerSpecificationHelper<Specification>(id, type.type, spec)
         }
     }
 
     fun adapt(type: Class<*>, instance: Any): Any? {
 
-        val bi = Bi(type, instance)
+        val bi = Pair(type, instance)
 
         if (this.map.containsKey(bi)) {
-            return this.map[bi]!!._2()
+            return this.map[bi]!!.second
         }
 
         val container = MutableContainer<AdaptedClassInfo>()
@@ -147,9 +130,9 @@ class SandstoneAdapters {
         }
     }
 
-    fun store(type: Class<*>, instance: Any, info: AdaptedClassInfo, generated: Any) = this.map.put(Bi(type, instance), Bi(info, generated))
+    fun store(type: Class<*>, instance: Any, info: AdaptedClassInfo, generated: Any) = this.map.put(Pair(type, instance), Pair(info, generated))
 
-    fun remove(type: Class<*>, instance: Any) = this.map.remove(Bi(type, instance))
+    fun remove(type: Class<*>, instance: Any) = this.map.remove(Pair(type, instance))
 
     /**
      * Save adapters

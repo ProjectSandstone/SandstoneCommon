@@ -44,6 +44,7 @@ object SandstoneTestMain {
     }
 
     fun start() {
+        SandstoneInit.initConsts()
         SandstoneInit.initGame(TestGame())
         SandstoneInit.initLogger(TestLogger(null))
         SandstoneInit.initLoggerFactory(TestLoggerFactory())

@@ -25,15 +25,12 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.event
+package com.github.projectsandstone.common.util.extension
 
-import com.github.jonathanxd.iutils.`object`.TypeInfo
-import com.github.projectsandstone.api.event.Event
-import com.github.projectsandstone.api.event.EventPriority
-import java.lang.reflect.Method
+import com.github.jonathanxd.adapter.AdapterEnvironment
+import com.github.jonathanxd.adapter.spec.Specification
 
-/**
- * Created by jonathan on 25/08/16.
- */
-internal class PluginMethodListener(eventType: TypeInfo<Event>, instance: Any?, ignoreCancelled: Boolean, isBeforeMods: Boolean, method_: Method, priority_: EventPriority) : SandstoneMethodListener(eventType, instance, ignoreCancelled, isBeforeMods, method_, priority_) {
+@Suppress("UNCHECKED_CAST")
+fun <T : Specification> AdapterEnvironment.registerSpecificationHelper(id: String, type: Class<*>, specification: Specification) {
+    this.registerSpecification(id, type as Class<T>, specification as T)
 }

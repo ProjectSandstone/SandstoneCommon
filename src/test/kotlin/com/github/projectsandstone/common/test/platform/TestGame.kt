@@ -32,10 +32,12 @@ import com.github.projectsandstone.api.Platform
 import com.github.projectsandstone.api.Server
 import com.github.projectsandstone.api.event.EventManager
 import com.github.projectsandstone.api.plugin.PluginManager
+import com.github.projectsandstone.api.registry.Registry
 import com.github.projectsandstone.api.scheduler.Scheduler
 import com.github.projectsandstone.api.service.ServiceManager
 import com.github.projectsandstone.common.event.SandstoneEventManager
 import com.github.projectsandstone.common.plugin.SandstonePluginManager
+import com.github.projectsandstone.common.registry.SandstoneRegistry
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -55,4 +57,6 @@ class TestGame : Game {
     override val server: Server = TestServer()
 
     override val serviceManager: ServiceManager = TestServiceManager()
+
+    override val registry: Registry = SandstoneRegistry()
 }

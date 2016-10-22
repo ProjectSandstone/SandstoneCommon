@@ -25,15 +25,11 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.adapter
+package com.github.projectsandstone.common.util.extension
 
-import com.github.jonathanxd.adapter.spec.Specification
-import com.github.projectsandstone.common.adapter.annotation.RegistryType
+import com.google.common.collect.Table
 
-interface RegistryCandidate<out T : Specification> {
-
-    val id: String
-    val spec: T
-    val registryType: RegistryType
-
+@Suppress("NOTHING_TO_INLINE")
+inline operator fun <R, C, V> Table<R, C, V>.set(rowKey: R, columnKey: C, value: V) {
+    this.put(rowKey, columnKey, value)
 }

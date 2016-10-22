@@ -32,10 +32,12 @@ import com.github.projectsandstone.api.Platform
 import com.github.projectsandstone.api.Server
 import com.github.projectsandstone.api.event.EventManager
 import com.github.projectsandstone.api.plugin.PluginManager
+import com.github.projectsandstone.api.registry.Registry
 import com.github.projectsandstone.api.scheduler.Scheduler
 import com.github.projectsandstone.api.service.ServiceManager
 import com.github.projectsandstone.common.event.SandstoneEventManager
 import com.github.projectsandstone.common.plugin.SandstonePluginManager
+import com.github.projectsandstone.common.registry.SandstoneRegistry
 import com.github.projectsandstone.common.service.SandstoneServiceManager
 import java.nio.file.Path
 
@@ -43,6 +45,7 @@ import java.nio.file.Path
  * Created by jonathan on 15/08/16.
  */
 abstract class AbstractGame(override val eventManager: EventManager = SandstoneEventManager(),
-                            override val pluginManager: PluginManager = SandstonePluginManager()) : Game {
+                            override val pluginManager: PluginManager = SandstonePluginManager(),
+                            override val registry: Registry = SandstoneRegistry()) : Game {
 
 }

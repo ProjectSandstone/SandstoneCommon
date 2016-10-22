@@ -31,17 +31,18 @@ import com.github.jonathanxd.adapter.info.CallInfo
 import com.github.jonathanxd.adapter.spec.ConverterSpec
 import com.github.projectsandstone.common.adapter.RegistryCandidate
 import com.github.projectsandstone.common.adapter.annotation.RegistryType
-import com.github.projectsandstone.common.adapter.annotation.RegistryTypes
 
 object MyConverter : RegistryCandidate<ConverterSpec> {
     override val id: String = "CONVERTER_9"
 
-    override val spec: ConverterSpec = ConverterSpec(MyConverter::class.java, "convert", Int::class.javaPrimitiveType, arrayOf(String::class.java))
+    override val spec: ConverterSpec = ConverterSpec(
+            String::class.java, Int::class.javaPrimitiveType!!,
+            MyConverter::class.java,
+            "convert",
+            Int::class.javaPrimitiveType,
+            arrayOf(String::class.java))
 
-    override val registryType: RegistryType<ConverterSpec> = RegistryTypes.Converter(
-            Int::class.javaPrimitiveType!!,
-            String::class.java)
-
+    override val registryType: RegistryType = RegistryType(ConverterSpec::class.java)
 
     @JvmStatic
     fun convert(callInfo: CallInfo, input: String): Int {

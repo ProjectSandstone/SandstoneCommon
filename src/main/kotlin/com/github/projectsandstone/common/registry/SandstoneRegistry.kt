@@ -25,15 +25,30 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.adapter
+package com.github.projectsandstone.common.registry
 
-import com.github.jonathanxd.adapter.spec.Specification
-import com.github.projectsandstone.common.adapter.annotation.RegistryType
+import com.github.projectsandstone.api.registry.Registry
+import com.github.projectsandstone.api.registry.RegistryEntry
+import com.github.projectsandstone.common.util.extension.set
+import com.google.common.collect.HashBasedTable
+import com.google.common.collect.Table
 
-interface RegistryCandidate<out T : Specification> {
+class SandstoneRegistry : Registry {
 
-    val id: String
-    val spec: T
-    val registryType: RegistryType
+    private val registryTable: Table<String, Class<*>, RegistryEntry> = HashBasedTable.create()
+
+    override fun <T : RegistryEntry> registerEntry(id: String, entry: T, type: Class<out T>) {
+        this.registryTable[id, type] = entry
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : RegistryEntry> getEntry(id: String, type: Class<out T>): T? {
+        return this.registryTable[id, type] as T?
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : RegistryEntry> getAll(type: Class<out T>): List<T> {
+        return this.registryTable.column(type).values.toList() as List<T>
+    }
 
 }

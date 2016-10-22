@@ -29,4 +29,4 @@ package com.github.projectsandstone.common.adapter.annotation
 
 import com.github.jonathanxd.adapter.spec.Specification
 
-interface RegistryType <out T : Specification> {}
+data class RegistryType(val type: Class<out Specification>)

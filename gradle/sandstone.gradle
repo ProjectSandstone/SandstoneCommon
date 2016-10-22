@@ -39,14 +39,15 @@ jar {
 dependencies {
 
     // Dependency injection
-    compile 'com.google.inject:guice:4.1.0'
+    compile "com.google.inject:guice:$guice_version"
 
     // Utilities
-    compile 'com.flowpowered:flow-math:1.0.3'
-    compile 'com.github.JonathanxD:JwIUtils:2.7.1'
-    compile 'com.github.JonathanxD:CodeAPI:1.14.2-SNAPSHOT'
-    compile 'com.github.JonathanxD:Adapter:3.8.0'
-    compile 'com.github.JonathanxD:CodeProxy:1.0.4'
+    compile "com.flowpowered:flow-math:$flowmath_version"
+    compile "com.github.JonathanxD:JwIUtils:$jwiutils_version"
+    compile "com.github.JonathanxD:CodeAPI:$codeapi_version"
+    compile "com.github.JonathanxD:Adapter:$adapter_version"
+    compile "com.github.JonathanxD:CodeProxy:$codeproxy_version"
+    compile "com.google.code.findbugs:jsr305:$jsr305_version"
 
     // Kotlin
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
@@ -56,7 +57,7 @@ dependencies {
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 
     // JUnit
-    testCompile group: 'junit', name:'junit', version: '4.12'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
 
@@ -111,10 +112,10 @@ license {
     header rootProject.file('LICENSE_HEADER')
 
     sourceSets = project.sourceSets
-    
+
     ignoreFailures false
     strictCheck true
-    
+
     mapping {
         java = 'JAVADOC_STYLE'
         kt = 'JAVADOC_STYLE'

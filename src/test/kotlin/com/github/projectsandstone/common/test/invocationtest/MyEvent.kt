@@ -25,15 +25,10 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.adapter
+package com.github.projectsandstone.common.test.invocationtest
 
-import com.github.jonathanxd.adapter.spec.Specification
-import com.github.projectsandstone.common.adapter.annotation.RegistryType
+import com.github.projectsandstone.api.event.Event
 
-interface RegistryCandidate<out T : Specification> {
-
-    val id: String
-    val spec: T
-    val registryType: RegistryType
-
+interface MyEvent : Event {
+    val message: String
 }

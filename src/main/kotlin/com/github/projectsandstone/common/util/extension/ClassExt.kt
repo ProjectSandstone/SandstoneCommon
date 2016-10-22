@@ -25,18 +25,16 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.adapter.annotation
+package com.github.projectsandstone.common.util.extension
 
-import com.github.jonathanxd.adapter.spec.ConverterSpec
-import com.github.jonathanxd.adapter.spec.Specification
+import com.github.jonathanxd.iutils.type.TypeInfo
+import kotlin.jvm.internal.ClassBasedDeclarationContainer
+import kotlin.reflect.KClass
 
-object RegistryTypes {
+val <T : Any> Class<T>.typeInfo: TypeInfo<T>
+    get() = TypeInfo.aEnd(this)
 
-    object Other : RegistryType<Specification> {
+@Suppress("UNCHECKED_CAST")
+val <T : Any> KClass<T>.typeInfo: TypeInfo<T>
+    get() = ((this as ClassBasedDeclarationContainer).jClass as Class<T>).typeInfo
 
-    }
-
-    data class Converter(val from: Class<*>, val to: Class<*>) : RegistryType<ConverterSpec> {
-
-    }
-}
