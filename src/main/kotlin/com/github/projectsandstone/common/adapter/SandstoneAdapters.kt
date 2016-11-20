@@ -32,7 +32,7 @@ import com.github.jonathanxd.adapter.AdapterEnvironment
 import com.github.jonathanxd.adapter.AdapterFactory
 import com.github.jonathanxd.adapter.adapter.AdapterSpecificationSpec
 import com.github.jonathanxd.adapter.spec.Specification
-import com.github.jonathanxd.iutils.containers.MutableContainer
+import com.github.jonathanxd.iutils.container.MutableContainer
 import com.github.projectsandstone.common.adapter.annotation.SingletonField
 import com.github.projectsandstone.common.util.extension.registerSpecificationHelper
 import java.lang.reflect.Modifier

@@ -3,6 +3,7 @@ buildscript {
 
     repositories {
         mavenCentral()
+        maven { url "http://dl.bintray.com/kotlin/kotlin-eap-1.1" }
     }
 
     dependencies {
@@ -23,7 +24,7 @@ version '1.0-SNAPSHOT'
 apply from: 'gradle/sandstone.gradle'
 
 dependencies {
-    compile 'com.github.ProjectSandstone:SandstoneAPI:41445c9c5e'
+    compile 'com.github.ProjectSandstone:SandstoneAPI:85addd5f83'
     compile 'com.github.zafarkhaja:java-semver:0.9.0'
 }
 

@@ -27,8 +27,8 @@
  */
 package com.github.projectsandstone.common.test.platform
 
-import com.github.jonathanxd.iutils.containers.MutableContainer
-import com.github.jonathanxd.iutils.containers.primitivecontainers.BooleanContainer
+import com.github.jonathanxd.iutils.container.MutableContainer
+import com.github.jonathanxd.iutils.container.primitivecontainers.BooleanContainer
 import com.github.projectsandstone.api.scheduler.SubmittedTask
 import com.github.projectsandstone.api.scheduler.Task
 import com.github.projectsandstone.common.Constants

@@ -27,7 +27,7 @@
  */
 package com.github.projectsandstone.common
 
-import com.github.jonathanxd.iutils.conditions.Conditions
+import com.github.jonathanxd.iutils.condition.Conditions
 import com.github.projectsandstone.api.Game
 import com.github.projectsandstone.api.Sandstone
 import com.github.projectsandstone.api.logging.Logger

@@ -66,8 +66,6 @@ object ASM {
                         }
                     }
 
-                    println("Annotation Values: $values")
-
                     return SimpleDesc(false)
 
                 }
