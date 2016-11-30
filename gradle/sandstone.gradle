@@ -11,7 +11,7 @@ allprojects {
     apply plugin: 'java'
 
     // License
-    apply plugin: 'license'
+    apply plugin: 'com.github.hierynomus.license'
 
     // Shade
     apply plugin: 'com.github.johnrengelman.shadow'
