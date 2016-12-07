@@ -27,13 +27,24 @@
  */
 package com.github.projectsandstone.common.adapter
 
-import com.github.jonathanxd.adapter.info.CallInfo
 import com.github.jonathanxd.adapter.spec.ConverterSpec
 import com.github.jonathanxd.adapter.spec.Specification
 
+/**
+ * Implementation must have static method
+ *
+ * convert(CallInfo?, I): R
+ *
+ * and optionally
+ *
+ * revertConversion(CallInfo?, R): I
+ *
+ */
 interface ConverterRegistryCandidate<I, R> : RegistryCandidate<ConverterSpec> {
     val inputType: Class<I>
     val outputType: Class<R>
+    val registerRevertConversion: Boolean
+        get() = false
 
     val revertId: String
         get() = "${this.id}_REVERT"
@@ -42,15 +53,22 @@ interface ConverterRegistryCandidate<I, R> : RegistryCandidate<ConverterSpec> {
         get() = ConverterSpec(this.inputType, this.outputType, this.javaClass, "convert", this.outputType, arrayOf(this.inputType))
 
     override val child: Array<RegistryCandidate<Specification>>
-        get() = arrayOf(ChildRegistryCandidate(this))
+        get() = if (this.registerRevertConversion) arrayOf(ChildRegistryCandidate(this)) else emptyArray()
 
+
+    /*
+    @Static
     fun convert(callInfo: CallInfo?, input: I): R
+    */
 
+    /*
+    @Static
     fun revertConversion(callInfo: CallInfo?, input: R): I {
         throw IllegalStateException("not implemented")
     }
+    */
 
-    private class ChildRegistryCandidate(converterCandidate: ConverterRegistryCandidate<*, *>): RegistryCandidate<ConverterSpec> {
+    private class ChildRegistryCandidate(converterCandidate: ConverterRegistryCandidate<*, *>) : RegistryCandidate<ConverterSpec> {
         override val id: String = converterCandidate.revertId
         override val spec: ConverterSpec =
                 ConverterSpec(
