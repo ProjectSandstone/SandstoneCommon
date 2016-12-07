@@ -94,12 +94,14 @@ class SandstoneAdapters {
             val instance = field.get(null) as? RegistryCandidate<*> ?:
                     throw IllegalArgumentException("Class $it is not a RegistryCandidate<*>")
 
-            val id = instance.id
-            val spec = instance.spec
-            val type = instance.registryType
-
-            this.adapterEnvironment.registerSpecificationHelper<Specification>(id, type.type, spec)
+            this.registerCandidate(instance)
         }
+    }
+
+    fun registerCandidate(candidate: RegistryCandidate<Specification>) {
+        this.adapterEnvironment.registerSpecificationHelper<Specification>(candidate.id, candidate.registryType.type, candidate.spec)
+
+        candidate.child.forEach(this::registerCandidate)
     }
 
     fun adapt(type: Class<*>, instance: Any): Any? {
