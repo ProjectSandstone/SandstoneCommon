@@ -32,7 +32,7 @@ package com.github.projectsandstone.common.util.extension
  *
  * Example: EnderPearl will be formatted as ender_pearl
  */
-fun String.uncapitalizeToSandstoneRegistry(): String {
+fun String.formatToSandstoneRegistryId(): String {
     val sb = StringBuilder()
     val chars = this.toCharArray()
 
@@ -41,6 +41,26 @@ fun String.uncapitalizeToSandstoneRegistry(): String {
 
         if (i + 1 < chars.size && chars[i + 1].isUpperCase()){
             sb.append('_')
+        }
+    }
+
+    return sb.toString()
+}
+
+/**
+ * Format [String] to Sandstone Registry Name.
+ *
+ * Example: EnderPearl will be formatted as Ender Pearl
+ */
+fun String.formatToSandstoneRegistryName(): String {
+    val sb = StringBuilder()
+    val chars = this.toCharArray()
+
+    chars.forEachIndexed { i, c ->
+        sb.append(c)
+
+        if (i + 1 < chars.size && chars[i + 1].isUpperCase()){
+            sb.append(' ')
         }
     }
 
