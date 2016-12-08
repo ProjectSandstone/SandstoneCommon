@@ -66,3 +66,37 @@ fun String.formatToSandstoneRegistryName(): String {
 
     return sb.toString()
 }
+
+/**
+ * Format [Enum] to Sandstone Registry Format.
+ *
+ * Example: ENDER_PEARL will be formatted as ender_pearl
+ */
+fun <E: Enum<E>> Enum<E>.formatToSandstoneRegistryId(): String = this.name.toLowerCase()
+
+/**
+ * Format [Enum] to Sandstone Registry Name.
+ *
+ * Example: ENDER_PEARL will be formatted as Ender Pearl
+ */
+fun <E: Enum<E>> Enum<E>.formatToSandstoneRegistryName(): String {
+    val sb = StringBuilder()
+    val chars = this.name.toCharArray()
+
+    chars.forEachIndexed { i, c ->
+
+        if(i == 0 || i - 1 > 0 && chars[i - 1] == '_')
+            sb.append(c.toUpperCase())
+        else if(c == '_')
+            sb.append(' ')
+        else
+            sb.append(c.toLowerCase())
+
+    }
+
+    return sb.toString()
+}
+
+enum class A {
+    ENDER_PEARL
+}
