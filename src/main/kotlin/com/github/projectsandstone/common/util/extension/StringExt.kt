@@ -25,30 +25,24 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.registry
+package com.github.projectsandstone.common.util.extension
 
-import com.github.projectsandstone.api.registry.Registry
-import com.github.projectsandstone.api.registry.RegistryEntry
-import com.github.projectsandstone.common.util.extension.set
-import com.google.common.collect.HashBasedTable
-import com.google.common.collect.Table
+/**
+ * Format [String] to Sandstone Registry Format.
+ *
+ * Example: EnderPearl will be formatted as ender_pearl
+ */
+fun String.uncapitalizeToSandstoneRegistry(): String {
+    val sb = StringBuilder()
+    val chars = this.toCharArray()
 
-class SandstoneRegistry : Registry {
+    chars.forEachIndexed { i, c ->
+        sb.append(c.toLowerCase())
 
-    private val registryTable: Table<String, Class<*>, RegistryEntry> = HashBasedTable.create()
-
-    override fun <T : RegistryEntry> registerEntry(id: String, type: Class<out T>, entry: T) {
-        this.registryTable[id, type] = entry
+        if (i + 1 < chars.size && chars[i + 1].isUpperCase()){
+            sb.append('_')
+        }
     }
 
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : RegistryEntry> getEntry(id: String, type: Class<out T>): T? {
-        return this.registryTable[id, type] as T?
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : RegistryEntry> getAll(type: Class<out T>): List<T> {
-        return this.registryTable.column(type).values.toList() as List<T>
-    }
-
+    return sb.toString()
 }

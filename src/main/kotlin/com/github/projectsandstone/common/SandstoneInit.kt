@@ -28,10 +28,14 @@
 package com.github.projectsandstone.common
 
 import com.github.jonathanxd.iutils.condition.Conditions
+import com.github.jonathanxd.iutils.string.StringUtils
 import com.github.projectsandstone.api.Game
 import com.github.projectsandstone.api.Sandstone
 import com.github.projectsandstone.api.logging.Logger
 import com.github.projectsandstone.api.logging.LoggerFactory
+import com.github.projectsandstone.api.registry.RegistryEntry
+import com.github.projectsandstone.api.util.exception.EntryNotFoundException
+import com.github.projectsandstone.api.util.extension.registry.getEntryGeneric
 import com.github.projectsandstone.api.util.version.Schemes
 import com.github.projectsandstone.common.util.version.SemVerSchemeImpl
 import java.nio.file.Path
@@ -66,14 +70,34 @@ object SandstoneInit {
         this.init("loggerFactory_", loggerFactory)
     }
 
+    @JvmStatic
+    fun initRegistryConstants(game: Game, constantsClass: Class<*>, instance: Any?) {
+        val missingEntries = mutableListOf<String>()
+
+        constantsClass.fields.forEach {
+            val type = it.type
+            val name = it.name.toLowerCase()
+
+            val entry = game.registry.getEntryGeneric<RegistryEntry>(name, type)
+
+            if(entry == null)
+                missingEntries += name
+            else
+                it[instance] = game.registry.getEntryGeneric(name, type)
+        }
+
+        if(missingEntries.isNotEmpty())
+            Sandstone.logger.error("Sandstone could not initialize all constants of class '$constantsClass'. Some entries were not registered: $missingEntries.")
+    }
+
     internal fun init(clazz: Class<*>, fieldName: String, instance: Any) {
         val field = clazz.getDeclaredField(fieldName)
 
         field.isAccessible = true
 
-        Conditions.checkNull(field.get(Sandstone), "Already initialized!")
+        Conditions.checkNull(field[Sandstone], "Already initialized!")
 
-        field.set(Sandstone, instance)
+        field[Sandstone] = instance
     }
 
     internal fun init(fieldName: String, instance: Any) {

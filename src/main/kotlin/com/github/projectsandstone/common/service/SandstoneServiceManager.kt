@@ -56,7 +56,7 @@ abstract class SandstoneServiceManager : ServiceManager {
 
         val pluginContainer = Sandstone.game.pluginManager.getRequiredPlugin(plugin)
 
-        val registeredProvider = SandstoneRegisteredProvider(pluginContainer, instance, service)
+        val registeredProvider: RegisteredProvider<T> = SandstoneRegisteredProvider(pluginContainer, instance, service)
 
         /////////////////////////////////////////////////////
         val event = SandstoneEventFactory.createChangeServiceProviderEvent(oldProvider = oldProvider, newProvider = registeredProvider, service = service)
@@ -64,7 +64,7 @@ abstract class SandstoneServiceManager : ServiceManager {
         Sandstone.eventManager.dispatch(event, pluginContainer)
         /////////////////////////////////////////////////////
 
-        this.serviceRegListeners.onRegister(plugin, service, instance, registeredProvider)
+        this.serviceRegListeners.onRegister(registeredProvider.plugin, registeredProvider.service, registeredProvider.provider, registeredProvider)
 
         this.services.put(service, registeredProvider)
 
