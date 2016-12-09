@@ -27,10 +27,11 @@
  */
 package com.github.projectsandstone.common.adapter
 
-import com.github.jonathanxd.adapter.AdaptedClassInfo
+import com.github.jonathanxd.adapter.AdapterClassInfo
 import com.github.jonathanxd.adapter.AdapterEnvironment
 import com.github.jonathanxd.adapter.AdapterFactory
 import com.github.jonathanxd.adapter.adapter.AdapterSpecificationSpec
+import com.github.jonathanxd.adapter.generate.ConcreteGeneratedClassAdapter
 import com.github.jonathanxd.adapter.spec.Specification
 import com.github.jonathanxd.iutils.container.MutableContainer
 import com.github.projectsandstone.common.adapter.annotation.SingletonField
@@ -55,7 +56,7 @@ class SandstoneAdapters {
      *
      * Cached adapters is good because avoid class generation.
      */
-    private val map: MutableMap<Pair<Class<*>, Any>, Pair<AdaptedClassInfo, Any>> = mutableMapOf()
+    private val map: MutableMap<Pair<Class<*>, Any>, Pair<AdapterClassInfo, Any>> = mutableMapOf()
 
     fun registerAdapterSpecification(adapterSpecificationSpec: AdapterSpecificationSpec) {
         this.adapterEnvironment.registerAdapterSpecification(adapterSpecificationSpec)
@@ -112,7 +113,7 @@ class SandstoneAdapters {
             return this.map[bi]!!.second
         }
 
-        val container = MutableContainer<AdaptedClassInfo>()
+        val container = MutableContainer<AdapterClassInfo>()
 
         val opt = this.adapterEnvironment.adapt<Any>(type, instance, { info ->
             container.set(info)
@@ -132,7 +133,7 @@ class SandstoneAdapters {
         }
     }
 
-    fun store(type: Class<*>, instance: Any, info: AdaptedClassInfo, generated: Any) = this.map.put(Pair(type, instance), Pair(info, generated))
+    fun store(type: Class<*>, instance: Any, info: AdapterClassInfo, generated: Any) = this.map.put(Pair(type, instance), Pair(info, generated))
 
     fun remove(type: Class<*>, instance: Any) = this.map.remove(Pair(type, instance))
 
@@ -140,33 +141,35 @@ class SandstoneAdapters {
      * Save adapters
      */
     fun save(path: Path) {
-        this.adapterEnvironment.adaptedClasses.forEach {
+        this.adapterEnvironment.adapterClassesInfo.forEach {
 
             val adapterClass = it.adapterClass
             val generatedClass = it.generatedClass
 
-            val class_ = generatedClass.bytes
-            val source_ = generatedClass.source.toByteArray(charset = Charset.forName("UTF-8"))
+            if(generatedClass !is ConcreteGeneratedClassAdapter) {
+
+                val class_ = generatedClass.bytes
+                val source_ = generatedClass.source.toByteArray(charset = Charset.forName("UTF-8"))
 
 
-            val saveClass = "class/${adapterClass.canonicalName.replace('.', '/')}.class"
-            val saveJava = "java/${adapterClass.canonicalName.replace('.', '/')}.java"
+                val saveClass = "class/${adapterClass.canonicalName.replace('.', '/')}.class"
+                val saveJava = "java/${adapterClass.canonicalName.replace('.', '/')}.java"
 
-            val resolvedClass = path.resolve(saveClass)
-            val resolvedJava = path.resolve(saveJava)
+                val resolvedClass = path.resolve(saveClass)
+                val resolvedJava = path.resolve(saveJava)
 
-            try {
-                Files.deleteIfExists(resolvedClass)
-                Files.deleteIfExists(resolvedJava)
-            } catch (ignored: Exception) {
+                try {
+                    Files.deleteIfExists(resolvedClass)
+                    Files.deleteIfExists(resolvedJava)
+                } catch (ignored: Exception) {
+                }
+
+                Files.createDirectories(resolvedClass.parent)
+                Files.createDirectories(resolvedJava.parent)
+
+                Files.write(resolvedClass, class_, StandardOpenOption.CREATE)
+                Files.write(resolvedJava, source_, StandardOpenOption.CREATE)
             }
-
-            Files.createDirectories(resolvedClass.parent)
-            Files.createDirectories(resolvedJava.parent)
-
-            Files.write(resolvedClass, class_, StandardOpenOption.CREATE)
-            Files.write(resolvedJava, source_, StandardOpenOption.CREATE)
-
         }
     }
 
