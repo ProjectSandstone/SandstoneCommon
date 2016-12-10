@@ -32,6 +32,7 @@ import com.github.projectsandstone.api.event.init.PreInitializationEvent
 import com.github.projectsandstone.api.logging.Logger
 import com.github.projectsandstone.api.plugin.Plugin
 import com.github.projectsandstone.common.adapter.Adapters
+import com.github.projectsandstone.common.adapter.registerAllConverters
 import javax.inject.Inject
 
 @Plugin(id = "com.github.projectsandstone.common.test.AdapterTestPlugin", name = "Adapter Test Plugin", version = "1.0.0")
@@ -39,9 +40,12 @@ class AdapterTestPlugin @Inject constructor(val logger: Logger) {
 
     @Listener
     fun preInit(event: PreInitializationEvent) {
-        Adapters.adapters.registerAll(this.javaClass.classLoader, "converters")
+        Adapters.adapters.registerAllConverters("com.github.projectsandstone.common.test.adapter")
 
-        logger.info("Converter = ${Adapters.adapters.adapterEnvironment.getConverter("CONVERTER_9")}")
+        logger.info("Converter = ${Adapters.adapters.getConverter(String::class.java, Int::class.javaObjectType)}")
+        logger.info("Revert Converter = ${Adapters.adapters.getConverter(Int::class.javaObjectType, String::class.java)}")
+
+        throw IllegalArgumentException("AAA")
     }
 
 }

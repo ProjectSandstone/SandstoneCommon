@@ -29,32 +29,35 @@ package com.github.projectsandstone.common.test
 
 import com.github.projectsandstone.api.Sandstone
 import com.github.projectsandstone.common.test.platform.SandstoneTestMain
+import org.junit.Test
 import java.util.*
 
-fun main(args: Array<String>) {
-    SandstoneTestMain.main(args)
+class Test {
+    @Test
+    fun init() {
+        SandstoneTestMain.main(emptyArray())
 
-    val resourceAsStream = SandstoneTestMain.javaClass.classLoader.getResourceAsStream("plugins.properties")
+        val resourceAsStream = SandstoneTestMain.javaClass.classLoader.getResourceAsStream("plugins.properties")
 
-    val properties = Properties()
+        val properties = Properties()
 
-    properties.load(resourceAsStream)
+        properties.load(resourceAsStream)
 
-    val keys = properties.keys.toString()
+        val keys = properties.keys.toString()
 
-    Sandstone.logger.info("Loading plugins: $keys...")
+        Sandstone.logger.info("Loading plugins: $keys...")
 
-    /*properties.values.forEach {
+        /*properties.values.forEach {
         Sandstone.pluginManager.loadPlugins(arrayOf(it as String))
-    }*/
+        }*/
 
 
+        Sandstone.pluginManager.loadPlugins(properties.values.map { it as String }.toTypedArray())
 
-    Sandstone.pluginManager.loadPlugins(properties.values.map { it as String }.toTypedArray())
+        Sandstone.pluginManager.loadAllPlugins()
 
-    Sandstone.pluginManager.loadAllPlugins()
+        SandstoneTestMain.init()
+        SandstoneTestMain.stop()
 
-    SandstoneTestMain.init()
-    SandstoneTestMain.stop()
-
+    }
 }

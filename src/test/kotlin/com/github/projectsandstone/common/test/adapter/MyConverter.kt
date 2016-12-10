@@ -27,25 +27,24 @@
  */
 package com.github.projectsandstone.common.test.adapter
 
-import com.github.jonathanxd.adapter.info.CallInfo
-import com.github.jonathanxd.adapter.spec.ConverterSpec
-import com.github.projectsandstone.common.adapter.RegistryCandidate
-import com.github.projectsandstone.common.adapter.annotation.RegistryType
+import com.github.jonathanxd.adapterhelper.Adapter
+import com.github.jonathanxd.adapterhelper.AdapterManager
+import com.github.jonathanxd.adapterhelper.Converter
 
-object MyConverter : RegistryCandidate<ConverterSpec> {
-    override val id: String = "CONVERTER_9"
+object MyConverter : Converter<String, Int> {
 
-    override val spec: ConverterSpec = ConverterSpec(
-            String::class.java, Int::class.javaPrimitiveType!!,
-            MyConverter::class.java,
-            "convert",
-            Int::class.javaPrimitiveType,
-            arrayOf(String::class.java))
-
-    override val registryType: RegistryType = RegistryType(ConverterSpec::class.java)
-
-    @JvmStatic
-    fun convert(callInfo: CallInfo, input: String): Int {
+    override fun convert(input: String, adapter: Adapter<*>?, manager: AdapterManager): Int {
         return input.toInt()
+    }
+
+    override fun revert(): Converter<Int, String> = Revert
+
+    private object Revert : Converter<Int, String> {
+
+        override fun convert(input: Int, adapter: Adapter<*>?, manager: AdapterManager): String {
+            return input.toString()
+        }
+
+        override fun revert(): Converter<String, Int> = MyConverter
     }
 }

@@ -61,21 +61,13 @@ class SandstoneEventManager : EventManager {
                                     event: T,
                                     pluginContainer: PluginContainer,
                                     isBeforeModifications: Boolean) {
-            try {
-                if (isAsync) {
-                    executor.execute({
-                        eventListenerContainer.eventListener.helpOnEvent(event, pluginContainer)
-                    })
-                } else {
-                    eventListenerContainer.eventListener.helpOnEvent(event, pluginContainer)
+
+            if (isAsync) {
+                executor.execute {
+                    dispatchDirect(eventListenerContainer, event, eventType, pluginContainer, isBeforeModifications)
                 }
-
-            } catch (throwable: Throwable) {
-                Sandstone.logger.exception(RuntimeException("Cannot dispatch event $event (type: $eventType) to listener " +
-                        "${eventListenerContainer.eventListener} (of event type: ${eventListenerContainer.eventType}) of plugin " +
-                        "${eventListenerContainer.pluginContainer}. " +
-                        "(Source Plugin: $pluginContainer, isBeforeModifications: $isBeforeModifications)", throwable), "")
-
+            } else {
+                dispatchDirect(eventListenerContainer, event, eventType, pluginContainer, isBeforeModifications)
             }
         }
 
@@ -89,6 +81,23 @@ class SandstoneEventManager : EventManager {
             this.check(container = it, isPlugin = false, eventType = eventType, isBeforeModifications = isBeforeModifications)
         }.forEach {
             tryDispatch(it, event, pluginContainer, isBeforeModifications)
+        }
+    }
+
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun <T : Event> dispatchDirect(eventListenerContainer: EventListenerContainer<*>,
+                                                  event: T,
+                                                  eventType: TypeInfo<*>,
+                                                  pluginContainer: PluginContainer,
+                                                  isBeforeModifications: Boolean) {
+        try {
+            eventListenerContainer.eventListener.helpOnEvent(event, pluginContainer)
+        } catch (throwable: Throwable) {
+            Sandstone.logger.exception(RuntimeException("Cannot dispatch event $event (type: $eventType) to listener " +
+                    "${eventListenerContainer.eventListener} (of event type: ${eventListenerContainer.eventType}) of plugin " +
+                    "${eventListenerContainer.pluginContainer}. " +
+                    "(Source Plugin: $pluginContainer, isBeforeModifications: $isBeforeModifications)", throwable), "")
+
         }
     }
 

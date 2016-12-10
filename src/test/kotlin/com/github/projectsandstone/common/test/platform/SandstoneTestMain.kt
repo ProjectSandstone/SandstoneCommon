@@ -51,7 +51,7 @@ object SandstoneTestMain {
     }
 
     fun init() {
-        Sandstone.eventManager.dispatch(SandstoneEventFactory.createPreInitializationEvent(), SandstonePlugin)
+        Sandstone.eventManager.dispatchAsync(SandstoneEventFactory.createPreInitializationEvent(), SandstonePlugin)
         Sandstone.eventManager.dispatch(SandstoneEventFactory.createInitializationEvent(), SandstonePlugin)
         Sandstone.eventManager.dispatch(SandstoneEventFactory.createPostInitializationEvent(), SandstonePlugin)
         Sandstone.eventManager.dispatch(SandstoneEventFactory.createServerStartingEvent(), SandstonePlugin)

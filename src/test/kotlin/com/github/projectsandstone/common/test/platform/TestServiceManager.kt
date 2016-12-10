@@ -30,6 +30,9 @@ package com.github.projectsandstone.common.test.platform
 import com.github.projectsandstone.common.service.SandstoneServiceManager
 
 class TestServiceManager : SandstoneServiceManager() {
+
+    override val dispatch: Boolean = true
+
     override fun <T : Any> internalSetProvider(service: Class<T>, instance: T) {
 
     }

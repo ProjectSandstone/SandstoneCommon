@@ -44,6 +44,12 @@ abstract class SandstoneServiceManager : ServiceManager {
     private val serviceRegListeners = ServiceRegListeners()
     private val proxyCache = WeakValueHashMap<Class<*>, Any>()
 
+    /**
+     * Dispatch is disabled by default, if enabled, make sure to prevent the event to be fired twice
+     * when the platform dispatch your own ChangeServiceProvider event.
+     */
+    open val dispatch: Boolean = false
+
     protected abstract fun <T : Any> internalSetProvider(service: Class<T>, instance: T)
 
     protected abstract fun <T : Any> internalProvide(service: Class<T>): T?
@@ -59,9 +65,13 @@ abstract class SandstoneServiceManager : ServiceManager {
         val registeredProvider: RegisteredProvider<T> = SandstoneRegisteredProvider(pluginContainer, instance, service)
 
         /////////////////////////////////////////////////////
-        val event = SandstoneEventFactory.createChangeServiceProviderEvent(oldProvider = oldProvider, newProvider = registeredProvider, service = service)
 
-        Sandstone.eventManager.dispatch(event, pluginContainer)
+        if (this.dispatch) {
+            val event = SandstoneEventFactory.createChangeServiceProviderEvent(oldProvider = oldProvider, newProvider = registeredProvider, service = service)
+
+            Sandstone.eventManager.dispatch(event, pluginContainer)
+        }
+
         /////////////////////////////////////////////////////
 
         this.serviceRegListeners.onRegister(registeredProvider.plugin, registeredProvider.service, registeredProvider.provider, registeredProvider)
@@ -85,17 +95,17 @@ abstract class SandstoneServiceManager : ServiceManager {
     @Suppress("UNCHECKED_CAST")
     override fun <T : Any> provideProxy(service: Class<T>): T {
 
-        if(Modifier.isFinal(service.modifiers))
+        if (Modifier.isFinal(service.modifiers))
             throw IllegalArgumentException("Cannot provide final class as Proxy, use provideLazy() instead.")
 
-        if(Modifier.isPrivate(service.modifiers))
+        if (Modifier.isPrivate(service.modifiers))
             throw IllegalArgumentException("Cannot provide private class as Proxy, use provideLazy() instead.")
 
-        if(this.proxyCache.containsKey(service))
+        if (this.proxyCache.containsKey(service))
             return this.proxyCache[service] as T
 
-        val superClass = if(!service.isInterface) service else Any::class.java
-        val interfaces = if(service.isInterface) arrayOf(service) else emptyArray()
+        val superClass = if (!service.isInterface) service else Any::class.java
+        val interfaces = if (service.isInterface) arrayOf(service) else emptyArray()
 
         val instance = CodeProxy.newProxyInstance(service.classLoader, superClass, interfaces, ProxyServiceIHandler(this, service)) as T
 

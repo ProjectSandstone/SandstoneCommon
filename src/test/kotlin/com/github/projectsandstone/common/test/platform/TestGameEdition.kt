@@ -25,18 +25,10 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.adapter
+package com.github.projectsandstone.common.test.platform
 
-import com.github.jonathanxd.adapter.spec.Specification
-import com.github.projectsandstone.common.adapter.annotation.RegistryType
+import com.github.projectsandstone.api.util.edition.GameEdition
 
-interface RegistryCandidate<out T : Specification> {
-
-    val id: String
-    val spec: T
-    val registryType: RegistryType
-        get() = RegistryType(spec.javaClass)
-
-    val child: Array<RegistryCandidate<Specification>>
-        get() = emptyArray()
+object TestGameEdition : GameEdition {
+    override val name: String = "Test"
 }
