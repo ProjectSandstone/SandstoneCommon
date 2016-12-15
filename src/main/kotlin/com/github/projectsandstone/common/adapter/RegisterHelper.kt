@@ -111,7 +111,7 @@ fun AdapterManager.registerAllAdapters(`package`: String) {
 
                         }
 
-                        val spec = AdapterSpecification.create<Adapter<Any>, Any>(factory, it, type.related[0].aClass as Class<Any>)
+                        val spec = AdapterSpecification.create<Any, Adapter<Any>>(factory, it, type.related[0].aClass as Class<Any>)
 
                         this.register(spec)
                     }

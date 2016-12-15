@@ -29,9 +29,6 @@ package com.github.projectsandstone.common.adapter
 
 import com.github.jonathanxd.adapterhelper.AdapterManager
 
-/**
- * Created by jonathan on 28/08/16.
- */
 object Adapters {
     val adapters = AdapterManager.create()
 }
