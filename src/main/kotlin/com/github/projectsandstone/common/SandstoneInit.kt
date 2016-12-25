@@ -28,7 +28,6 @@
 package com.github.projectsandstone.common
 
 import com.github.jonathanxd.iutils.condition.Conditions
-import com.github.jonathanxd.iutils.string.StringUtils
 import com.github.projectsandstone.api.Game
 import com.github.projectsandstone.api.Sandstone
 import com.github.projectsandstone.api.logging.Logger
@@ -38,6 +37,8 @@ import com.github.projectsandstone.api.util.exception.EntryNotFoundException
 import com.github.projectsandstone.api.util.extension.registry.getEntryGeneric
 import com.github.projectsandstone.api.util.version.Schemes
 import com.github.projectsandstone.common.util.version.SemVerSchemeImpl
+import java.lang.reflect.Field
+import java.lang.reflect.Modifier
 import java.nio.file.Path
 
 /**
@@ -75,6 +76,14 @@ object SandstoneInit {
         val missingEntries = mutableListOf<String>()
 
         constantsClass.fields.forEach {
+            it.isAccessible = true
+
+            if(Modifier.isFinal(it.modifiers)) {
+                val modifiersField = Field::class.java.getDeclaredField("modifiers")
+                modifiersField.isAccessible = true
+                modifiersField.setInt(it, it.modifiers and Modifier.FINAL.inv())
+            }
+
             val type = it.type
             val name = it.name.toLowerCase()
 
