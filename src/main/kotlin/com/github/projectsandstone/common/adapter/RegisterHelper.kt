@@ -102,7 +102,7 @@ fun AdapterManager.registerAllAdapters(`package`: String) {
                                 A constructor with two parameters of type '${type.related[0].aClass.canonicalName}' and '${AdapterManager::class.java.canonicalName}'!!!""")
                     } else {
 
-                        val factory: BiFunction<Any, AdapterManager, Adapter<Any>> = BiFunction { a, m ->
+                        val factory: (Any, AdapterManager) -> Adapter<Any> = { a, m ->
                             when (constructor.parameterCount) {
                                 0 -> constructor.newInstance()
                                 1 -> constructor.newInstance(a)
@@ -111,7 +111,7 @@ fun AdapterManager.registerAllAdapters(`package`: String) {
 
                         }
 
-                        val spec = AdapterSpecification.create<Any, Adapter<Any>>(factory, it, type.related[0].aClass as Class<Any>)
+                        val spec = AdapterSpecification.create(factory, it, type.related[0].aClass as Class<Any>)
 
                         this.register(spec)
                     }
