@@ -25,9 +25,12 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.util
+package com.github.projectsandstone.common.util.extension
 
-import com.google.common.collect.ImmutableBiMap
+fun <A, B> Pair<A, B>.toEntry(): Map.Entry<A, B> = PairEntry(this)
 
-fun <A, B> biMapOf(vararg pairs: Pair<A, B>) =
-        ImmutableBiMap.copyOf(mapOf(*pairs))
+class PairEntry<out A, out B>(pair: Pair<A, B>) : Map.Entry<A, B> {
+    override val key: A = pair.first
+    override val value: B = pair.second
+
+}
