@@ -27,7 +27,11 @@
  */
 package com.github.projectsandstone.common.util.extension
 
+import com.google.common.collect.HashBiMap
 import com.google.common.collect.ImmutableBiMap
 
 fun <A, B> biMapOf(vararg pairs: Pair<A, B>) =
+        HashBiMap.create(mapOf(*pairs))
+
+fun <A, B> immutableBiMapOf(vararg pairs: Pair<A, B>) =
         ImmutableBiMap.copyOf(mapOf(*pairs))

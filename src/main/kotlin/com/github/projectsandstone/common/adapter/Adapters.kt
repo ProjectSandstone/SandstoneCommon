@@ -28,7 +28,19 @@
 package com.github.projectsandstone.common.adapter
 
 import com.github.jonathanxd.adapterhelper.AdapterManager
+import com.github.projectsandstone.common.adapter.converters.ArrayToListConverter
+import com.github.projectsandstone.common.adapter.converters.ClassConverter
+import com.github.projectsandstone.common.adapter.converters.CollectionConverter
+import com.github.projectsandstone.common.adapter.converters.ListToArrayConverter
+import com.github.projectsandstone.common.util.extension.registerConverter
 
 object Adapters {
     val adapters = AdapterManager.create()
+
+    init {
+        adapters.registerConverter(ArrayToListConverter)
+        adapters.registerConverter(CollectionConverter)
+        adapters.registerConverter(ListToArrayConverter)
+        adapters.registerConverter(ClassConverter)
+    }
 }

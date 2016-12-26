@@ -25,37 +25,18 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.util.extension
+package com.github.projectsandstone.common.adapter.converters
 
 import com.github.jonathanxd.adapterhelper.Adapter
 import com.github.jonathanxd.adapterhelper.AdapterManager
-import com.github.jonathanxd.adapterhelper.AdapterSpecification
 import com.github.jonathanxd.adapterhelper.Converter
 
-inline fun <reified I: Any, reified R: Any> AdapterManager.adapt(instance: I): R {
-    return this.adaptUnchecked(I::class.java, instance, R::class.java)
+object ArrayToListConverter : Converter<Array<Any>, List<*>> {
+
+    override fun convert(input: Array<Any>, adapter: Adapter<*>?, manager: AdapterManager): List<*> {
+        return input.map {
+            manager.adaptUnchecked<Any, Any>(it.javaClass, it, emptyArray())
+        }
+    }
+
 }
-
-inline fun <I: Any, reified R: Any> AdapterManager.adapt(adaptee: Class<I>, instance: I): R {
-    return this.adaptUnchecked(adaptee, instance, R::class.java)
-}
-
-inline fun <reified I: Any, reified R: Any> AdapterManager.adaptAll(instancesIterable: Iterable<I>): List<R> {
-    return this.adaptAll(I::class.java, instancesIterable, R::class.java)
-}
-
-inline fun <I: Any, reified R: Any> AdapterManager.adaptAll(adaptee: Class<I>, instancesIterable: Iterable<I>): List<R> {
-    return this.adaptAll(adaptee, instancesIterable, R::class.java)
-}
-
-inline fun <reified A: Any, reified O: Any> AdapterManager.register(noinline factory: (O, AdapterManager) -> A) {
-    this.register(AdapterSpecification.create(factory, A::class.java, O::class.java))
-}
-
-inline fun <reified I: Any, reified O: Any> AdapterManager.registerConverter(converter: Converter<I, O>) {
-    this.registerConverter(I::class.java, O::class.java, converter)
-}
-
-inline fun <reified I: Any, reified O: Any> AdapterManager.convert(instance: I, adapter: Adapter<*>?): O =
-    this.convert(I::class.java, O::class.java, instance, adapter).get()
-
