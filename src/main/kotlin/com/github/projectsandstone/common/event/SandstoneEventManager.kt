@@ -42,9 +42,12 @@ import java.util.*
 import java.util.concurrent.Executors
 
 /**
- * Created by jonathan on 18/08/16.
+ * Sandstone Event Manager common implementation
+ *
+ * @param generateDispatchClass True to generate classes that delegates directly to the listener method (faster),
+ * false to use Java 7 MethodHandles to delegate to listener methods (slower) (see [MethodDispatcher]).
  */
-class SandstoneEventManager : EventManager {
+class SandstoneEventManager @JvmOverloads constructor(val generateDispatchClass: Boolean = true) : EventManager {
     private val listeners: MutableSet<EventListenerContainer<*>> = TreeSet()
     private val executor = Executors.newCachedThreadPool(Constants.daemonThreadFactory)
 
@@ -189,10 +192,20 @@ class SandstoneEventManager : EventManager {
                     && it.parameterCount > 0
                     && Event::class.java.isAssignableFrom(it.parameterTypes[0])
         }.map {
-            this.createPluginMethodListener(
-                    plugin = Sandstone.game.pluginManager.getRequiredPlugin(plugin),
-                    method = it,
-                    instance = instance)
+            if(this.generateDispatchClass) {
+                return@map this.createPluginMethodListener(
+                        plugin = Sandstone.game.pluginManager.getRequiredPlugin(plugin),
+                        method = it,
+                        instance = instance)
+            } else {
+                val data = ListenerData.fromMethod(it)
+
+                @Suppress("UNCHECKED_CAST")
+                return@map EventListenerContainer(
+                        pluginContainer = Sandstone.game.pluginManager.getRequiredPlugin(plugin),
+                        eventType = data.eventType as TypeInfo<Event>,
+                        eventListener = MethodDispatcher(instance, data, it))
+            }
         }
     }
 
