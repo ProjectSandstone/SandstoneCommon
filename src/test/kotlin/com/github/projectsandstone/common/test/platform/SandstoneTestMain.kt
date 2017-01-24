@@ -3,7 +3,7 @@
  *
  *         The MIT License (MIT)
  *
- *      Copyright (c) 2016 Sandstone <https://github.com/ProjectSandstone/>
+ *      Copyright (c) Sandstone <https://github.com/ProjectSandstone/>
  *      Copyright (c) contributors
  *
  *
@@ -31,6 +31,7 @@ import com.github.projectsandstone.api.Sandstone
 import com.github.projectsandstone.api.constants.SandstonePlugin
 import com.github.projectsandstone.api.event.SandstoneEventFactory
 import com.github.projectsandstone.common.SandstoneInit
+import java.nio.file.Paths
 
 object SandstoneTestMain {
     fun main(args: Array<String>) {
@@ -48,6 +49,7 @@ object SandstoneTestMain {
         SandstoneInit.initGame(TestGame())
         SandstoneInit.initLogger(TestLogger(null))
         SandstoneInit.initLoggerFactory(TestLoggerFactory())
+        SandstoneInit.initPath(Paths.get("testenv"))
     }
 
     fun init() {

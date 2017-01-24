@@ -3,7 +3,7 @@
  *
  *         The MIT License (MIT)
  *
- *      Copyright (c) 2016 Sandstone <https://github.com/ProjectSandstone/>
+ *      Copyright (c) Sandstone <https://github.com/ProjectSandstone/>
  *      Copyright (c) contributors
  *
  *
@@ -95,8 +95,4 @@ fun <E: Enum<E>> Enum<E>.formatToSandstoneRegistryName(): String {
     }
 
     return sb.toString()
-}
-
-enum class A {
-    ENDER_PEARL
 }
