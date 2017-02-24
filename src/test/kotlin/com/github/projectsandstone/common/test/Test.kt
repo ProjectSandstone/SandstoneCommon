@@ -30,6 +30,8 @@ package com.github.projectsandstone.common.test
 import com.github.projectsandstone.api.Sandstone
 import com.github.projectsandstone.common.test.platform.SandstoneTestMain
 import org.junit.Test
+import java.time.Duration
+import java.time.Instant
 import java.util.*
 
 class Test {
@@ -37,13 +39,15 @@ class Test {
     fun init() {
         SandstoneTestMain.main(emptyArray())
 
-        val resourceAsStream = SandstoneTestMain.javaClass.classLoader.getResourceAsStream("plugins.properties")
+        val resourceAsStream = SandstoneTestMain::class.java.classLoader.getResourceAsStream("plugins.properties")
 
         val properties = Properties()
 
         properties.load(resourceAsStream)
 
         val keys = properties.keys.toString()
+
+        val loadInstant = Instant.now()
 
         Sandstone.logger.info("Loading plugins: $keys...")
 
@@ -55,6 +59,10 @@ class Test {
         Sandstone.pluginManager.loadPlugins(properties.values.map { it as String }.toTypedArray())
 
         Sandstone.pluginManager.loadAllPlugins()
+
+        Sandstone.logger.info("Plugins loaded in: ${Duration.between(loadInstant, Instant.now()).seconds}s")
+
+        Sandstone.logger.info("Initializing Sandstone Test Environment...")
 
         SandstoneTestMain.init()
         SandstoneTestMain.stop()
