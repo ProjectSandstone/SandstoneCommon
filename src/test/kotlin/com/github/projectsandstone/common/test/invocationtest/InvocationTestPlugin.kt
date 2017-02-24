@@ -35,6 +35,7 @@ import com.github.projectsandstone.api.event.init.PostInitializationEvent
 import com.github.projectsandstone.api.logging.Logger
 import com.github.projectsandstone.api.plugin.Plugin
 import com.github.projectsandstone.api.plugin.PluginContainer
+import com.github.projectsandstone.api.util.internal.gen.event.SandstoneEventGen
 import com.github.projectsandstone.api.util.internal.gen.event.listener.MethodListenerGen
 import com.github.projectsandstone.common.util.extension.typeInfo
 import javax.inject.Inject
@@ -47,7 +48,7 @@ class InvocationTestPlugin @Inject constructor(val logger: Logger, val game: Gam
     @Listener
     fun post(event: PostInitializationEvent) {
 
-        val event = SandstoneEventFactory.createEvent(MyEvent::class.typeInfo, mapOf("message" to "Test 123"))
+        val event = SandstoneEventGen.gen(MyEvent::class.typeInfo, mapOf("message" to "Test 123"))
 
         val toInvoke = EvListener::class.java.getDeclaredMethod("toInvoke", MyEvent::class.java)
 

@@ -53,15 +53,15 @@ object SandstoneTestMain {
     }
 
     fun init() {
-        Sandstone.eventManager.dispatchAsync(SandstoneEventFactory.createPreInitializationEvent(), SandstonePlugin)
-        Sandstone.eventManager.dispatch(SandstoneEventFactory.createInitializationEvent(), SandstonePlugin)
-        Sandstone.eventManager.dispatch(SandstoneEventFactory.createPostInitializationEvent(), SandstonePlugin)
-        Sandstone.eventManager.dispatch(SandstoneEventFactory.createServerStartingEvent(), SandstonePlugin)
-        Sandstone.eventManager.dispatch(SandstoneEventFactory.createServerStartedEvent(), SandstonePlugin)
+        Sandstone.eventManager.dispatchAsync(SandstoneEventFactory.instance.createPreInitializationEvent(), SandstonePlugin)
+        Sandstone.eventManager.dispatch(SandstoneEventFactory.instance.createInitializationEvent(), SandstonePlugin)
+        Sandstone.eventManager.dispatch(SandstoneEventFactory.instance.createPostInitializationEvent(), SandstonePlugin)
+        Sandstone.eventManager.dispatch(SandstoneEventFactory.instance.createServerStartingEvent(), SandstonePlugin)
+        Sandstone.eventManager.dispatch(SandstoneEventFactory.instance.createServerStartedEvent(), SandstonePlugin)
     }
 
     fun stop() {
-        Sandstone.eventManager.dispatch(SandstoneEventFactory.createServerStoppingEvent(), SandstonePlugin)
-        Sandstone.eventManager.dispatch(SandstoneEventFactory.createServerStoppedEvent(), SandstonePlugin)
+        Sandstone.eventManager.dispatch(SandstoneEventFactory.instance.createServerStoppingEvent(), SandstonePlugin)
+        Sandstone.eventManager.dispatch(SandstoneEventFactory.instance.createServerStoppedEvent(), SandstonePlugin)
     }
 }

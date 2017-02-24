@@ -67,7 +67,7 @@ abstract class SandstoneServiceManager : ServiceManager {
         /////////////////////////////////////////////////////
 
         if (this.dispatch) {
-            val event = SandstoneEventFactory.createChangeServiceProviderEvent(oldProvider = oldProvider, newProvider = registeredProvider, service = service)
+            val event = SandstoneEventFactory.instance.createChangeServiceProviderEvent(oldProvider = oldProvider, newProvider = registeredProvider, service = service)
 
             Sandstone.eventManager.dispatch(event, pluginContainer)
         }

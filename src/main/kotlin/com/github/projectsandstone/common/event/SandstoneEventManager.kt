@@ -187,7 +187,7 @@ class SandstoneEventManager @JvmOverloads constructor(val generateDispatchClass:
     private fun createMethodListeners(plugin: Any,
                                       instance: Any): List<EventListenerContainer<*>> {
 
-        return instance.javaClass.declaredMethods.filter {
+        return instance::class.java.declaredMethods.filter {
             it.getDeclaredAnnotation(Listener::class.java) != null
                     && it.parameterCount > 0
                     && Event::class.java.isAssignableFrom(it.parameterTypes[0])

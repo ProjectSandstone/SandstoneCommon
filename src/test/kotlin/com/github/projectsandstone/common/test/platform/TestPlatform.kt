@@ -36,6 +36,8 @@ class TestPlatform : Platform {
 
     override val platformFullName: String = "Test Environment"
 
+    override val platformBaseName: String = "testenv"
+
     override val platformName: String = "testenv"
 
     override val platformVersion: Version = Version("BETA", CommonVersionScheme)
