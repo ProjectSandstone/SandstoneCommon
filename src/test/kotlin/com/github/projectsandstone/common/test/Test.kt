@@ -55,10 +55,8 @@ class Test {
         Sandstone.pluginManager.loadPlugins(arrayOf(it as String))
         }*/
 
-
-        Sandstone.pluginManager.loadPlugins(properties.values.map { it as String }.toTypedArray())
-
-        Sandstone.pluginManager.loadAllPlugins()
+        val containers = Sandstone.pluginManager.createContainers(properties.values.map { it as String }.toTypedArray())
+        Sandstone.pluginManager.loadAll(containers)
 
         Sandstone.logger.info("Plugins loaded in: ${Duration.between(loadInstant, Instant.now()).seconds}s")
 

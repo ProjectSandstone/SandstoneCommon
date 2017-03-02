@@ -28,16 +28,10 @@
 package com.github.projectsandstone.common.plugin
 
 import com.github.projectsandstone.api.logging.Logger
-import com.github.projectsandstone.api.plugin.DependencyContainer
-import com.github.projectsandstone.api.plugin.PluginClassLoader
-import com.github.projectsandstone.api.plugin.PluginDefinition
-import com.github.projectsandstone.api.plugin.PluginState
+import com.github.projectsandstone.api.plugin.*
 import com.github.projectsandstone.api.util.version.Version
 import java.nio.file.Path
 
-/**
- * Created by jonathan on 27/08/16.
- */
 class SandstonePluginDefinition(var pluginContainer: SandstonePluginContainer?) : PluginDefinition {
 
     override var id: String
@@ -74,7 +68,12 @@ class SandstonePluginDefinition(var pluginContainer: SandstonePluginContainer?) 
     override val dependencies: Array<DependencyContainer>?
         get() = pluginContainer?.dependencies ?: throw IllegalStateException("Post Definition Phase")
 
-    override var authors: Array<String>?
+
+    override val dependenciesState: Array<DependencyState>
+        get() = pluginContainer?.dependenciesState ?: throw IllegalStateException("Post Definition Phase")
+
+
+    override var authors: Array<String>
         get() = pluginContainer?.authors ?: throw IllegalStateException("Post Definition Phase")
         set(value) {
             pluginContainer?.authors_ = value

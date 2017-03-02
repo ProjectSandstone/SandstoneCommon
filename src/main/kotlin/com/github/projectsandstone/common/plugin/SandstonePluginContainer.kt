@@ -33,24 +33,24 @@ import com.github.projectsandstone.api.util.version.Version
 import com.github.projectsandstone.common.util.CommonVersionScheme
 import java.nio.file.Path
 
-/**
- * Created by jonathan on 17/08/16.
- */
-open class SandstonePluginContainer(override val file: Path?,
-                                    var id_: String,
+open class SandstonePluginContainer(var id_: String,
                                     var name_: String,
                                     var version_: Version,
                                     var description_: String?,
                                     var usePlatformInternals_: Boolean,
-                                    override val classLoader: PluginClassLoader,
-                                    override val dependencies: Array<DependencyContainer>?,
-                                    var authors_: Array<String>?,
+                                    override val dependencies: Array<DependencyContainer>,
+                                    var authors_: Array<String>,
                                     override val mainClass: String) : PluginContainer {
 
     internal var definition: SandstonePluginDefinition? = null
     internal var instance_: Any? = null
+
+    internal var file_: Path? = null
+    internal var classLoader_: PluginClassLoader? = null
     internal lateinit var logger_: Logger
     internal lateinit var state_: PluginState
+    internal lateinit var dependenciesState_: Array<DependencyState>
+    internal lateinit var classes: Array<String>
 
     override val id: String
         get() = this.id_
@@ -67,8 +67,11 @@ open class SandstonePluginContainer(override val file: Path?,
     override val usePlatformInternals: Boolean
         get() = this.usePlatformInternals_
 
-    override val authors: Array<String>?
+    override val authors: Array<String>
         get() = this.authors_
+
+    override val dependenciesState: Array<DependencyState>
+        get() = this.dependenciesState_
 
     override val instance: Any?
         get() = this.instance_
@@ -79,6 +82,11 @@ open class SandstonePluginContainer(override val file: Path?,
     override val state: PluginState
         get() = this.state_
 
+    override val file: Path?
+        get() = this.file_
+
+    override val classLoader: PluginClassLoader
+        get() = this.classLoader_!!
 
     override fun equals(other: Any?): Boolean {
         if (other is PluginContainer)
@@ -96,22 +104,27 @@ open class SandstonePluginContainer(override val file: Path?,
     }
 
     companion object {
-        fun fromAnnotation(pluginClassLoader: PluginClassLoader, file: Path?, mainClass: String, annotation: Plugin): SandstonePluginContainer {
+        fun fromAnnotation(pluginClassLoader: PluginClassLoader, file: Path?, mainClass: String, classes: Array<String>, annotation: Plugin): SandstonePluginContainer {
             return SandstonePluginContainer(
                     id_ = annotation.id,
                     name_ = annotation.name.ifEmpty { annotation.id },
                     version_ = Version(annotation.version, CommonVersionScheme),
                     description_ = annotation.description.nullIfEmpty(),
-                    file = file,
+                    //file = file,
                     authors_ = annotation.authors.ifEmpty { emptyArray() },
                     dependencies = annotation.dependencies.ifEmpty { emptyArray() }.map {
                         SandstoneDependencyContainer(it.id, it.incompatibleVersions, it.isRequired, it.version)
                     }.toTypedArray(),
-                    classLoader = pluginClassLoader,
+                    //classLoader = pluginClassLoader,
                     usePlatformInternals_ = annotation.usePlatformInternals,
                     mainClass = mainClass
+            ).run {
+                this.classLoader_ = pluginClassLoader
+                this.file_ = file
+                this.classes = classes
 
-            )
+                return@run this
+            }
         }
 
         /**

@@ -28,16 +28,18 @@
 package com.github.projectsandstone.common.plugin
 
 import com.github.projectsandstone.api.Sandstone
+import com.github.projectsandstone.api.constants.SandstonePlugin
 import com.github.projectsandstone.api.plugin.*
+import com.github.projectsandstone.common.util.DependencyComparator
 import java.nio.file.Path
 import java.util.*
 
-/**
- * Created by jonathan on 15/08/16.
- */
 class SandstonePluginManager : PluginManager {
+
+    private val pluginSet = mutableSetOf<PluginContainer>(SandstonePlugin)
+    private val failedPluginSet = mutableSetOf<PluginContainer>()
+
     private val dependencyResolver_ = SandstoneDependencyResolver(this)
-    private val pluginSet = dependencyResolver_.createDependencySet()
     private val unmodifiablePluginSet = Collections.unmodifiableSet(this.pluginSet)
     private val pluginLoader_ = SandstonePluginLoader(this)
 
@@ -48,67 +50,91 @@ class SandstonePluginManager : PluginManager {
         get() = this.pluginLoader_
 
     override fun loadPlugins(classes: Array<String>): List<PluginContainer> {
-
-        val containers = this.pluginLoader.loadClasses(classes)
+        val containers = this.createContainers(classes)
 
         containers.forEach {
-            this.dependencyResolver.checkDependencies(it)
+            loadPlugin(it)
         }
-
-        pluginSet += containers
 
         return containers
     }
 
-    override fun loadPlugin(file: Path): List<PluginContainer> {
-        val containers = this.pluginLoader.loadFile(file)
+    override fun loadFile(file: Path): List<PluginContainer> {
+        val containers = this.createContainers(file)
 
         containers.forEach {
-            this.dependencyResolver.checkDependencies(it)
+            loadPlugin(it)
         }
 
-        pluginSet += containers
-
         return containers
+
     }
 
-    override fun loadPlugin(pluginContainer: PluginContainer): Boolean {
+    override fun loadAll(pluginContainers: List<PluginContainer>) {
+        val containers = pluginContainers.toMutableList().sortedWith(DependencyComparator(this.dependencyResolver_, pluginContainers))
+
+        containers.forEach {
+            loadPlugin(it)
+        }
+    }
+
+    fun loadPlugin(pluginContainer: PluginContainer): Boolean {
 
         try {
+            if(this.pluginSet.any { it.id == pluginContainer.id })
+                throw IllegalArgumentException("Plugin with id ${pluginContainer.id} already loaded!")
 
-            if(!this.pluginSet.any{pluginContainer.equals(it)}) {
+            if (!this.pluginSet.any { pluginContainer == it }) {
                 this.pluginSet.add(pluginContainer)
             }
 
             this.pluginLoader.load(pluginContainer)
 
-            if(pluginContainer.state == PluginState.FAILED) {
-                this.pluginSet -= pluginContainer
+            if (pluginContainer.state == PluginState.FAILED) {
+                this.addToFailedSet(pluginContainer)
             } else if (!this.pluginSet.contains(pluginContainer)) {
-                this.pluginSet.add(pluginContainer)
+                this.addToLoadedSet(pluginContainer)
             }
 
             return true
-        }catch (t: Exception) {
+        } catch (t: Exception) {
             Sandstone.logger.exception(t, "Failed to load PluginContainer: $pluginContainer!")
             return false
         }
     }
 
-    override fun loadAllPlugins(): Boolean {
-        val pluginList = pluginSet.toList().filter { it.state == PluginState.ABOUT_TO_LOAD }
-
-        return pluginList.all { this.loadPlugin(it) }
-    }
 
     override fun getPlugin(id: String): PluginContainer? {
         return this.pluginSet.find { it.id == id }
+    }
+
+    override fun getFailedPlugin(id: String): PluginContainer? {
+        return this.failedPluginSet.find { it.id == id }
     }
 
     override fun getPlugins(): Set<PluginContainer> {
         return unmodifiablePluginSet
     }
 
+    private fun addToLoadedSet(pluginContainer: PluginContainer) {
+        this.failedPluginSet.removeIf { it.id == pluginContainer.id }
 
+        if(!this.pluginSet.any { it.id == pluginContainer.id })
+            this.pluginSet += pluginContainer
+    }
 
+    private fun addToFailedSet(pluginContainer: PluginContainer) {
+        this.pluginSet.removeIf { it.id == pluginContainer.id }
+
+        if(!this.failedPluginSet.any { it.id == pluginContainer.id })
+            this.failedPluginSet += pluginContainer
+    }
+
+    override fun createContainers(classes: Array<String>): List<PluginContainer> {
+        return pluginLoader_.createFromClasses(classes)
+    }
+
+    override fun createContainers(file: Path): List<PluginContainer> {
+        return pluginLoader_.createFromFile(file)
+    }
 }

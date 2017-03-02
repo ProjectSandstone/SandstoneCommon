@@ -32,9 +32,6 @@ import com.github.projectsandstone.api.event.Event
 import com.github.projectsandstone.api.event.EventListener
 import com.github.projectsandstone.api.plugin.PluginContainer
 
-/**
- * Created by jonathan on 18/08/16.
- */
 open class EventListenerContainer<T : Event>(val pluginContainer: PluginContainer,
                                              val eventType: TypeInfo<T>,
                                              val eventListener: EventListener<T>) : Comparable<EventListenerContainer<*>> {

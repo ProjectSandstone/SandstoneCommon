@@ -29,9 +29,6 @@ package com.github.projectsandstone.common.util
 
 import java.util.concurrent.TimeUnit
 
-/**
- * Created by jonathan on 27/08/16.
- */
 object MinecraftTicks {
 
     val MILLI_PER_TICK = 50

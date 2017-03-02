@@ -29,9 +29,6 @@ package com.github.projectsandstone.common.scheduler
 
 import com.github.projectsandstone.api.Sandstone
 
-/**
- * Created by jonathan on 28/08/16.
- */
 class SandstoneRunnable(val plugin: Any, val name: String?, val runnable: Runnable) : Runnable {
     val pluginContainer = Sandstone.game.pluginManager.getRequiredPlugin(plugin)
 

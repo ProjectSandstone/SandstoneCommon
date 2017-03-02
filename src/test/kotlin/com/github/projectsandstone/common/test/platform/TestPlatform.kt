@@ -32,7 +32,7 @@ import com.github.projectsandstone.api.util.version.Version
 import com.github.projectsandstone.common.util.CommonVersionScheme
 
 class TestPlatform : Platform {
-    override val minecraftVersion: Version = Version("1.10.2", CommonVersionScheme)
+    override val minecraftVersion: Version = Version("1.11.2", CommonVersionScheme)
 
     override val platformFullName: String = "Test Environment"
 

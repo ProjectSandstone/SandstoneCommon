@@ -30,9 +30,6 @@ package com.github.projectsandstone.common.util
 import com.github.projectsandstone.api.util.version.Version
 import com.github.projectsandstone.api.util.version.VersionScheme
 
-/**
- * Created by jonathan on 27/08/16.
- */
 object CommonVersionScheme : VersionScheme {
     override fun compare(o1: Version?, o2: Version?): Int = 0
 

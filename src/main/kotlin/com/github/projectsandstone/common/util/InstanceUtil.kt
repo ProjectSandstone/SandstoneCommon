@@ -25,9 +25,35 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.asm
+package com.github.projectsandstone.common.util
+
+import java.lang.invoke.MethodHandles
+
+
+internal val LOOKUP = MethodHandles.publicLookup()
 
 /**
- * Created by jonathan on 15/08/16.
+ * Tries to resolve instance of Kotlin and Scala objects.
+ *
+ * For Kotlin Objects, the method will use [kotlin.reflect.KClass.objectInstance] method to get `object` instance.
+ *
+ * For Scala, the method will use [MethodHandles.publicLookup] to lookup for a static `MODULE$` field.
  */
-data class SimpleDesc(val usePlatformInternals: Boolean)
+@Suppress("UNCHECKED_CAST")
+fun <T : Any> getInstance(klass: Class<T>): T? {
+
+    val objectInstance = klass.kotlin.objectInstance
+
+    // Kotlin
+    if (objectInstance != null)
+        return objectInstance
+
+    val find = try {
+        LOOKUP.findStaticGetter(klass, "MODULE\$", klass)
+    } catch(t: NoSuchFieldException) {
+        null
+    }
+
+    return find?.invokeExact() as? T
+
+}

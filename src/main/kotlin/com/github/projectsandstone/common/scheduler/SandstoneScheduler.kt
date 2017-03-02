@@ -32,9 +32,6 @@ import com.github.projectsandstone.api.scheduler.Scheduler
 import com.github.projectsandstone.api.scheduler.Task
 import java.time.Duration
 
-/**
- * Created by jonathan on 27/08/16.
- */
 abstract class SandstoneScheduler : Scheduler {
     override fun createAsyncExecutor(plugin: Any): SandstoneExecutorService {
         return com.github.projectsandstone.common.scheduler.SandstoneExecutorService(this, plugin, isAsync = true)

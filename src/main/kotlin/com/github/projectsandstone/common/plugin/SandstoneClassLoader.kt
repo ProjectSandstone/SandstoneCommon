@@ -35,9 +35,6 @@ import java.net.URL
 import java.net.URLClassLoader
 import java.nio.file.Path
 
-/**
- * Created by jonathan on 15/08/16.
- */
 class SandstoneClassLoader(
         urls: Array<URL>,
         parent: ClassLoader,

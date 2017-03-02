@@ -29,12 +29,8 @@ package com.github.projectsandstone.common.plugin
 
 import com.github.projectsandstone.api.plugin.DependencyContainer
 
-/**
- * Created by jonathan on 17/08/16.
- */
 data class SandstoneDependencyContainer(
         override val id: String,
         override val incompatibleVersions: String,
         override val isRequired: Boolean,
-        override val version: String) : DependencyContainer {
-}
+        override val version: String) : DependencyContainer

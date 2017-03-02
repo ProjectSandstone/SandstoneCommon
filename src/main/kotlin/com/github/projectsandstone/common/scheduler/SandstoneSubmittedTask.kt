@@ -32,9 +32,14 @@ import com.github.projectsandstone.api.scheduler.Task
 
 class SandstoneSubmittedTask(override val task: Task,
                              val canceller: (SubmittedTask) -> Unit,
+                             val isCancelledFunc: (SubmittedTask) -> Boolean,
                              val runningFetcher: (SubmittedTask) -> Boolean,
                              val submittedFetcher: (SubmittedTask) -> Boolean,
                              val waitFinish: (SubmittedTask) -> Unit) : SubmittedTask {
+
+    override val isCancelled: Boolean
+        get() = isCancelledFunc(this)
+
     override fun cancel() {
         canceller(this)
     }

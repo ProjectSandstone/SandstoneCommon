@@ -36,10 +36,8 @@ import com.google.inject.AbstractModule
 import com.google.inject.Scopes
 import com.google.inject.name.Names
 
-/**
- * Created by jonathan on 17/08/16.
- */
 class SandstonePluginModule(val pluginManager: PluginManager, val pluginContainer: SandstonePluginContainer, val pluginClass: Class<*>) : AbstractModule() {
+
     override fun configure() {
 
         bind(PluginContainer::class.java).toInstance(this.pluginContainer)

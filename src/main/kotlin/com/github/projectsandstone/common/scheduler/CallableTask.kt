@@ -31,9 +31,6 @@ import com.google.common.util.concurrent.AbstractFuture
 import java.util.concurrent.Callable
 import java.util.concurrent.RunnableFuture
 
-/**
- * Created by jonathan on 27/08/16.
- */
 class CallableTask<V>(val callable: Callable<V>) : AbstractFuture<V>(), RunnableFuture<V> {
 
     override fun run() {

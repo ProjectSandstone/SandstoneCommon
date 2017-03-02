@@ -87,6 +87,8 @@ class TestScheduler : SandstoneScheduler() {
 
         val submittedTask = SandstoneSubmittedTask(task = task, canceller = {
             cancelled.set(true)
+        }, isCancelledFunc = {
+            cancelled.get()
         }, submittedFetcher = {
             submitted.get()
         }, runningFetcher = {

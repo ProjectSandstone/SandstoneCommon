@@ -35,15 +35,11 @@ import java.time.Duration
 import java.util.concurrent.Delayed
 import java.util.concurrent.TimeUnit
 
-/**
- * Created by jonathan on 27/08/16.
- */
 class ScheduledFutureTaskImpl<V>(override val task: Task,
                                  override val submittedTask: SubmittedTask,
                                  val callableTask: CallableTask<V>) : ScheduledFutureTask<V> {
-    override fun isCancelled(): Boolean {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+
+    override fun isCancelled(): Boolean = submittedTask.isCancelled
 
     override fun get(): V {
         return this.callableTask.get()
@@ -71,7 +67,7 @@ class ScheduledFutureTaskImpl<V>(override val task: Task,
     }
 
     override fun isPeriodic(): Boolean {
-        return task.interval.compareTo(Duration.ZERO) > 0
+        return task.interval > Duration.ZERO
     }
 
     override fun compareTo(other: Delayed?): Int {

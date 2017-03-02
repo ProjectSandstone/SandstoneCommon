@@ -27,22 +27,28 @@
  */
 package com.github.projectsandstone.common.asm
 
+import com.github.projectsandstone.api.plugin.Dependency
+import com.github.projectsandstone.api.plugin.DependencyContainer
 import com.github.projectsandstone.api.plugin.Plugin
+import com.github.projectsandstone.api.plugin.PluginContainer
+import com.github.projectsandstone.api.util.version.Version
+import com.github.projectsandstone.api.util.version.VersionScheme
+import com.github.projectsandstone.common.plugin.SandstoneDependencyContainer
+import com.github.projectsandstone.common.plugin.SandstonePluginContainer
+import com.github.projectsandstone.common.util.CommonVersionScheme
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.Type
 import org.objectweb.asm.tree.AnnotationNode
 import org.objectweb.asm.tree.ClassNode
 import java.io.InputStream
 
-/**
- * Created by jonathan on 15/08/16.
- */
 object ASM {
 
     private val annotationType = Type.getDescriptor(Plugin::class.java)
+    private val depAnnotationType = Type.getDescriptor(Dependency::class.java)
 
     @Suppress("UNCHECKED_CAST")
-    fun findPluginAnnotation(inputStream: InputStream): SimpleDesc? {
+    fun findPluginAnnotation(inputStream: InputStream): SandstonePluginContainer? {
         try {
             val reader = ClassReader(inputStream)
 
@@ -55,26 +61,98 @@ object ASM {
             for (annotation in visibleAnnotations) {
                 if (annotation.desc == ASM.annotationType) {
 
-                    val values = annotation.values;
+                    var id: String? = null
+                    var name: String? = null
+                    var version: String? = null
+                    var description: String? = null
+                    var authors: Array<String> = emptyArray()
+                    var usePlatformInternals = false
+                    var dependencies: Array<DependencyContainer> = emptyArray()
 
 
-                    for (x in 0..(values.size-1)) {
-                        val value = values[x]
+                    val values = annotation.values
 
-                        if (value == "usePlatformInternals") {
-                            return SimpleDesc(values[x + 1] as Boolean)
+                    if(values != null) {
+
+                        for (x in 0..(values.size - 1) step 2) {
+                            val key = values[x]
+                            val value = values[x + 1]
+
+                            when (key) {
+                                "id" -> id = value as String
+                                "name" -> name = value as String
+                                "version" -> version = value as String
+                                "description" -> description = (value as String).let { if (it.isEmpty()) null else it }
+                                "authors" -> authors = (value as List<String>).toTypedArray()
+                                "usePlatformInternals" -> usePlatformInternals = value as Boolean
+                                "dependencies" -> dependencies = createDependenciesArray(value as List<AnnotationNode>)
+                            }
+
                         }
                     }
 
-                    return SimpleDesc(false)
+                    if (id == null)
+                        throw IllegalArgumentException("Id cannot be null.")
 
+                    if (version == null)
+                        throw IllegalArgumentException("Version cannot be null.")
+
+                    return SandstonePluginContainer(
+                            id_ = id,
+                            name_ = name ?: id,
+                            authors_ = authors,
+                            description_ = description,
+                            version_ = Version(version, CommonVersionScheme),
+                            usePlatformInternals_ = usePlatformInternals,
+                            dependencies = dependencies,
+                            mainClass = Type.getType(node.name).className
+
+                    )
                 }
             }
 
             return null
-        }catch(e: Exception) {
+        } catch(e: Exception) {
             return null
         }
+    }
+
+    private fun createDependenciesArray(list: List<AnnotationNode>): Array<DependencyContainer> {
+        return list.map {
+
+            if (it.desc != ASM.depAnnotationType)
+                throw IllegalArgumentException("Annotation ${it.desc} is not a @Dependency annotation!")
+
+            val values = it.values
+
+            val end = values.size - 1
+
+            var id: String? = null
+            var version: String = ".*"
+            var incompatibleVersions: String = ""
+            var isRequired = true
+
+            for(x in 0..end step 2) {
+                val key = values[x]
+                val value = values[x + 1]
+
+                when(key) {
+                    "id" -> id = value as String
+                    "version" -> version = value as String
+                    "incompatibleVersions" -> incompatibleVersions = value as String
+                    "isRequired" -> isRequired = value as Boolean
+                }
+            }
+
+            id ?: throw IllegalArgumentException("'id' cannot be null in '@${it.desc}' annotation.")
+
+            return@map SandstoneDependencyContainer(
+                    id = id,
+                    version = version,
+                    incompatibleVersions = incompatibleVersions,
+                    isRequired = isRequired
+            )
+        }.toTypedArray()
     }
 
 }

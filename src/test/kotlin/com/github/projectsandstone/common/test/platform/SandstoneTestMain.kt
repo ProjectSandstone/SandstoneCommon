@@ -37,6 +37,8 @@ object SandstoneTestMain {
     fun main(args: Array<String>) {
         System.err.println(" Starting Sandstone test environment...")
 
+        SandstoneEventFactory.createAsync()
+
         start()
 
         System.err.println(" Sandstone test environment started!")

@@ -31,10 +31,7 @@ import com.github.projectsandstone.api.plugin.PluginContainer
 import com.github.projectsandstone.common.plugin.SandstoneDependencyResolver
 import java.util.*
 
-/**
- * Created by jonathan on 15/08/16.
- */
-class DependencyComparator(val sandstoneDependencyResolver: SandstoneDependencyResolver) : Comparator<PluginContainer> {
+class DependencyComparator(val sandstoneDependencyResolver: SandstoneDependencyResolver, val queue: List<PluginContainer>) : Comparator<PluginContainer> {
 
     override fun compare(o1: PluginContainer?, o2: PluginContainer?): Int {
         if (o1 == null)
@@ -44,7 +41,7 @@ class DependencyComparator(val sandstoneDependencyResolver: SandstoneDependencyR
             return -1
 
         // o1 hasDirectOrIndirectDependency of o2
-        if (sandstoneDependencyResolver.hasDirectOrIndirectDependency(o1, o2)) {
+        if (sandstoneDependencyResolver.hasDirectOrIndirectDependency(o1, o2, queue)) {
             return 1
         }
 

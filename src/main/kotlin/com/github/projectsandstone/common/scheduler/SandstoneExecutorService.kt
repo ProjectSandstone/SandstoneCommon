@@ -36,9 +36,6 @@ import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-/**
- * Created by jonathan on 27/08/16.
- */
 class SandstoneExecutorService(val scheduler: Scheduler, val plugin: Any, val isAsync: Boolean) : AbstractExecutorService(), SandstoneExecutorService {
 
     override fun schedule(command: Runnable, delay: Long, unit: TimeUnit): ScheduledFutureTask<*> {

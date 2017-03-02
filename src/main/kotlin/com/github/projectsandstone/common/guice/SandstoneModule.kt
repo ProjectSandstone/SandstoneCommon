@@ -36,10 +36,8 @@ import com.github.projectsandstone.api.service.ServiceManager
 import com.google.inject.AbstractModule
 import com.google.inject.Guice
 
-/**
- * Created by jonathan on 17/08/16.
- */
 object SandstoneModule : AbstractModule() {
+
     val injector = Guice.createInjector(SandstoneModule)
 
     override fun configure() {
@@ -50,4 +48,5 @@ object SandstoneModule : AbstractModule() {
         bind(PluginManager::class.java).toInstance(Sandstone.game.pluginManager)
         bind(ServiceManager::class.java).toInstance(Sandstone.game.serviceManager)
     }
+
 }

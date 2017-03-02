@@ -32,10 +32,13 @@ import com.github.projectsandstone.api.event.Listener
 import com.github.projectsandstone.api.event.init.PreInitializationEvent
 import com.github.projectsandstone.api.event.init.ServerStartedEvent
 import com.github.projectsandstone.api.logging.Logger
+import com.github.projectsandstone.api.plugin.Dependency
 import com.github.projectsandstone.api.plugin.Plugin
 import javax.inject.Inject
 
-@Plugin(id = "projectsandstone.ServiceProxyPlugin", name = "ServiceProxy", version = "1.0.0")
+@Plugin(id = "projectsandstone.serviceproxyplugin", name = "ServiceProxy", version = "1.0.0", dependencies = arrayOf(
+        Dependency("com.github.projectsandstone.common.test.eventlistenerplugin")
+))
 class ServiceProxyPlugin @Inject constructor(val game: Game, val logger: Logger) {
 
     lateinit var service: TestService

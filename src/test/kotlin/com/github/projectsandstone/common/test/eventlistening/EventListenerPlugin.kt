@@ -42,7 +42,7 @@ import com.github.projectsandstone.api.world.World
 import com.google.inject.Inject
 import java.util.*
 
-@Plugin(id = "com.github.projectsandstone.common.test.EventListenerPlugin", name = "Event Listening Test Plugin", version = "1.0.0")
+@Plugin(id = "com.github.projectsandstone.common.test.eventlistenerplugin", name = "Event Listening Test Plugin", version = "1.0.0")
 class EventListenerPlugin @Inject constructor(val logger: Logger) {
 
 

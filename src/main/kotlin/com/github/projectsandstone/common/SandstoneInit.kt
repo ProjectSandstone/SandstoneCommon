@@ -120,14 +120,8 @@ object SandstoneInit {
      */
     @JvmStatic
     fun loadPlugins(pluginsDir: Path) {
-        Sandstone.game.pluginManager.loadPlugins(pluginsDir)
+        val plugins = Sandstone.game.pluginManager.createContainersFromPath(pluginsDir)
+        Sandstone.game.pluginManager.loadAll(plugins)
     }
 
-    /**
-     * Start loaded plugins.
-     */
-    @JvmStatic
-    fun startPlugins() {
-        Sandstone.game.pluginManager.loadAllPlugins()
-    }
 }
