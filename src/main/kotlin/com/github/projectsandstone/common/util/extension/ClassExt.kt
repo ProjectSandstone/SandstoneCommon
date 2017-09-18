@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -32,7 +32,7 @@ import kotlin.jvm.internal.ClassBasedDeclarationContainer
 import kotlin.reflect.KClass
 
 val <T : Any> Class<T>.typeInfo: TypeInfo<T>
-    get() = TypeInfo.aEnd(this)
+    get() = TypeInfo.of(this)
 
 @Suppress("UNCHECKED_CAST")
 val <T : Any> KClass<T>.typeInfo: TypeInfo<T>

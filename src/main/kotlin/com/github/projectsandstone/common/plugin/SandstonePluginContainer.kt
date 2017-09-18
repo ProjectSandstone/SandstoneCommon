@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -27,20 +27,23 @@
  */
 package com.github.projectsandstone.common.plugin
 
-import com.github.projectsandstone.api.logging.Logger
 import com.github.projectsandstone.api.plugin.*
 import com.github.projectsandstone.api.util.version.Version
 import com.github.projectsandstone.common.util.CommonVersionScheme
+import org.slf4j.Logger
 import java.nio.file.Path
+import java.util.*
 
 open class SandstonePluginContainer(var id_: String,
                                     var name_: String,
                                     var version_: Version,
                                     var description_: String?,
                                     var usePlatformInternals_: Boolean,
-                                    override val dependencies: Array<DependencyContainer>,
-                                    var authors_: Array<String>,
-                                    override val mainClass: String) : PluginContainer {
+                                    override val optional: Boolean,
+                                    override val dependencies: List<DependencyContainer>,
+                                    var authors_: List<String>,
+                                    override val mainClass: String,
+                                    override val targetPlatformNames: List<String>) : PluginContainer {
 
     internal var definition: SandstonePluginDefinition? = null
     internal var instance_: Any? = null
@@ -49,7 +52,7 @@ open class SandstonePluginContainer(var id_: String,
     internal var classLoader_: PluginClassLoader? = null
     internal lateinit var logger_: Logger
     internal lateinit var state_: PluginState
-    internal lateinit var dependenciesState_: Array<DependencyState>
+    internal lateinit var dependenciesState_: List<DependencyState>
     internal lateinit var classes: Array<String>
 
     override val id: String
@@ -67,10 +70,10 @@ open class SandstonePluginContainer(var id_: String,
     override val usePlatformInternals: Boolean
         get() = this.usePlatformInternals_
 
-    override val authors: Array<String>
+    override val authors: List<String>
         get() = this.authors_
 
-    override val dependenciesState: Array<DependencyState>
+    override val dependenciesState: List<DependencyState>
         get() = this.dependenciesState_
 
     override val instance: Any?
@@ -111,13 +114,15 @@ open class SandstonePluginContainer(var id_: String,
                     version_ = Version(annotation.version, CommonVersionScheme),
                     description_ = annotation.description.nullIfEmpty(),
                     //file = file,
-                    authors_ = annotation.authors.ifEmpty { emptyArray() },
-                    dependencies = annotation.dependencies.ifEmpty { emptyArray() }.map {
+                    authors_ = Collections.unmodifiableList(annotation.authors.toList()),
+                    dependencies = Collections.unmodifiableList(annotation.dependencies.ifEmpty { emptyArray() }.map {
                         SandstoneDependencyContainer(it.id, it.incompatibleVersions, it.isRequired, it.version)
-                    }.toTypedArray(),
+                    }),
                     //classLoader = pluginClassLoader,
                     usePlatformInternals_ = annotation.usePlatformInternals,
-                    mainClass = mainClass
+                    mainClass = mainClass,
+                    optional = annotation.optional,
+                    targetPlatformNames = Collections.unmodifiableList(annotation.targetPlatformNames.toList())
             ).run {
                 this.classLoader_ = pluginClassLoader
                 this.file_ = file
@@ -130,11 +135,13 @@ open class SandstonePluginContainer(var id_: String,
         /**
          * Return current String if not empty, or null if is empty
          */
-        fun String.nullIfEmpty(): String? = if (this.isNotEmpty()) this else null
+        private fun String.nullIfEmpty(): String? = if (this.isNotEmpty()) this else null
 
-        inline fun String.ifEmpty(func: (String) -> String): String = if (this.isNotEmpty()) this else func(this)
+        inline private fun String.ifEmpty(func: (String) -> String): String =
+                if (this.isNotEmpty()) this else func(this)
 
-        inline fun <T> Array<T>.ifEmpty(func: (Array<T>) -> Array<T>): Array<T> = if (this.isNotEmpty()) this else func(this)
+        inline private fun <T> Array<T>.ifEmpty(func: (Array<T>) -> Array<T>): Array<T> =
+                if (this.isNotEmpty()) this else func(this)
 
     }
 

@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -98,7 +98,7 @@ class SandstonePluginManager : PluginManager {
 
             return true
         } catch (t: Exception) {
-            Sandstone.logger.exception(t, "Failed to load PluginContainer: $pluginContainer!")
+            Sandstone.logger.error("Failed to load PluginContainer: $pluginContainer!", t)
             return false
         }
     }

@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -29,21 +29,18 @@ package com.github.projectsandstone.common
 
 import com.github.jonathanxd.iutils.condition.Conditions
 import com.github.projectsandstone.api.Game
+import com.github.projectsandstone.api.Implementation
 import com.github.projectsandstone.api.Sandstone
-import com.github.projectsandstone.api.logging.Logger
 import com.github.projectsandstone.api.logging.LoggerFactory
 import com.github.projectsandstone.api.registry.RegistryEntry
-import com.github.projectsandstone.api.util.exception.EntryNotFoundException
 import com.github.projectsandstone.api.util.extension.registry.getEntryGeneric
 import com.github.projectsandstone.api.util.version.Schemes
 import com.github.projectsandstone.common.util.version.SemVerSchemeImpl
+import org.slf4j.Logger
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
 import java.nio.file.Path
 
-/**
- * Created by jonathan on 15/08/16.
- */
 object SandstoneInit {
 
     @JvmStatic
@@ -72,13 +69,18 @@ object SandstoneInit {
     }
 
     @JvmStatic
+    fun initImplementation(implementation: Implementation) {
+        this.init("implementation_", implementation)
+    }
+
+    @JvmStatic
     fun initRegistryConstants(game: Game, constantsClass: Class<*>, instance: Any?) {
         val missingEntries = mutableListOf<String>()
 
         constantsClass.fields.forEach {
             it.isAccessible = true
 
-            if(Modifier.isFinal(it.modifiers)) {
+            if (Modifier.isFinal(it.modifiers)) {
                 val modifiersField = Field::class.java.getDeclaredField("modifiers")
                 modifiersField.isAccessible = true
                 modifiersField.setInt(it, it.modifiers and Modifier.FINAL.inv())
@@ -89,14 +91,15 @@ object SandstoneInit {
 
             val entry = game.registry.getEntryGeneric<RegistryEntry>(name, type)
 
-            if(entry == null)
+            if (entry == null)
                 missingEntries += name
             else
                 it[instance] = game.registry.getEntryGeneric(name, type)
         }
 
-        if(missingEntries.isNotEmpty())
-            Sandstone.logger.error("Sandstone could not initialize all constants of class '$constantsClass'. Some entries were not registered: $missingEntries.")
+        if (missingEntries.isNotEmpty())
+            Sandstone.logger
+                    .error("Sandstone could not initialize all constants of class '$constantsClass'. Some entries were not registered: $missingEntries.")
     }
 
     internal fun init(clazz: Class<*>, fieldName: String, instance: Any) {
@@ -104,9 +107,9 @@ object SandstoneInit {
 
         field.isAccessible = true
 
-        Conditions.checkNull(field[Sandstone], "Already initialized!")
+        Conditions.checkNull(field[null], "Already initialized!")
 
-        field[Sandstone] = instance
+        field[null] = instance
     }
 
     internal fun init(fieldName: String, instance: Any) {

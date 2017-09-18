@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -27,9 +27,9 @@
  */
 package com.github.projectsandstone.common.plugin
 
-import com.github.projectsandstone.api.logging.Logger
 import com.github.projectsandstone.api.plugin.*
 import com.github.projectsandstone.api.util.version.Version
+import org.slf4j.Logger
 import java.nio.file.Path
 
 class SandstonePluginDefinition(var pluginContainer: SandstonePluginContainer?) : PluginDefinition {
@@ -65,19 +65,21 @@ class SandstonePluginDefinition(var pluginContainer: SandstonePluginContainer?) 
             pluginContainer?.usePlatformInternals_ = value
         }
 
-    override val dependencies: Array<DependencyContainer>?
+    override val dependencies: List<DependencyContainer>
         get() = pluginContainer?.dependencies ?: throw IllegalStateException("Post Definition Phase")
 
 
-    override val dependenciesState: Array<DependencyState>
+    override val dependenciesState: List<DependencyState>
         get() = pluginContainer?.dependenciesState ?: throw IllegalStateException("Post Definition Phase")
 
-
-    override var authors: Array<String>
+    override var authors: List<String>
         get() = pluginContainer?.authors ?: throw IllegalStateException("Post Definition Phase")
         set(value) {
             pluginContainer?.authors_ = value
         }
+
+    override val optional: Boolean
+        get() = pluginContainer?.optional ?: throw IllegalStateException("Post Definition Phase")
 
     override val logger: Logger
         get() = pluginContainer?.logger ?: throw IllegalStateException("Post Definition Phase")
@@ -93,6 +95,9 @@ class SandstonePluginDefinition(var pluginContainer: SandstonePluginContainer?) 
 
     override val state: PluginState
         get() = pluginContainer?.state ?: throw IllegalStateException("Post Definition Phase")
+
+    override val targetPlatformNames: List<String>
+        get() = pluginContainer?.targetPlatformNames ?: throw IllegalStateException("Post Definition Phase")
 
     fun invalidate() {
         this.pluginContainer = null

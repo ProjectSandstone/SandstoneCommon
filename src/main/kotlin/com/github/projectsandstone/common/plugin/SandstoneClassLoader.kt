@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -35,22 +35,16 @@ import java.net.URL
 import java.net.URLClassLoader
 import java.nio.file.Path
 
+/**
+ * @property file Plugin file path
+ * @property useInternal Whether the plugin explicitly specifies that uses platform internals.
+ * @property classes Plugin classes
+ */
 class SandstoneClassLoader(
         urls: Array<URL>,
         parent: ClassLoader,
-        /**
-         * Plugin file
-         */
         override val file: Path?,
-
-        /**
-         * Plugin inform about the use of internal classes
-         */
         override val useInternal: Boolean,
-
-        /**
-         * Plugins Classes
-         */
         override val classes: List<String>) : URLClassLoader(urls, parent), PluginClassLoader {
 
     private val pluginContainers_: MutableList<PluginContainer> = mutableListOf()
@@ -60,15 +54,10 @@ class SandstoneClassLoader(
 
     override var isInitialized: Boolean = false
 
-    fun defineClass(name: String, data: ByteArray): Class<*> {
-        return defineClass(name, data, 0, data.size)
-    }
+    fun defineClass(name: String, data: ByteArray): Class<*> =
+            defineClass(name, data, 0, data.size)
 
     override fun loadClass(name: String?): Class<*> {
-        // TODO: IF USE INTERNAL
-
-        // TODO: Schedule task using Scheduler/Task API
-
         this.checkInternalAPI(name)
 
         return super.loadClass(name)
@@ -90,7 +79,7 @@ class SandstoneClassLoader(
     private fun checkInternalAPI(name: String?) {
         Constants.cachedThreadPool.execute {
             if (!useInternal && Sandstone.game.platform.isInternalClass(name)) {
-                Sandstone.logger.warn("Plugin ${this.getPluginName()} uses an internal/platform dependent API. ")
+                Sandstone.logger.warn("Plugin ${this.getPluginName()} used an internal/platform dependent API without specifying that. ")
             }
         }
     }
@@ -102,5 +91,5 @@ class SandstoneClassLoader(
         this.pluginContainers_ += pluginContainer
     }
 
-    fun getPluginName(): String = if(!this.isInitialized) file?.fileName.toString() else pluginContainers_[0].name
+    private fun getPluginName(): String = if(!this.isInitialized) file?.fileName.toString() else pluginContainers_[0].name
 }

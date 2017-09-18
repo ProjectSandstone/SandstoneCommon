@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -25,19 +25,21 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.event
+package com.github.projectsandstone.common.command
 
 import com.github.jonathanxd.iutils.type.TypeInfo
-import com.github.projectsandstone.api.event.Event
-import com.github.projectsandstone.api.event.EventListener
-import com.github.projectsandstone.api.plugin.PluginContainer
+import com.github.jonathanxd.kwcommands.information.Information
+import com.github.jonathanxd.kwcommands.information.InformationProvider
+import com.github.jonathanxd.kwcommands.manager.InformationManager
+import com.github.projectsandstone.api.service.permission.Subject
 
-open class EventListenerContainer<T : Event>(val pluginContainer: PluginContainer,
-                                             val eventType: TypeInfo<T>,
-                                             val eventListener: EventListener<T>) : Comparable<EventListenerContainer<*>> {
-    override fun compareTo(other: EventListenerContainer<*>): Int {
-        val compare = this.eventListener.getPriority().compareTo(other.eventListener.getPriority())
+class SubjectProvider(val manager: InformationManager) : InformationProvider {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T> provide(id: Information.Id, type: TypeInfo<T>): Information<T>? =
+            if (id.id == Subject::class.java && "subject" in id.tags)
+                manager.informationSet.firstOrNull {
+                    it.value is Subject
+                } as Information<T>?
+            else null
 
-        return if(compare == 0) -1 else compare
-    }
 }

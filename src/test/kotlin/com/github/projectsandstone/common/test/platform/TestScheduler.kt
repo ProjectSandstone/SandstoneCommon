@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -40,10 +40,10 @@ class TestScheduler : SandstoneScheduler() {
 
     override fun submit(task: Task): SubmittedTask {
         val container: MutableContainer<Runnable?> = MutableContainer()
-        val submitted: BooleanContainer = BooleanContainer(false)
-        val running: BooleanContainer = BooleanContainer(false)
+        val submitted = BooleanContainer(false)
+        val running = BooleanContainer(false)
 
-        val cancelled: BooleanContainer = BooleanContainer(false)
+        val cancelled = BooleanContainer(false)
 
         val start = Runnable {
             submitted.set(true)

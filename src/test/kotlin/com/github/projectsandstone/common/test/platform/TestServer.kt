@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -28,6 +28,7 @@
 package com.github.projectsandstone.common.test.platform
 
 import com.github.projectsandstone.api.Server
+import com.github.projectsandstone.api.entity.living.player.Player
 import com.github.projectsandstone.api.world.World
 
 class TestServer : Server {
@@ -42,4 +43,6 @@ class TestServer : Server {
     override val serverName: String = "Test Server"
 
     override val worlds: List<World> = emptyList()
+
+    override val players: List<Player> = emptyList()
 }

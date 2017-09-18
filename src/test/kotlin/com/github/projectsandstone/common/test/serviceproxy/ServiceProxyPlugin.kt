@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -28,12 +28,12 @@
 package com.github.projectsandstone.common.test.serviceproxy
 
 import com.github.projectsandstone.api.Game
-import com.github.projectsandstone.api.event.Listener
 import com.github.projectsandstone.api.event.init.PreInitializationEvent
 import com.github.projectsandstone.api.event.init.ServerStartedEvent
-import com.github.projectsandstone.api.logging.Logger
 import com.github.projectsandstone.api.plugin.Dependency
 import com.github.projectsandstone.api.plugin.Plugin
+import com.github.projectsandstone.eventsys.event.annotation.Listener
+import org.slf4j.Logger
 import javax.inject.Inject
 
 @Plugin(id = "projectsandstone.serviceproxyplugin", name = "ServiceProxy", version = "1.0.0", dependencies = arrayOf(

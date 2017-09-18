@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -30,9 +30,9 @@ package com.github.projectsandstone.common.guice
 import com.github.projectsandstone.api.Game
 import com.github.projectsandstone.api.Platform
 import com.github.projectsandstone.api.Sandstone
-import com.github.projectsandstone.api.event.EventManager
 import com.github.projectsandstone.api.plugin.PluginManager
 import com.github.projectsandstone.api.service.ServiceManager
+import com.github.projectsandstone.eventsys.event.EventManager
 import com.google.inject.AbstractModule
 import com.google.inject.Guice
 

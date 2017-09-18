@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -27,8 +27,7 @@
  */
 package com.github.projectsandstone.common.test.invocationtest
 
-import com.github.projectsandstone.api.event.Event
-import com.github.projectsandstone.api.event.property.GSProperty
+import com.github.projectsandstone.eventsys.event.Event
 
 interface MyEvent : Event {
     val message: String

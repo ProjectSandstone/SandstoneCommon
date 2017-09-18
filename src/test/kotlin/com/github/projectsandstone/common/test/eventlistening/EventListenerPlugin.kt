@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -29,17 +29,19 @@ package com.github.projectsandstone.common.test.eventlistening
 
 import com.github.projectsandstone.api.Sandstone
 import com.github.projectsandstone.api.entity.living.player.Player
-import com.github.projectsandstone.api.event.Listener
-import com.github.projectsandstone.api.event.annotation.Name
 import com.github.projectsandstone.api.event.init.PostInitializationEvent
 import com.github.projectsandstone.api.event.message.MessageEvent
-import com.github.projectsandstone.api.logging.Logger
+import com.github.projectsandstone.api.inventory.CarriedInventory
+import com.github.projectsandstone.api.inventory.Carrier
 import com.github.projectsandstone.api.plugin.Plugin
 import com.github.projectsandstone.api.text.Text
 import com.github.projectsandstone.api.util.SID
 import com.github.projectsandstone.api.world.Location
 import com.github.projectsandstone.api.world.World
+import com.github.projectsandstone.eventsys.event.annotation.Listener
+import com.github.projectsandstone.eventsys.event.annotation.Name
 import com.google.inject.Inject
+import org.slf4j.Logger
 import java.util.*
 
 @Plugin(id = "com.github.projectsandstone.common.test.eventlistenerplugin", name = "Event Listening Test Plugin", version = "1.0.0")
@@ -50,7 +52,7 @@ class EventListenerPlugin @Inject constructor(val logger: Logger) {
     fun listen(postInit: PostInitializationEvent) {
 
         Sandstone.eventManager.dispatch(Sandstone.eventFactory.createMessageEvent(Text.of("Test")), this)
-        Sandstone.eventManager.dispatch(Sandstone.eventFactory.createMessageEvent(TestPlayer(), Text.of("Test")), this)
+        Sandstone.eventManager.dispatch(Sandstone.eventFactory.createMessageEvent(Text.of("Test"), TestPlayer()), this)
 
     }
 
@@ -65,6 +67,9 @@ class EventListenerPlugin @Inject constructor(val logger: Logger) {
 }
 
 class TestPlayer : Player {
+
+    override val inventory: CarriedInventory<Carrier>
+        get() = TODO("not implemented")
 
     override val sandstoneId: SID
         get() = SID.UuidSid(UUID.randomUUID())

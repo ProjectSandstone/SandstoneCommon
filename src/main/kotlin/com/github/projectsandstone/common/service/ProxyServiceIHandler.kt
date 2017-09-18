@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -29,20 +29,17 @@ package com.github.projectsandstone.common.service
 
 import com.github.jonathanxd.codeproxy.ProxyData
 import com.github.jonathanxd.codeproxy.handler.InvocationHandler
+import com.github.jonathanxd.codeproxy.info.MethodInfo
 import com.github.projectsandstone.api.service.ServiceManager
-import java.lang.reflect.Method
 
 class ProxyServiceIHandler<T : Any>(val serviceManager: ServiceManager,
-                              val service: Class<T>) : InvocationHandler {
+                                    val service: Class<T>) : InvocationHandler {
 
 
-    override fun invoke(instance: Any?, method: Method, args: Array<out Any>?, proxyData: ProxyData?): Any? {
+    override fun invoke(instance: Any?, methodInfo: MethodInfo, args: Array<out Any>, proxyData: ProxyData): Any? {
         val provide = requireNotNull(serviceManager.provide(service), { "No provider of service '$service' found!" })
 
-        if(args == null) {
-            return method.invoke(provide)
-        }else {
-            return method.invoke(provide, *args)
-        }
+        return methodInfo.resolveOrFail(provide::class.java).bindTo(provide).invokeWithArguments(*args)
     }
+
 }

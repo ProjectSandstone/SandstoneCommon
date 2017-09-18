@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -39,7 +39,8 @@ class Test {
     fun init() {
         SandstoneTestMain.main(emptyArray())
 
-        val resourceAsStream = SandstoneTestMain::class.java.classLoader.getResourceAsStream("plugins.properties")
+        val resourceAsStream =
+                SandstoneTestMain::class.java.classLoader.getResourceAsStream("plugins.properties")
 
         val properties = Properties()
 
@@ -55,7 +56,8 @@ class Test {
         Sandstone.pluginManager.loadPlugins(arrayOf(it as String))
         }*/
 
-        val containers = Sandstone.pluginManager.createContainers(properties.values.map { it as String }.toTypedArray())
+        val containers =
+                Sandstone.pluginManager.createContainers(properties.values.map { it as String }.toTypedArray())
         Sandstone.pluginManager.loadAll(containers)
 
         Sandstone.logger.info("Plugins loaded in: ${Duration.between(loadInstant, Instant.now()).seconds}s")

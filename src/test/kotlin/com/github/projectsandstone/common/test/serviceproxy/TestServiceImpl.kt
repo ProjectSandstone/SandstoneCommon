@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -27,7 +27,7 @@
  */
 package com.github.projectsandstone.common.test.serviceproxy
 
-import com.github.projectsandstone.api.logging.Logger
+import org.slf4j.Logger
 
 class TestServiceImpl(val text: String) : TestService {
     override fun speak(logger: Logger) = logger.info(text)

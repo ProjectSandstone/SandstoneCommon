@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -29,14 +29,15 @@ package com.github.projectsandstone.common.scheduler
 
 import com.github.projectsandstone.api.Sandstone
 
-class SandstoneRunnable(val plugin: Any, val name: String?, val runnable: Runnable) : Runnable {
+class SandstoneRunnable(val plugin: Any,
+                        val name: String?, val runnable: Runnable) : Runnable {
     val pluginContainer = Sandstone.game.pluginManager.getRequiredPlugin(plugin)
 
     override fun run() {
         try {
             runnable.run()
         } catch (t: Throwable) {
-            Sandstone.logger.exception(RuntimeException("An exception occurred during task execution. (Task Name: $name, Runnable: $runnable, plugin: $pluginContainer)", t), "")
+            Sandstone.logger.error("", RuntimeException("An exception occurred during task execution. (Task Name: $name, Runnable: $runnable, plugin: $pluginContainer)", t))
         }
     }
 }

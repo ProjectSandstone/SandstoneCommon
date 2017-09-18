@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -36,13 +36,16 @@ import com.github.projectsandstone.api.util.exception.CircularDependencyExceptio
 import com.github.projectsandstone.api.util.exception.DependencyException
 import com.github.projectsandstone.api.util.exception.IncompatibleDependencyException
 import com.github.projectsandstone.api.util.exception.MissingDependencyException
+import com.github.projectsandstone.common.util.idVersion
 
 class SandstoneDependencyResolver(override val pluginManager: PluginManager) : DependencyResolver {
 
-    override fun getDependenciesState(pluginContainer: PluginContainer): Array<DependencyState> {
+
+
+    override fun getDependenciesState(pluginContainer: PluginContainer): List<DependencyState> {
         val dependencies = pluginContainer.dependencies
 
-        return Array(dependencies.size, init = { index ->
+        return List(dependencies.size, init = { index ->
 
             val it = dependencies[index]
 
@@ -55,7 +58,7 @@ class SandstoneDependencyResolver(override val pluginManager: PluginManager) : D
             val failed = this.pluginManager.getFailedPlugin(id)
 
             if (failed == null && plugin == null && required) {
-                return@Array DependencyState(it, DependencyState.State.MISSING)
+                return@List DependencyState(it, DependencyState.State.MISSING)
             }
 
             if (plugin != null) {
@@ -64,29 +67,28 @@ class SandstoneDependencyResolver(override val pluginManager: PluginManager) : D
 
                 if (incompatible.isNotEmpty()) {
                     if (pluginVersion.versionString.matches(Regex.fromLiteral(incompatible))) {
-                        return@Array DependencyState(it, DependencyState.State.INCOMPATIBLE)
+                        return@List DependencyState(it, DependencyState.State.INCOMPATIBLE)
                     }
                 }
 
                 if (version.isNotEmpty()) {
                     if (!pluginVersion.versionString.matches(Regex.fromLiteral(version))) {
-                        return@Array DependencyState(it, DependencyState.State.INCOMPATIBLE)
+                        return@List DependencyState(it, DependencyState.State.INCOMPATIBLE)
                     }
                 }
 
             } else if (failed != null) {
-                return@Array DependencyState(it, DependencyState.State.FAILED)
+                return@List DependencyState(it, DependencyState.State.FAILED)
             }
 
-            return@Array DependencyState(it, DependencyState.State.PRESENT)
+            return@List DependencyState(it, DependencyState.State.PRESENT)
 
         })
     }
 
     override fun checkDependencies(pluginContainer: PluginContainer) {
 
-        pluginContainer.dependenciesState.forEach { dependency ->
-            val it = dependency.dependencyContainer
+        pluginContainer.dependenciesState.forEach { (it, state) ->
 
             val incompatible = it.incompatibleVersions
             val version = it.version
@@ -95,37 +97,80 @@ class SandstoneDependencyResolver(override val pluginManager: PluginManager) : D
 
             val plugin = this.pluginManager.getPlugin(id)
 
-            if (dependency.state == DependencyState.State.INCOMPATIBLE) {
+            if (state == DependencyState.State.INCOMPATIBLE) {
                 if (plugin != null) {
                     val pluginVersion = plugin.version
 
                     if (incompatible.isNotEmpty() && required) {
                         if (pluginVersion.versionString.matches(incompatible.toRegex())) {
-                            throw IncompatibleDependencyException("Incompatible plugin version detected. Plugin: $pluginContainer. Incompatible dependency plugin: $plugin.")
+                            handleIncompatibleVersion(pluginContainer, incompatible, plugin)
                         }
                     }
 
                     if (version.isNotEmpty()) {
                         if (!pluginVersion.versionString.matches(version.toRegex())) {
-                            Sandstone.logger.exception(
-                                    IncompatibleDependencyException("Incompatible plugin version detected. Plugin '$pluginContainer' only supports versions that matches pattern: '$version'. Found plugin: $plugin"),
-                                    "Incompatible version."
-                            )
+                            handleVersionDoesNotMatch(pluginContainer, version, plugin)
                         }
                     }
                 } else if(required) {
-                    throw IncompatibleDependencyException("Incompatible plugin detected. Plugin: $pluginContainer. Incompatible dependency plugin: $plugin.")
+                    handleIncompatible(pluginContainer, id)
                 }
             } else if (required) {
-                if (dependency.state == DependencyState.State.MISSING) {
-                    throw MissingDependencyException("Dependency '$it' of plugin '$pluginContainer' is missing.")
-                } else if (dependency.state == DependencyState.State.FAILED) {
-                    throw MissingDependencyException("Dependency '$it' of plugin '$pluginContainer' failed to load.")
+                if (state == DependencyState.State.MISSING) {
+                    handleMissing(pluginContainer, id)
+                } else if (state == DependencyState.State.FAILED) {
+                    handleFailed(pluginContainer, id)
                 }
             }
 
         }
 
+    }
+
+    private fun handleIncompatibleVersion(pluginContainer: PluginContainer, pattern: String, dependency: PluginContainer) {
+        if (pluginContainer.optional)
+            Sandstone.logger.info("Plugin '${pluginContainer.idVersion}' was not enabled because of " +
+                    "incompatible dependency plugin version '${dependency.idVersion}' defined by pattern '$pattern'")
+        else
+            throw IncompatibleDependencyException("Incompatible plugin version detected. Plugin: " +
+                    "${pluginContainer.idVersion}. Incompatible dependency dependency: ${dependency.idVersion}.")
+    }
+
+    private fun handleVersionDoesNotMatch(pluginContainer: PluginContainer, versionPattern: String, dependency: PluginContainer) {
+        if (pluginContainer.optional)
+            Sandstone.logger.info("Plugin '${pluginContainer.idVersion}' was not enabled because the version of " +
+                    "dependency plugin '${dependency.idVersion}' does not match version pattern: $versionPattern")
+        else
+            Sandstone.logger.error("Incompatible dependency",
+                    IncompatibleDependencyException("Incompatible plugin version detected. Plugin " +
+                            "'${pluginContainer.idVersion}' only supports versions that matches pattern: " +
+                            "'$versionPattern'. Found plugin: ${dependency.idVersion}")
+            )
+    }
+
+    private fun handleIncompatible(pluginContainer: PluginContainer, dependencyId: String) {
+        if (pluginContainer.optional)
+            Sandstone.logger.info("Plugin ${pluginContainer.idVersion} was not enabled " +
+                    "because of incompatible dependency plugin id $dependencyId")
+        else
+            throw IncompatibleDependencyException("Incompatible plugin detected. Plugin: " +
+                    "${pluginContainer.idVersion}. Incompatible dependency plugin id: $dependencyId.")
+    }
+
+    private fun handleMissing(pluginContainer: PluginContainer, dependencyId: String) {
+        if (pluginContainer.optional)
+            Sandstone.logger.info("Plugin ${pluginContainer.idVersion} was not enabled " +
+                    "because of missing dependency plugin id $dependencyId")
+        else
+            throw MissingDependencyException("Dependency '$dependencyId' of plugin '${pluginContainer.idVersion}' is missing.")
+    }
+
+    private fun handleFailed(pluginContainer: PluginContainer, dependencyId: String) {
+        if (pluginContainer.optional)
+            Sandstone.logger.info("Plugin ${pluginContainer.idVersion} was not enabled " +
+                    "because dependency plugin id $dependencyId failed to load")
+        else
+            throw MissingDependencyException("Dependency '$dependencyId' of plugin '$pluginContainer' failed to load.")
     }
 
     /**
@@ -135,11 +180,15 @@ class SandstoneDependencyResolver(override val pluginManager: PluginManager) : D
      * @param dependencyToFind Dependency to find
      * @param queue Plugins in the loading queue.
      */
-    fun hasDirectOrIndirectDependency(plugin: PluginContainer, dependencyToFind: PluginContainer, queue: List<PluginContainer>): Boolean {
-        return hasDirectOrIndirectDependency(plugin, dependencyToFind, queue, true)
-    }
+    fun hasDirectOrIndirectDependency(plugin: PluginContainer,
+                                      dependencyToFind: PluginContainer,
+                                      queue: List<PluginContainer>): Boolean =
+            hasDirectOrIndirectDependency(plugin, dependencyToFind, queue, true)
 
-    private fun hasDirectOrIndirectDependency(plugin: PluginContainer, dependencyToFind: PluginContainer, queue: List<PluginContainer>, check: Boolean): Boolean {
+    private fun hasDirectOrIndirectDependency(plugin: PluginContainer,
+                                              dependencyToFind: PluginContainer,
+                                              queue: List<PluginContainer>,
+                                              check: Boolean): Boolean {
         val dependencies = plugin.dependencies
 
         val dependenciesContainer = dependencies.map {

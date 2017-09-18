@@ -25,35 +25,8 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.scheduler
+package com.github.projectsandstone.common.util
 
-import com.github.projectsandstone.api.scheduler.SubmittedTask
-import com.github.projectsandstone.api.scheduler.Task
+import com.github.projectsandstone.api.plugin.PluginContainer
 
-class SandstoneSubmittedTask(override val task: Task,
-                             val canceller: (SubmittedTask) -> Unit,
-                             val isCancelledFunc: (SubmittedTask) -> Boolean,
-                             val runningFetcher: (SubmittedTask) -> Boolean,
-                             val submittedFetcher: (SubmittedTask) -> Boolean,
-                             val waitFinish: (SubmittedTask) -> Unit) : SubmittedTask {
-
-    override val isCancelled: Boolean
-        get() = isCancelledFunc(this)
-
-    override fun cancel() {
-        canceller(this)
-    }
-
-    override fun isRunning(): Boolean {
-        return runningFetcher(this)
-    }
-
-    override fun isSubmitted(): Boolean {
-        return submittedFetcher(this)
-    }
-
-    override fun waitFinish() {
-        waitFinish(this)
-    }
-
-}
+val PluginContainer.idVersion get() = "${this.id}:${this.version.versionString}"

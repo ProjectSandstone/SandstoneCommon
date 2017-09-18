@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -27,5 +27,4 @@
  */
 package com.github.projectsandstone.common.test.managertest
 
-open class MyServiceImpl(override val id: Int) : MyService {
-}
+open class MyServiceImpl(override val id: Int) : MyService

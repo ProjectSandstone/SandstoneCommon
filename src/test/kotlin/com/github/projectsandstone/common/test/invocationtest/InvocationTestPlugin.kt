@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -28,16 +28,15 @@
 package com.github.projectsandstone.common.test.invocationtest
 
 import com.github.projectsandstone.api.Game
-import com.github.projectsandstone.api.event.Listener
-import com.github.projectsandstone.api.event.ListenerData
-import com.github.projectsandstone.api.event.SandstoneEventFactory
 import com.github.projectsandstone.api.event.init.PostInitializationEvent
-import com.github.projectsandstone.api.logging.Logger
 import com.github.projectsandstone.api.plugin.Plugin
 import com.github.projectsandstone.api.plugin.PluginContainer
-import com.github.projectsandstone.api.util.internal.gen.event.SandstoneEventGen
-import com.github.projectsandstone.api.util.internal.gen.event.listener.MethodListenerGen
 import com.github.projectsandstone.common.util.extension.typeInfo
+import com.github.projectsandstone.eventsys.event.ListenerSpec
+import com.github.projectsandstone.eventsys.event.annotation.Listener
+import com.github.projectsandstone.eventsys.gen.event.EventClassSpecification
+import com.github.projectsandstone.eventsys.reflect.PropertiesSort
+import org.slf4j.Logger
 import javax.inject.Inject
 
 @Plugin(id = "projectsandstone.invocationtest", name = "InvocationTestPlugin", version = "1.0")
@@ -48,15 +47,29 @@ class InvocationTestPlugin @Inject constructor(val logger: Logger, val game: Gam
     @Listener
     fun post(event: PostInitializationEvent) {
 
-        val event = SandstoneEventGen.gen(MyEvent::class.typeInfo, mapOf("message" to "Test 123"))
+        val spec = EventClassSpecification(
+                MyEvent::class.typeInfo,
+                emptyList(),
+                emptyList()
+        )
+
+        val evClass = game.eventManager.eventGenerator
+                .createEventClass(MyEvent::class.typeInfo, emptyList(), emptyList())
+
+        game.eventManager.eventGenerator.registerEventImplementation(spec, evClass)
+
+        val arg = PropertiesSort.sort(evClass.constructors.first(),
+                arrayOf("message"),
+                arrayOf("Test 123")) // A factory interface is better
+
+        val myEvent = evClass.constructors.first().newInstance(*arg) as MyEvent
 
         val toInvoke = EvListener::class.java.getDeclaredMethod("toInvoke", MyEvent::class.java)
 
-        val generated = MethodListenerGen.create(container, toInvoke, evListener, ListenerData.fromMethod(toInvoke))
+        val generated = game.eventManager.eventGenerator.
+                createMethodListener(container, toInvoke, evListener, ListenerSpec.fromMethod(toInvoke))
 
-        generated.onEvent(event, container)
-
-
+        generated.onEvent(myEvent, container)
     }
 }
 

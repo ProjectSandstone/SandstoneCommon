@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -25,33 +25,20 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.util.event
+package com.github.projectsandstone.common.test.platform
 
-import com.github.jonathanxd.iutils.type.TypeInfo
-import com.github.jonathanxd.iutils.type.TypeUtil
-import com.github.projectsandstone.api.event.Event
-import com.github.projectsandstone.common.util.pair.pairFromArrays
-import java.lang.reflect.Type
+import com.github.projectsandstone.api.SandstoneObjectFactory
+import com.github.projectsandstone.api.inventory.ItemStack
+import com.github.projectsandstone.api.item.ItemType
 
-fun <T: Event> getEventTypes(event: T) : List<TypeInfo<*>> {
-    val jClass = event.javaClass
-    val superClass: Pair<Class<*>?, Type> = jClass.superclass to jClass.genericSuperclass
-    val interfaces: Array<Pair<Class<*>, Type>> = pairFromArrays(jClass.interfaces, jClass.genericInterfaces)
+object TestObjectFactory : SandstoneObjectFactory {
+    override fun createItemStack(itemType: ItemType, quantity: Int): ItemStack = object : ItemStack {
+        override val item: ItemType
+            get() = itemType
+        override var quantity: Int = quantity
+        override val maxStackQuantity: Int
+            get() = item.maxStack
 
-    val types = mutableListOf<TypeInfo<*>>()
-
-    if(superClass.first != null && Event::class.java.isAssignableFrom(superClass.first)) {
-        types += TypeUtil.toReference(superClass.second)!!
+        override fun copy(item: ItemType, quantity: Int): ItemStack = createItemStack(itemType, quantity)
     }
-
-    for((itf, type) in interfaces) {
-        if(Event::class.java.isAssignableFrom(itf)) {
-            types += TypeUtil.toReference(type)!!
-        }
-    }
-
-    return types
 }
-
-fun <T: Event> getEventType(event: T) : TypeInfo<*> =
-        TypeUtil.toReference(event.javaClass)

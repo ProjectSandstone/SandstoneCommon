@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -36,7 +36,9 @@ import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-class SandstoneExecutorService(val scheduler: Scheduler, val plugin: Any, val isAsync: Boolean) : AbstractExecutorService(), SandstoneExecutorService {
+class SandstoneExecutorService(val scheduler: Scheduler,
+                               val plugin: Any,
+                               val isAsync: Boolean) : AbstractExecutorService(), SandstoneExecutorService {
 
     override fun schedule(command: Runnable, delay: Long, unit: TimeUnit): ScheduledFutureTask<*> {
         return this.schedule(Executors.callable(command), delay, unit)

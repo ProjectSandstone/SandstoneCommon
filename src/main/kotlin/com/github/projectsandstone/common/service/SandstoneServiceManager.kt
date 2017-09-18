@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -29,15 +29,15 @@ package com.github.projectsandstone.common.service
 
 import com.github.jonathanxd.codeproxy.CodeProxy
 import com.github.jonathanxd.iutils.map.WeakValueHashMap
+import com.github.jonathanxd.iutils.type.TypeInfo
 import com.github.projectsandstone.api.Sandstone
 import com.github.projectsandstone.api.event.SandstoneEventFactory
+import com.github.projectsandstone.api.event.SandstoneEventFactoryCache
+import com.github.projectsandstone.api.event.service.ChangeServiceProviderEvent
 import com.github.projectsandstone.api.service.RegisteredProvider
 import com.github.projectsandstone.api.service.ServiceManager
 import java.lang.reflect.Modifier
 
-/**
- * Created by jonathan on 18/08/16.
- */
 abstract class SandstoneServiceManager : ServiceManager {
 
     private val services = mutableMapOf<Class<*>, RegisteredProvider<*>>()
@@ -67,7 +67,12 @@ abstract class SandstoneServiceManager : ServiceManager {
         /////////////////////////////////////////////////////
 
         if (this.dispatch) {
-            val event = SandstoneEventFactory.instance.createChangeServiceProviderEvent(oldProvider = oldProvider, newProvider = registeredProvider, service = service)
+            val event = SandstoneEventFactoryCache.getInstance()
+                    .createChangeServiceProviderEvent(
+                            TypeInfo.builderOf(ChangeServiceProviderEvent::class.java)
+                                    .of(service)
+                                    .buildGeneric(),
+                            TypeInfo.of(service), oldProvider, registeredProvider)
 
             Sandstone.eventManager.dispatch(event, pluginContainer)
         }
@@ -85,10 +90,10 @@ abstract class SandstoneServiceManager : ServiceManager {
 
         val reg = this.getRegisteredProvider(service)
 
-        if (reg != null) {
-            return reg.provider
+        return if (reg != null) {
+            reg.provider
         } else {
-            return this.internalProvide(service)
+            this.internalProvide(service)
         }
     }
 

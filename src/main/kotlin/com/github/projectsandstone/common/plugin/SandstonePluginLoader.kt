@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -29,6 +29,7 @@ package com.github.projectsandstone.common.plugin
 
 import com.github.projectsandstone.api.Sandstone
 import com.github.projectsandstone.api.event.SandstoneEventFactory
+import com.github.projectsandstone.api.event.SandstoneEventFactoryCache
 import com.github.projectsandstone.api.event.plugin.PluginLoadFailedEvent
 import com.github.projectsandstone.api.plugin.*
 import com.github.projectsandstone.api.util.exception.DependencyException
@@ -63,13 +64,18 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
 
         plugin.state_ != PluginState.LOADING
 
-        Sandstone.eventManager.dispatch(SandstoneEventFactory.instance.createPluginLoadingEvent(this.pluginManager, plugin), Sandstone)
+        Sandstone.eventManager.dispatch(SandstoneEventFactoryCache.getInstance()
+                .createPluginLoadingEvent(this.pluginManager, plugin), Sandstone)
 
         try {
             pluginManager.dependencyResolver.checkDependencies(plugin)
         } catch (e: DependencyException) {
-            Sandstone.eventManager.dispatch(SandstoneEventFactory.instance.createPluginLoadFailedEvent(this.pluginManager, plugin, PluginLoadFailedEvent.Reason.DependencyResolutionFailed), Sandstone)
-            Sandstone.logger.exception(e)
+            Sandstone.eventManager.dispatch(SandstoneEventFactoryCache.getInstance()
+                    .createPluginLoadFailedEvent(PluginLoadFailedEvent.Reason.DependencyResolutionFailed,
+                            this.pluginManager,
+                            plugin), Sandstone)
+
+            Sandstone.logger.error("Dependency missing for plugin: '$plugin'", e)
 
             plugin.state_ != PluginState.FAILED
             return
@@ -108,8 +114,12 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
                 plugin.definition?.invalidate()
                 plugin.definition = null
 
-                Sandstone.logger.exception(exception, "Failed to load plugin: '$plugin'!")
-                Sandstone.eventManager.dispatch(SandstoneEventFactory.instance.createPluginLoadFailedEvent(this.pluginManager, plugin, PluginLoadFailedEvent.Reason.Exception(exception)), Sandstone)
+                Sandstone.logger.error("Failed to load plugin: '$plugin'!", exception)
+                Sandstone.eventManager.dispatch(SandstoneEventFactoryCache.getInstance()
+                        .createPluginLoadFailedEvent(
+                                PluginLoadFailedEvent.Reason.Exception(exception),
+                                this.pluginManager,
+                                plugin), Sandstone)
             }
         }
 
@@ -226,7 +236,7 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
             try {
                 mapped += classLoader.loadClass(className)
             } catch (e: Exception) {
-                Sandstone.logger.exception(e, "Failed to load class '$className'. Other classes will not be loaded to avoid future problems. Additional information: [urls: $urls, file: $file]. Some plugins may not be loaded!")
+                Sandstone.logger.error("Failed to load class '$className'. Other classes will not be loaded to avoid future problems. Additional information: [urls: $urls, file: $file]. Some plugins may not be loaded!", e)
                 mapped.clear()
                 break
             }

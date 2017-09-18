@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -44,17 +44,14 @@ object ClassConverter : Converter<Class<*>, Class<*>> {
     fun hasPlatformEquivalent(klass: Class<*>) = converters.inverse().containsKey(klass)
     fun hasEquivalent(klass: Class<*>) = this.hasSandstoneEquivalent(klass) || this.hasPlatformEquivalent(klass)
 
-    fun getEquivalent(klass: Class<*>): Class<*> {
-        return this.converters.getOrElse(klass, { this.converters.inverse()[klass] }) ?: throw IllegalArgumentException("Cannot convert input class: '$klass'!")
-    }
+    fun getEquivalent(klass: Class<*>): Class<*> =
+            this.converters.getOrElse(klass, { this.converters.inverse()[klass] }) ?: throw IllegalArgumentException("Cannot convert input class: '$klass'!")
 
-    fun getSandstoneEquivalent(klass: Class<*>): Class<*> {
-        return this.converters[klass] ?: throw IllegalArgumentException("Cannot get Sandstone equivalent class of: '$klass'!")
-    }
+    fun getSandstoneEquivalent(klass: Class<*>): Class<*> =
+            this.converters[klass] ?: throw IllegalArgumentException("Cannot get Sandstone equivalent class of: '$klass'!")
 
-    fun getPlatformEquivalent(klass: Class<*>): Class<*> {
-        return this.converters.inverse()[klass] ?: throw IllegalArgumentException("Cannot get Platform equivalent class of: '$klass'!")
-    }
+    fun getPlatformEquivalent(klass: Class<*>): Class<*> =
+            this.converters.inverse()[klass] ?: throw IllegalArgumentException("Cannot get Platform equivalent class of: '$klass'!")
 
     override fun convert(input: Class<*>, adapter: Adapter<*>?, manager: AdapterManager): Class<*> = this.getEquivalent(input)
 

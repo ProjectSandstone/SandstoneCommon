@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -27,18 +27,18 @@
  */
 package com.github.projectsandstone.common.test.platform
 
-import com.github.projectsandstone.api.Game
-import com.github.projectsandstone.api.Platform
-import com.github.projectsandstone.api.Server
-import com.github.projectsandstone.api.event.EventManager
+import com.github.projectsandstone.api.*
+import com.github.projectsandstone.api.command.CommandManager
 import com.github.projectsandstone.api.plugin.PluginManager
 import com.github.projectsandstone.api.registry.Registry
 import com.github.projectsandstone.api.scheduler.Scheduler
 import com.github.projectsandstone.api.service.ServiceManager
 import com.github.projectsandstone.api.util.edition.GameEdition
+import com.github.projectsandstone.common.command.SandstoneCommandManager
 import com.github.projectsandstone.common.event.SandstoneEventManager
 import com.github.projectsandstone.common.plugin.SandstonePluginManager
 import com.github.projectsandstone.common.registry.SandstoneRegistry
+import com.github.projectsandstone.eventsys.event.EventManager
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -62,4 +62,8 @@ class TestGame : Game {
     override val registry: Registry = SandstoneRegistry()
 
     override val edition: GameEdition = TestGameEdition
+
+    override val objectFactory: SandstoneObjectFactory = TestObjectFactory
+    override val objectHelper: SandstoneObjectHelper = TestObjectHelper
+    override val commandManager: CommandManager = SandstoneCommandManager()
 }

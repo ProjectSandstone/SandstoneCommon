@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -28,16 +28,13 @@
 package com.github.projectsandstone.common
 
 import com.github.projectsandstone.api.Game
-import com.github.projectsandstone.api.event.EventManager
 import com.github.projectsandstone.api.plugin.PluginManager
 import com.github.projectsandstone.api.registry.Registry
 import com.github.projectsandstone.common.event.SandstoneEventManager
 import com.github.projectsandstone.common.plugin.SandstonePluginManager
 import com.github.projectsandstone.common.registry.SandstoneRegistry
+import com.github.projectsandstone.eventsys.event.EventManager
 
-/**
- * Created by jonathan on 15/08/16.
- */
 abstract class AbstractGame(override val eventManager: EventManager = SandstoneEventManager(),
                             override val pluginManager: PluginManager = SandstonePluginManager(),
                             override val registry: Registry = SandstoneRegistry()) : Game

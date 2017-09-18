@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -27,9 +27,9 @@
  */
 package com.github.projectsandstone.common.test.platform
 
-import com.github.projectsandstone.api.logging.Logger
 import com.github.projectsandstone.api.logging.LoggerFactory
 import com.github.projectsandstone.api.plugin.PluginContainer
+import org.slf4j.Logger
 
 class TestLoggerFactory : LoggerFactory {
     override fun createLogger(pluginContainer: PluginContainer): Logger {

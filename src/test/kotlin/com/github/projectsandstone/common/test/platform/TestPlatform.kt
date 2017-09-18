@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -28,6 +28,7 @@
 package com.github.projectsandstone.common.test.platform
 
 import com.github.projectsandstone.api.Platform
+import com.github.projectsandstone.api.platform.PlatformObjectConverter
 import com.github.projectsandstone.api.util.version.Version
 import com.github.projectsandstone.common.util.CommonVersionScheme
 
@@ -45,4 +46,7 @@ class TestPlatform : Platform {
     override fun isInternalClass(name: String?): Boolean {
         return false
     }
+
+    override val platformObjectConverter: PlatformObjectConverter
+        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
 }

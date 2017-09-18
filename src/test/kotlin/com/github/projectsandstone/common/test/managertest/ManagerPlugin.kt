@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -28,13 +28,13 @@
 package com.github.projectsandstone.common.test.managertest
 
 import com.github.projectsandstone.api.Game
-import com.github.projectsandstone.api.event.Listener
 import com.github.projectsandstone.api.event.init.InitializationEvent
 import com.github.projectsandstone.api.event.init.PostInitializationEvent
 import com.github.projectsandstone.api.event.init.ServerStartedEvent
 import com.github.projectsandstone.api.event.service.ChangeServiceProviderEvent
-import com.github.projectsandstone.api.logging.Logger
 import com.github.projectsandstone.api.plugin.Plugin
+import com.github.projectsandstone.eventsys.event.annotation.Listener
+import org.slf4j.Logger
 import javax.inject.Inject
 
 @Plugin(id = "ManagerPlugin", name = "Manager Test Plugin", version = "1.0.0", description = "Event manager test plugin")
@@ -93,7 +93,7 @@ class ManagerPlugin @Inject constructor(val game: Game, val logger: Logger) {
     fun printChange(tag: String, event: ChangeServiceProviderEvent<*>) {
         val oldProviderStr = event.oldProvider?.provider?.javaClass?.toString() ?: "null"
         val newProviderStr = event.newProvider.provider.javaClass.toString()
-        println("$tag -> Provider of '${event.service}' changed from '${oldProviderStr}' to '${newProviderStr}'.")
+        println("$tag -> Provider of '${event.serviceType}' changed from '$oldProviderStr' to '$newProviderStr'.")
         println("$tag ---> Event instance: ${event}.")
         println()
         println()

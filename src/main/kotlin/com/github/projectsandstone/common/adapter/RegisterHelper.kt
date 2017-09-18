@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -36,7 +36,6 @@ import com.github.projectsandstone.api.Sandstone
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
 import java.lang.reflect.Constructor
 import java.lang.reflect.Modifier
-import java.util.function.BiFunction
 
 @Suppress("UNCHECKED_CAST")
 fun AdapterManager.registerAllConverters(`package`: String) {
@@ -53,7 +52,7 @@ fun AdapterManager.registerAllConverters(`package`: String) {
 
                     val instance: Converter<Any, Any> =
                             try {
-                                it.getDeclaredField("INSTANCE").let{
+                                it.getDeclaredField("INSTANCE").let {
                                     it.isAccessible = true
                                     it
                                 }.get(null) as Converter<Any, Any>
@@ -63,9 +62,13 @@ fun AdapterManager.registerAllConverters(`package`: String) {
                                 ctr.newInstance()
                             }
 
-                    this.registerConverter<Any, Any>(type.related[0].aClass as Class<Any>, type.related[1].aClass as Class<Any>, instance)
+                    this.registerConverter(
+                            type.related[0].typeClass as Class<Any>,
+                            type.related[1].typeClass as Class<Any>,
+                            instance
+                    )
                 } catch (e: Exception) {
-                    Sandstone.logger.exception(e, "Can't register converter class '$it'!")
+                    Sandstone.logger.error("Can't register converter class '$it'!", e)
                 }
 
             }
@@ -87,19 +90,20 @@ fun AdapterManager.registerAllAdapters(`package`: String) {
                     val type = TypeUtil.resolve(it, Adapter::class.java)
 
                     val constructor: Constructor<Adapter<Any>>? = it.declaredConstructors.find {
-                        when(it.parameterCount) {
+                        when (it.parameterCount) {
                             0 -> true
-                            1 -> it.parameterTypes[0] == type.related[0].aClass
-                            2 -> it.parameterTypes[0] == type.related[0].aClass && it.parameterTypes[1] == AdapterManager::class.java
+                            1 -> it.parameterTypes[0] == type.related[0].typeClass
+                            2 -> it.parameterTypes[0] == type.related[0].typeClass
+                                    && it.parameterTypes[1] == AdapterManager::class.java
                             else -> false
                         }
                     } as Constructor<Adapter<Any>>?
 
-                    if(constructor == null) {
+                    if (constructor == null) {
                         Sandstone.logger.error("""Can't register adapter class '$it'. The adapter class must have at least:
                                 A empty constructor.
-                                A constructor with only parameter of type '${type.related[0].aClass.canonicalName}'.
-                                A constructor with two parameters of type '${type.related[0].aClass.canonicalName}' and '${AdapterManager::class.java.canonicalName}'!!!""")
+                                A constructor with only parameter of type '${type.related[0].typeClass.canonicalName}'.
+                                A constructor with two parameters of type '${type.related[0].typeClass.canonicalName}' and '${AdapterManager::class.java.canonicalName}'!!!""")
                     } else {
 
                         val factory: (Any, AdapterManager) -> Adapter<Any> = { a, m ->
@@ -111,12 +115,12 @@ fun AdapterManager.registerAllAdapters(`package`: String) {
 
                         }
 
-                        val spec = AdapterSpecification.create(factory, it, type.related[0].aClass as Class<Any>)
+                        val spec = AdapterSpecification.create(factory, it, type.related[0].typeClass as Class<Any>)
 
                         this.register(spec)
                     }
                 } catch (e: Exception) {
-                    Sandstone.logger.exception(e, "Can't register adapter class '$it'!")
+                    Sandstone.logger.error("Can't register adapter class '$it'!", e)
                 }
 
             }

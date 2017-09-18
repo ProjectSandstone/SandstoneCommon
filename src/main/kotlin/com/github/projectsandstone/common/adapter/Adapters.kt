@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -28,11 +28,11 @@
 package com.github.projectsandstone.common.adapter
 
 import com.github.jonathanxd.adapterhelper.AdapterManager
+import com.github.jonathanxd.adapterhelper.registerConverter
 import com.github.projectsandstone.common.adapter.converters.ArrayToListConverter
 import com.github.projectsandstone.common.adapter.converters.ClassConverter
 import com.github.projectsandstone.common.adapter.converters.CollectionConverter
 import com.github.projectsandstone.common.adapter.converters.ListToArrayConverter
-import com.github.projectsandstone.common.util.extension.registerConverter
 
 object Adapters {
     val adapters = AdapterManager.create()

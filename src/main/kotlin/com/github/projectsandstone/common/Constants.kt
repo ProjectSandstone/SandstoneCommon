@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -27,13 +27,14 @@
  */
 package com.github.projectsandstone.common
 
+import com.github.projectsandstone.eventsys.event.EventListener
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
 
-/**
- * Created by jonathan on 17/08/16.
- */
 object Constants {
+
+    val listenerSorter = Comparator.comparing(EventListener<*>::priority)
 
     val daemonThreadFactory: ThreadFactory = ThreadFactory {
         val tr = Executors.defaultThreadFactory().newThread(it)
@@ -41,6 +42,6 @@ object Constants {
         tr
     }
 
-    val cachedThreadPool = Executors.newCachedThreadPool(daemonThreadFactory)
+    val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(daemonThreadFactory)
 
 }

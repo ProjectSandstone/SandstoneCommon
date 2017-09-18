@@ -12,6 +12,7 @@ buildscript {
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
         classpath "gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:$license_version"
         classpath "com.github.jengelman.gradle.plugins:shadow:$shadow_version"
+        classpath "net.ltgt.gradle:gradle-apt-plugin:$apt_version"
     }
 
 }

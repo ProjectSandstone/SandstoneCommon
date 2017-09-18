@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -41,6 +41,7 @@ import org.objectweb.asm.Type
 import org.objectweb.asm.tree.AnnotationNode
 import org.objectweb.asm.tree.ClassNode
 import java.io.InputStream
+import java.util.*
 
 object ASM {
 
@@ -65,10 +66,11 @@ object ASM {
                     var name: String? = null
                     var version: String? = null
                     var description: String? = null
-                    var authors: Array<String> = emptyArray()
+                    var authors: List<String> = emptyList()
                     var usePlatformInternals = false
-                    var dependencies: Array<DependencyContainer> = emptyArray()
-
+                    var dependencies: List<DependencyContainer> = emptyList()
+                    var optional = false
+                    var targetPlatformNames: List<String> = emptyList()
 
                     val values = annotation.values
 
@@ -83,9 +85,11 @@ object ASM {
                                 "name" -> name = value as String
                                 "version" -> version = value as String
                                 "description" -> description = (value as String).let { if (it.isEmpty()) null else it }
-                                "authors" -> authors = (value as List<String>).toTypedArray()
+                                "authors" -> authors = (value as List<String>)
                                 "usePlatformInternals" -> usePlatformInternals = value as Boolean
-                                "dependencies" -> dependencies = createDependenciesArray(value as List<AnnotationNode>)
+                                "dependencies" -> dependencies = createDependenciesList(value as List<AnnotationNode>)
+                                "optional" -> optional = value as Boolean
+                                "targetPlatformNames" -> targetPlatformNames = (value as List<String>)
                             }
 
                         }
@@ -100,13 +104,14 @@ object ASM {
                     return SandstonePluginContainer(
                             id_ = id,
                             name_ = name ?: id,
-                            authors_ = authors,
+                            authors_ = Collections.unmodifiableList(authors),
                             description_ = description,
                             version_ = Version(version, CommonVersionScheme),
                             usePlatformInternals_ = usePlatformInternals,
-                            dependencies = dependencies,
-                            mainClass = Type.getType(node.name).className
-
+                            dependencies = Collections.unmodifiableList(dependencies),
+                            mainClass = Type.getType(node.name).className,
+                            optional = optional,
+                            targetPlatformNames = Collections.unmodifiableList(targetPlatformNames)
                     )
                 }
             }
@@ -117,7 +122,7 @@ object ASM {
         }
     }
 
-    private fun createDependenciesArray(list: List<AnnotationNode>): Array<DependencyContainer> {
+    private fun createDependenciesList(list: List<AnnotationNode>): List<DependencyContainer> {
         return list.map {
 
             if (it.desc != ASM.depAnnotationType)
@@ -152,7 +157,7 @@ object ASM {
                     incompatibleVersions = incompatibleVersions,
                     isRequired = isRequired
             )
-        }.toTypedArray()
+        }
     }
 
 }

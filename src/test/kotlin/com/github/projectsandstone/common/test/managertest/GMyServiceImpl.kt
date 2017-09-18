@@ -1,4 +1,4 @@
-/**
+/*
  *      SandstoneCommon - Common implementation of SandstoneAPI
  *
  *         The MIT License (MIT)
@@ -27,5 +27,4 @@
  */
 package com.github.projectsandstone.common.test.managertest
 
-class GMyServiceImpl(override val id: Int) : MyServiceImpl(id) {
-}
+class GMyServiceImpl(override val id: Int) : MyServiceImpl(id)
