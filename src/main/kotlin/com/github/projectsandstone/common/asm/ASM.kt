@@ -109,7 +109,7 @@ object ASM {
                             version_ = Version(version, CommonVersionScheme),
                             usePlatformInternals_ = usePlatformInternals,
                             dependencies = Collections.unmodifiableList(dependencies),
-                            mainClass = Type.getType(node.name).className,
+                            mainClass = Type.getType(node.name).className ?: Type.getType(node.name).internalName.replace('/', '.'),
                             optional = optional,
                             targetPlatformNames = Collections.unmodifiableList(targetPlatformNames)
                     )
