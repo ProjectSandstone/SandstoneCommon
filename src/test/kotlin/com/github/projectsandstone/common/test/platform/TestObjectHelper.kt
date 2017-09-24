@@ -30,6 +30,28 @@ package com.github.projectsandstone.common.test.platform
 import com.github.projectsandstone.api.SandstoneObjectHelper
 
 object TestObjectHelper : SandstoneObjectHelper {
+    override fun <U, T> createLiveCollection(from: Collection<U>, mapper: (U) -> T): Collection<T> =
+            object : Collection<T> {
+                override val size: Int
+                    get() = from.size
+
+                override fun contains(element: T): Boolean =
+                        from.any { mapper(it) == element }
+
+                override fun containsAll(elements: Collection<T>): Boolean =
+                        elements.all { this.contains(it) }
+
+                override fun isEmpty(): Boolean = from.isEmpty()
+
+                override fun iterator(): Iterator<T> = object : Iterator<T> {
+
+                    val iter = from.iterator()
+
+                    override fun next(): T = mapper(iter.next())
+                    override fun hasNext(): Boolean = iter.hasNext()
+                }
+            }
+
     override fun <U, T> createLiveList(from: List<U>, mapper: (U) -> T): List<T> =
             object : List<T> {
                 override val size: Int

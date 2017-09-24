@@ -28,6 +28,8 @@
 package com.github.projectsandstone.common.test.eventlistening
 
 import com.github.projectsandstone.api.Sandstone
+import com.github.projectsandstone.api.entity.EntityType
+import com.github.projectsandstone.api.entity.EntityTypes
 import com.github.projectsandstone.api.entity.living.player.Player
 import com.github.projectsandstone.api.event.init.PostInitializationEvent
 import com.github.projectsandstone.api.event.message.MessageEvent
@@ -67,6 +69,8 @@ class EventListenerPlugin @Inject constructor(val logger: Logger) {
 }
 
 class TestPlayer : Player {
+    override val type: EntityType
+        get() = EntityTypes.PLAYER
 
     override val inventory: CarriedInventory<Carrier>
         get() = TODO("not implemented")

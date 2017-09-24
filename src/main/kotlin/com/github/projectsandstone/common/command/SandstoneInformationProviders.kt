@@ -34,6 +34,8 @@ import com.github.jonathanxd.kwcommands.manager.InformationManager
 import com.github.projectsandstone.api.service.permission.Subject
 
 class SubjectProvider(val manager: InformationManager) : InformationProvider {
+    override fun <T> provide(id: Information.Id): Information<T>? = null
+
     @Suppress("UNCHECKED_CAST")
     override fun <T> provide(id: Information.Id, type: TypeInfo<T>): Information<T>? =
             if (id.id == Subject::class.java && "subject" in id.tags)

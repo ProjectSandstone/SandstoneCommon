@@ -134,7 +134,7 @@ object ASM {
 
             var id: String? = null
             var version: String = ".*"
-            var incompatibleVersions: String = ""
+            var incompatibleVersions = ""
             var isRequired = true
 
             for(x in 0..end step 2) {
