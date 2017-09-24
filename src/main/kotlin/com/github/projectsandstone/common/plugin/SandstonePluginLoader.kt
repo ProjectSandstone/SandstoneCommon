@@ -62,7 +62,7 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
             return
         }
 
-        plugin.state_ != PluginState.LOADING
+        plugin.state_ = PluginState.LOADING
 
         Sandstone.eventManager.dispatch(SandstoneEventFactoryCache.getInstance()
                 .createPluginLoadingEvent(this.pluginManager, plugin), Sandstone)

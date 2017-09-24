@@ -32,9 +32,11 @@ import com.github.projectsandstone.api.Game
 import com.github.projectsandstone.api.Implementation
 import com.github.projectsandstone.api.Sandstone
 import com.github.projectsandstone.api.logging.LoggerFactory
+import com.github.projectsandstone.api.plugin.PluginState
 import com.github.projectsandstone.api.registry.RegistryEntry
 import com.github.projectsandstone.api.util.extension.registry.getEntryGeneric
 import com.github.projectsandstone.api.util.version.Schemes
+import com.github.projectsandstone.common.util.idVersion
 import com.github.projectsandstone.common.util.version.SemVerSchemeImpl
 import org.slf4j.Logger
 import java.lang.reflect.Field
@@ -123,8 +125,23 @@ object SandstoneInit {
      */
     @JvmStatic
     fun loadPlugins(pluginsDir: Path) {
+        Sandstone.logger.info("Discovering plugins...")
         val plugins = Sandstone.game.pluginManager.createContainersFromPath(pluginsDir)
+
+        Sandstone.logger.info("${plugins.size} plugins discovered, loading plugins: " +
+                plugins.joinToString { "${it.name} ${it.version.versionString}" })
+
         Sandstone.game.pluginManager.loadAll(plugins)
+
+        val currentPlugins = Sandstone.game.pluginManager.getPlugins()
+
+        Sandstone.logger.info("${currentPlugins.count { it.state == PluginState.LOADED }} plugins loaded with success.")
+
+        val failed = currentPlugins.count { it.state == PluginState.FAILED }
+
+        if (failed > 0)
+            Sandstone.logger.info("$failed plugins failed to load: " +
+                currentPlugins.filter { it.state == PluginState.FAILED }.joinToString { "${it.name} ${it.version.versionString}" })
     }
 
 }
