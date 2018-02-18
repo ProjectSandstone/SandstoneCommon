@@ -27,19 +27,49 @@
  */
 package com.github.projectsandstone.common.service
 
-import com.github.jonathanxd.codeproxy.ProxyData
-import com.github.jonathanxd.codeproxy.handler.InvocationHandler
-import com.github.jonathanxd.codeproxy.info.MethodInfo
+import com.github.jonathanxd.iutils.kt.classOf
+import com.github.jonathanxd.kores.Instruction
+import com.github.jonathanxd.kores.base.Access
+import com.github.jonathanxd.kores.factory.invokeInterface
+import com.github.jonathanxd.kores.factory.invokeStatic
+import com.github.jonathanxd.kores.factory.typeSpec
+import com.github.jonathanxd.kores.literal.string
+import com.github.jonathanxd.kores.literal.type
+import com.github.jonathanxd.koresproxy.ProxyData
+import com.github.jonathanxd.koresproxy.gen.direct.WrappedInstance
+import com.github.jonathanxd.koresproxy.handler.InvocationHandler
+import com.github.jonathanxd.koresproxy.info.MethodInfo
 import com.github.projectsandstone.api.service.ServiceManager
+import java.util.*
 
-class ProxyServiceIHandler<T : Any>(val serviceManager: ServiceManager,
-                                    val service: Class<T>) : InvocationHandler {
+class ProxyService<T : Any>(
+    val serviceManager: ServiceManager,
+    val service: Class<T>
+) : WrappedInstance(service) {
+    override fun getWrapper(): Any = this.serviceManager
 
+    override fun getWrapperType(): Class<*> = classOf<ServiceManager>()
 
-    override fun invoke(instance: Any?, methodInfo: MethodInfo, args: Array<out Any>, proxyData: ProxyData): Any? {
-        val provide = requireNotNull(serviceManager.provide(service), { "No provider of service '$service' found!" })
+    override fun evaluate(wrapper: Instruction): Instruction =
+        checkValidit(
+            invokeInterface(
+                localization = classOf<ServiceManager>(),
+                target = wrapper,
+                name = "provide",
+                spec = typeSpec(classOf<Any>(), classOf<Class<*>>()),
+                arguments = listOf(type(service))
+            )
+        )
 
-        return methodInfo.resolveOrFail(provide::class.java).bindTo(provide).invokeWithArguments(*args)
-    }
-
+    private fun checkValidit(ins: Instruction): Instruction =
+        invokeStatic(
+            localization = classOf<Objects>(),
+            target = Access.STATIC,
+            name = "requireNonNull",
+            spec = typeSpec(classOf<Any>(), classOf<Any>(), classOf<String>()),
+            arguments = listOf(
+                ins,
+                string("No provider of service '${service.canonicalName}' was found!")
+            )
+        )
 }

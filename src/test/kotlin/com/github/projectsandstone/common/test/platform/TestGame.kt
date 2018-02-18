@@ -35,21 +35,19 @@ import com.github.projectsandstone.api.scheduler.Scheduler
 import com.github.projectsandstone.api.service.ServiceManager
 import com.github.projectsandstone.api.util.edition.GameEdition
 import com.github.projectsandstone.common.command.SandstoneCommandManager
-import com.github.projectsandstone.common.event.SandstoneEventManager
-import com.github.projectsandstone.common.plugin.SandstonePluginManager
-import com.github.projectsandstone.common.registry.SandstoneRegistry
 import com.github.projectsandstone.eventsys.event.EventManager
 import java.nio.file.Path
 import java.nio.file.Paths
+import javax.inject.Inject
 
-class TestGame : Game {
-    override val eventManager: EventManager = SandstoneEventManager()
-
+class TestGame @Inject constructor(
+    override val eventManager: EventManager,
+    override val pluginManager: PluginManager,
+    override val registry: Registry
+) : Game {
     override val gamePath: Path = Paths.get("/")
 
     override val platform: Platform = TestPlatform()
-
-    override val pluginManager: PluginManager = SandstonePluginManager()
 
     override val savePath: Path = Paths.get("/")
 
@@ -59,11 +57,9 @@ class TestGame : Game {
 
     override val serviceManager: ServiceManager = TestServiceManager()
 
-    override val registry: Registry = SandstoneRegistry()
-
     override val edition: GameEdition = TestGameEdition
 
     override val objectFactory: SandstoneObjectFactory = TestObjectFactory
     override val objectHelper: SandstoneObjectHelper = TestObjectHelper
-    override val commandManager: CommandManager = SandstoneCommandManager()
+    override val commandManager: CommandManager = SandstoneCommandManager(this)
 }

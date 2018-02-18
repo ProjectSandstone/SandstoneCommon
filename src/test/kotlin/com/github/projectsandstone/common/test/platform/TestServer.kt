@@ -29,7 +29,9 @@ package com.github.projectsandstone.common.test.platform
 
 import com.github.projectsandstone.api.Server
 import com.github.projectsandstone.api.entity.living.player.Player
+import com.github.projectsandstone.api.entity.living.player.User
 import com.github.projectsandstone.api.world.World
+import java.util.*
 
 class TestServer : Server {
     override val ip: String = "0.0.0.0"
@@ -45,4 +47,14 @@ class TestServer : Server {
     override val worlds: List<World> = emptyList()
 
     override val players: List<Player> = emptyList()
+
+    override fun getOnlinePlayer(name: String): Player? = null
+
+    override fun getOnlinePlayer(uuid: UUID): Player? = null
+
+    override fun getUser(uuid: UUID): User? = null
+
+    override fun getWorld(uuid: UUID): World? = null
+
+    override fun getWorld(name: String): World? = null
 }

@@ -48,7 +48,6 @@ class SandstoneEventManager : EventManager {
 
     private val commonManager: EventManager by lazy(LazyThreadSafetyMode.NONE) {
         CommonEventManager(
-                true,
                 Constants.listenerSorter,
                 Constants.daemonThreadFactory,
                 logger,

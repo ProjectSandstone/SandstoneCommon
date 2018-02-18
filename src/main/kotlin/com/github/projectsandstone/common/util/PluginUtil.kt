@@ -27,6 +27,11 @@
  */
 package com.github.projectsandstone.common.util
 
+import com.github.projectsandstone.api.annotation.PluginInstance
 import com.github.projectsandstone.api.plugin.PluginContainer
+import com.github.projectsandstone.api.plugin.PluginManager
 
 val PluginContainer.idVersion get() = "${this.id}:${this.version.versionString}"
+
+fun PluginManager.isOwnerEq(@PluginInstance first: Any, second: Any): Boolean =
+    this.getRequiredPlugin(first) == this.getPlugin(second) // Second must not be plugin

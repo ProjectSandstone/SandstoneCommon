@@ -36,43 +36,36 @@ import com.github.projectsandstone.api.plugin.PluginState
 import com.github.projectsandstone.api.registry.RegistryEntry
 import com.github.projectsandstone.api.util.extension.registry.getEntryGeneric
 import com.github.projectsandstone.api.util.version.Schemes
-import com.github.projectsandstone.common.util.idVersion
-import com.github.projectsandstone.common.util.version.SemVerSchemeImpl
+import com.github.projectsandstone.common.guice.GameSandstoneModule
+import com.github.projectsandstone.common.guice.SandstoneModule
+import com.github.projectsandstone.common.guice.SandstoneSchemeModule
+import com.google.inject.AbstractModule
+import com.google.inject.Guice
 import org.slf4j.Logger
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
 import java.nio.file.Path
+import java.time.Duration
+import java.time.Instant
 
 object SandstoneInit {
 
     @JvmStatic
-    fun initConsts() {
-        this.init(Schemes::class.java, "semVerScheme_", SemVerSchemeImpl)
+    fun initSchemes() {
+        Guice.createInjector(SandstoneSchemeModule())
     }
 
     @JvmStatic
-    fun initPath(path: Path) {
-        this.init("sandstonePath_", path)
-    }
+    fun init(
+        game: Class<out Game>,
+        logger: Logger,
+        loggerFactory: LoggerFactory,
+        sandstonePath: Path,
+        implementation: Implementation
+    ) {
+        val basic = Guice.createInjector(GameSandstoneModule(game))
 
-    @JvmStatic
-    fun initGame(game: Game) {
-        this.init("game_", game)
-    }
-
-    @JvmStatic
-    fun initLogger(logger: Logger) {
-        this.init("logger_", logger)
-    }
-
-    @JvmStatic
-    fun initLoggerFactory(loggerFactory: LoggerFactory) {
-        this.init("loggerFactory_", loggerFactory)
-    }
-
-    @JvmStatic
-    fun initImplementation(implementation: Implementation) {
-        this.init("implementation_", implementation)
+        basic.createChildInjector(SandstoneModule(logger, loggerFactory, sandstonePath, implementation))
     }
 
     @JvmStatic
@@ -101,10 +94,10 @@ object SandstoneInit {
 
         if (missingEntries.isNotEmpty())
             Sandstone.logger
-                    .error("Sandstone could not initialize all constants of class '$constantsClass'. Some entries were not registered: $missingEntries.")
+                .error("Sandstone could not initialize all constants of class '$constantsClass'. Some entries were not registered: $missingEntries.")
     }
 
-    internal fun init(clazz: Class<*>, fieldName: String, instance: Any) {
+    private fun initConstField(clazz: Class<*>, fieldName: String, instance: Any) {
         val field = clazz.getDeclaredField(fieldName)
 
         field.isAccessible = true
@@ -112,10 +105,6 @@ object SandstoneInit {
         Conditions.checkNull(field[null], "Already initialized!")
 
         field[null] = instance
-    }
-
-    internal fun init(fieldName: String, instance: Any) {
-        this.init(Sandstone::class.java, fieldName, instance)
     }
 
     /**
@@ -131,17 +120,21 @@ object SandstoneInit {
         Sandstone.logger.info("${plugins.size} plugins discovered, loading plugins: " +
                 plugins.joinToString { "${it.name} ${it.version.versionString}" })
 
+        val start = Instant.now()
+
         Sandstone.game.pluginManager.loadAll(plugins)
 
-        val currentPlugins = Sandstone.game.pluginManager.getPlugins()
+        val initTime = Duration.between(start, Instant.now())
 
-        Sandstone.logger.info("${currentPlugins.count { it.state == PluginState.LOADED }} plugins loaded with success.")
+        val currentPlugins = Sandstone.game.pluginManager.plugins
+
+        Sandstone.logger.info("${currentPlugins.count { it.state == PluginState.LOADED }} plugins loaded with success in ${initTime.seconds}s.")
 
         val failed = currentPlugins.count { it.state == PluginState.FAILED }
 
         if (failed > 0)
             Sandstone.logger.info("$failed plugins failed to load: " +
-                currentPlugins.filter { it.state == PluginState.FAILED }.joinToString { "${it.name} ${it.version.versionString}" })
+                    currentPlugins.filter { it.state == PluginState.FAILED }.joinToString { "${it.name} ${it.version.versionString}" })
     }
 
 }

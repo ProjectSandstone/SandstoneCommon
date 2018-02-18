@@ -27,10 +27,12 @@
  */
 package com.github.projectsandstone.common.asm
 
+import com.github.projectsandstone.api.constants.SandstonePlatform
 import com.github.projectsandstone.api.plugin.Dependency
 import com.github.projectsandstone.api.plugin.DependencyContainer
 import com.github.projectsandstone.api.plugin.Plugin
 import com.github.projectsandstone.api.plugin.PluginContainer
+import com.github.projectsandstone.api.util.version.Schemes
 import com.github.projectsandstone.api.util.version.Version
 import com.github.projectsandstone.api.util.version.VersionScheme
 import com.github.projectsandstone.common.plugin.SandstoneDependencyContainer
@@ -106,12 +108,13 @@ object ASM {
                             name_ = name ?: id,
                             authors_ = Collections.unmodifiableList(authors),
                             description_ = description,
-                            version_ = Version(version, CommonVersionScheme),
+                            version_ = Version(version, Schemes.commonVersionScheme),
                             usePlatformInternals_ = usePlatformInternals,
                             dependencies = Collections.unmodifiableList(dependencies),
                             mainClass = Type.getType(node.name).className ?: Type.getType(node.name).internalName.replace('/', '.'),
                             optional = optional,
-                            targetPlatformNames = Collections.unmodifiableList(targetPlatformNames)
+                            targetPlatformNames = Collections.unmodifiableList(targetPlatformNames),
+                            platform = SandstonePlatform
                     )
                 }
             }

@@ -63,8 +63,8 @@ fun AdapterManager.registerAllConverters(`package`: String) {
                             }
 
                     this.registerConverter(
-                            type.related[0].typeClass as Class<Any>,
-                            type.related[1].typeClass as Class<Any>,
+                            type.getTypeParameter(0).typeClass as Class<Any>,
+                            type.getTypeParameter(1).typeClass as Class<Any>,
                             instance
                     )
                 } catch (e: Exception) {
@@ -92,8 +92,8 @@ fun AdapterManager.registerAllAdapters(`package`: String) {
                     val constructor: Constructor<Adapter<Any>>? = it.declaredConstructors.find {
                         when (it.parameterCount) {
                             0 -> true
-                            1 -> it.parameterTypes[0] == type.related[0].typeClass
-                            2 -> it.parameterTypes[0] == type.related[0].typeClass
+                            1 -> it.parameterTypes[0] == type.getTypeParameter(0).typeClass
+                            2 -> it.parameterTypes[0] == type.getTypeParameter(0).typeClass
                                     && it.parameterTypes[1] == AdapterManager::class.java
                             else -> false
                         }
@@ -101,9 +101,9 @@ fun AdapterManager.registerAllAdapters(`package`: String) {
 
                     if (constructor == null) {
                         Sandstone.logger.error("""Can't register adapter class '$it'. The adapter class must have at least:
-                                A empty constructor.
-                                A constructor with only parameter of type '${type.related[0].typeClass.canonicalName}'.
-                                A constructor with two parameters of type '${type.related[0].typeClass.canonicalName}' and '${AdapterManager::class.java.canonicalName}'!!!""")
+                                | - A empty constructor.
+                                | - A constructor with only parameter of type '${type.getTypeParameter(0).typeClass.canonicalName}'.
+                                | - A constructor with two parameters of type '${type.getTypeParameter(0).typeClass.canonicalName}' and '${AdapterManager::class.java.canonicalName}'!!!""".trimMargin())
                     } else {
 
                         val factory: (Any, AdapterManager) -> Adapter<Any> = { a, m ->
@@ -115,7 +115,7 @@ fun AdapterManager.registerAllAdapters(`package`: String) {
 
                         }
 
-                        val spec = AdapterSpecification.create(factory, it, type.related[0].typeClass as Class<Any>)
+                        val spec = AdapterSpecification.create(factory, it, type.getTypeParameter(0).typeClass as Class<Any>)
 
                         this.register(spec)
                     }

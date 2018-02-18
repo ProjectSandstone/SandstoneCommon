@@ -28,6 +28,7 @@
 package com.github.projectsandstone.common.test.serviceproxy
 
 import com.github.projectsandstone.api.Game
+import com.github.projectsandstone.api.event.init.InitializationEvent
 import com.github.projectsandstone.api.event.init.PreInitializationEvent
 import com.github.projectsandstone.api.event.init.ServerStartedEvent
 import com.github.projectsandstone.api.plugin.Dependency
@@ -36,16 +37,19 @@ import com.github.projectsandstone.eventsys.event.annotation.Listener
 import org.slf4j.Logger
 import javax.inject.Inject
 
-@Plugin(id = "projectsandstone.serviceproxyplugin", name = "ServiceProxy", version = "1.0.0", dependencies = arrayOf(
-        Dependency("com.github.projectsandstone.common.test.eventlistenerplugin")
-))
+@Plugin(
+    id = "projectsandstone.serviceproxyplugin",
+    name = "ServiceProxy",
+    version = "1.0.0",
+    dependencies = [Dependency("com.github.projectsandstone.common.test.eventlistenerplugin")]
+)
 class ServiceProxyPlugin @Inject constructor(val game: Game, val logger: Logger) {
 
     lateinit var service: TestService
     lateinit var unavailable: UnavailableService
 
     @Listener
-    fun onPre(event: PreInitializationEvent) {
+    fun onInit(event: InitializationEvent) {
 
         service = game.serviceManager.provideProxy(TestService::class.java)
         unavailable = game.serviceManager.provideProxy(UnavailableService::class.java)

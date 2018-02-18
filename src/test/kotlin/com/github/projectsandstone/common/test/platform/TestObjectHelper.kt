@@ -27,81 +27,69 @@
  */
 package com.github.projectsandstone.common.test.platform
 
+import com.github.jonathanxd.iutils.collection.view.ViewCollections
+import com.github.jonathanxd.iutils.collection.view.ViewUtils
+import com.github.jonathanxd.iutils.text.Text
+import com.github.jonathanxd.kwcommands.printer.CommonPrinter
+import com.github.jonathanxd.kwcommands.printer.Printer
+import com.github.jonathanxd.kwcommands.util.KLocale
 import com.github.projectsandstone.api.SandstoneObjectHelper
+import com.github.projectsandstone.api.text.channel.MessageReceiver
+import org.slf4j.Logger
+import java.util.*
+import java.util.function.Function
 
 object TestObjectHelper : SandstoneObjectHelper {
+    private val loggerPrinter: MutableMap<Logger, Printer> = WeakHashMap()
+    private val messageReceiverPrinter: MutableMap<MessageReceiver, Printer> = WeakHashMap()
+
     override fun <U, T> createLiveCollection(from: Collection<U>, mapper: (U) -> T): Collection<T> =
-            object : Collection<T> {
-                override val size: Int
-                    get() = from.size
+        object : Collection<T> {
+            override val size: Int
+                get() = from.size
 
-                override fun contains(element: T): Boolean =
-                        from.any { mapper(it) == element }
+            override fun contains(element: T): Boolean =
+                from.any { mapper(it) == element }
 
-                override fun containsAll(elements: Collection<T>): Boolean =
-                        elements.all { this.contains(it) }
+            override fun containsAll(elements: Collection<T>): Boolean =
+                elements.all { this.contains(it) }
 
-                override fun isEmpty(): Boolean = from.isEmpty()
+            override fun isEmpty(): Boolean = from.isEmpty()
 
-                override fun iterator(): Iterator<T> = object : Iterator<T> {
+            override fun iterator(): Iterator<T> = object : Iterator<T> {
 
-                    val iter = from.iterator()
+                val iter = from.iterator()
 
-                    override fun next(): T = mapper(iter.next())
-                    override fun hasNext(): Boolean = iter.hasNext()
-                }
+                override fun next(): T = mapper(iter.next())
+                override fun hasNext(): Boolean = iter.hasNext()
             }
+        }
 
     override fun <U, T> createLiveList(from: List<U>, mapper: (U) -> T): List<T> =
-            object : List<T> {
-                override val size: Int
-                    get() = from.size
+        ViewCollections.listMapped(
+            from,
+            Function { mapper(it) },
+            Function { throw UnsupportedOperationException("Unmodifiable") },
+            ViewUtils.unmodifiable(),
+            ViewUtils.unmodifiable()
+        )
 
-                override fun contains(element: T): Boolean =
-                        from.any { mapper(it) == element }
+    override fun <U, T> createLiveSet(from: Set<U>, mapper: (U) -> T): Set<T> =
+        ViewCollections.setMapped(
+            from,
+            Function { mapper(it) },
+            ViewUtils.unmodifiable(),
+            ViewUtils.unmodifiable()
+        )
 
-                override fun containsAll(elements: Collection<T>): Boolean =
-                        elements.all { this.contains(it) }
 
-                override fun get(index: Int): T = mapper(from[index])
+    override fun createPrinter(logger: Logger): Printer =
+        this.loggerPrinter.computeIfAbsent(logger) {
+            CommonPrinter(KLocale.localizer, { logger.info(it) }, false)
+        }
 
-                override fun indexOf(element: T): Int =
-                        from.indexOfFirst { mapper(it) == element }
-
-                override fun isEmpty(): Boolean = from.isEmpty()
-
-                override fun iterator(): Iterator<T> = object : Iterator<T> {
-
-                    val iter = from.iterator()
-
-                    override fun next(): T = mapper(iter.next())
-                    override fun hasNext(): Boolean = iter.hasNext()
-                }
-
-                override fun lastIndexOf(element: T): Int =
-                        from.indexOfLast { mapper(it) == element }
-
-                override fun listIterator(): ListIterator<T> = this.listIterator(0)
-
-                override fun listIterator(index: Int): ListIterator<T> = object : ListIterator<T> {
-                    val iter = from.listIterator(index)
-
-                    override fun hasNext(): Boolean = iter.hasNext()
-
-                    override fun hasPrevious(): Boolean = iter.hasPrevious()
-
-                    override fun next(): T = mapper(iter.next())
-
-                    override fun nextIndex(): Int = iter.nextIndex()
-
-                    override fun previous(): T = mapper(iter.previous())
-
-                    override fun previousIndex(): Int = iter.previousIndex()
-                }
-
-                override fun subList(fromIndex: Int, toIndex: Int): List<T> =
-                        createLiveList(from.subList(fromIndex, toIndex), mapper)
-
-            }
-
+    override fun createPrinter(receiver: MessageReceiver): Printer =
+        this.messageReceiverPrinter.computeIfAbsent(receiver) {
+            CommonPrinter(KLocale.localizer, { receiver.sendMessage(Text.of(it)) }, false)
+        }
 }

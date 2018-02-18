@@ -28,20 +28,21 @@
 package com.github.projectsandstone.common.plugin
 
 import com.github.projectsandstone.api.Sandstone
-import com.github.projectsandstone.api.event.SandstoneEventFactory
 import com.github.projectsandstone.api.event.SandstoneEventFactoryCache
 import com.github.projectsandstone.api.event.plugin.PluginLoadFailedEvent
 import com.github.projectsandstone.api.plugin.*
 import com.github.projectsandstone.api.util.exception.DependencyException
 import com.github.projectsandstone.common.asm.ASM
-import com.github.projectsandstone.common.guice.SandstoneModule
-import com.github.projectsandstone.common.guice.SandstonePluginModule
+import com.github.projectsandstone.common.di.SandstonePluginDependencyInjection
 import com.github.projectsandstone.common.util.getInstance
 import java.net.URL
 import java.nio.file.Path
 import java.util.jar.JarFile
 
-class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginLoader {
+class SandstonePluginLoader(
+    override val pluginManager: PluginManager,
+    private val di: SandstonePluginDependencyInjection
+) : PluginLoader {
 
     val CLASS_LENGTH = ".class".length
 
@@ -55,7 +56,8 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
         this.init(plugin)
 
 
-        plugin.dependenciesState_ = this.pluginManager.dependencyResolver.getDependenciesState(plugin)
+        plugin.dependenciesState_ =
+                this.pluginManager.dependencyResolver.getDependenciesState(plugin)
 
         if (plugin.state_ != PluginState.ABOUT_TO_LOAD) {
             Sandstone.logger.error("Cannot load plugin container: $plugin. Current state: ${plugin.state_}!")
@@ -64,16 +66,22 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
 
         plugin.state_ = PluginState.LOADING
 
-        Sandstone.eventManager.dispatch(SandstoneEventFactoryCache.getInstance()
-                .createPluginLoadingEvent(this.pluginManager, plugin), Sandstone)
+        Sandstone.eventManager.dispatch(
+            SandstoneEventFactoryCache.getInstance()
+                .createPluginLoadingEvent(this.pluginManager, plugin), Sandstone
+        )
 
         try {
             pluginManager.dependencyResolver.checkDependencies(plugin)
         } catch (e: DependencyException) {
-            Sandstone.eventManager.dispatch(SandstoneEventFactoryCache.getInstance()
-                    .createPluginLoadFailedEvent(PluginLoadFailedEvent.Reason.DependencyResolutionFailed,
-                            this.pluginManager,
-                            plugin), Sandstone)
+            Sandstone.eventManager.dispatch(
+                SandstoneEventFactoryCache.getInstance()
+                    .createPluginLoadFailedEvent(
+                        PluginLoadFailedEvent.Reason.DependencyResolutionFailed,
+                        this.pluginManager,
+                        plugin
+                    ), Sandstone
+            )
 
             Sandstone.logger.error("Dependency missing for plugin: '$plugin'", e)
 
@@ -97,9 +105,12 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
             try {
                 val klass = pluginClassLoader.loadClass(clName)
 
-                val injector = SandstoneModule.injector.createChildInjector(SandstonePluginModule(pluginManager, plugin, klass))
+                val injector = this.di.createPluginInjector(this.pluginManager, plugin, klass)
 
-                val instance = getInstance(klass)?.let { injector.injectMembers(it) } ?: injector.getInstance(klass)
+                val instance =
+                    getInstance(klass)?.let { injector.injectMembers(it) } ?: injector.getInstance(
+                        klass
+                    )
 
                 plugin.definition!!.invalidate()
                 plugin.definition = null
@@ -115,11 +126,14 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
                 plugin.definition = null
 
                 Sandstone.logger.error("Failed to load plugin: '$plugin'!", exception)
-                Sandstone.eventManager.dispatch(SandstoneEventFactoryCache.getInstance()
+                Sandstone.eventManager.dispatch(
+                    SandstoneEventFactoryCache.getInstance()
                         .createPluginLoadFailedEvent(
-                                PluginLoadFailedEvent.Reason.Exception(exception),
-                                this.pluginManager,
-                                plugin), Sandstone)
+                            PluginLoadFailedEvent.Reason.Exception(exception),
+                            this.pluginManager,
+                            plugin
+                        ), Sandstone
+                )
             }
         }
 
@@ -137,19 +151,26 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
         val urls = emptyArray<URL>()
 
         val classLoader = SandstoneClassLoader(
-                urls = urls,
-                file = null,
-                parent = this.javaClass.classLoader,
-                useInternal = false,
-                classes = classList)
+            urls = urls,
+            file = null,
+            parent = this.javaClass.classLoader,
+            useInternal = false,
+            classes = classList
+        )
 
         val loadedClasses = loadClasses(classLoader, classList, urls, null)
 
         return loadedClasses.map {
             val annotation = it.getDeclaredAnnotation(Plugin::class.java)
 
-            if(annotation != null) {
-                return@map SandstonePluginContainer.fromAnnotation(classLoader, null, it.canonicalName, classes, annotation)
+            if (annotation != null) {
+                return@map SandstonePluginContainer.fromAnnotation(
+                    classLoader,
+                    null,
+                    it.canonicalName,
+                    classes,
+                    annotation
+                )
             }
 
             return@map null
@@ -204,20 +225,22 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
         val filePathAsFile = sandstonePluginContainer.file_?.toFile()
 
         // TODO: Change this for Java 9 (when it get released).
-        val urls = if(filePathAsFile != null) arrayOf(URL("jar:file:$filePathAsFile!/")) else emptyArray()
+        val urls =
+            if (filePathAsFile != null) arrayOf(URL("jar:file:$filePathAsFile!/")) else emptyArray()
 
         if (classes.isEmpty()) {
             throw IllegalArgumentException("Empty class collection of plugin '$sandstonePluginContainer'!")
         }
 
-        if(sandstonePluginContainer.classLoader_ == null) {
+        if (sandstonePluginContainer.classLoader_ == null) {
 
             val classLoader = SandstoneClassLoader(
-                    urls = urls,
-                    file = file,
-                    parent = this.javaClass.classLoader,
-                    useInternal = sandstonePluginContainer.usePlatformInternals,
-                    classes = classes)
+                urls = urls,
+                file = file,
+                parent = this.javaClass.classLoader,
+                useInternal = sandstonePluginContainer.usePlatformInternals,
+                classes = classes
+            )
 
             this.loadClasses(classLoader, classes, urls, file)
 
@@ -229,14 +252,22 @@ class SandstonePluginLoader(override val pluginManager: PluginManager) : PluginL
 
     }
 
-    private fun loadClasses(classLoader: ClassLoader, classes: List<String>, urls: Array<URL>, file: Path?): List<Class<*>> {
+    private fun loadClasses(
+        classLoader: ClassLoader,
+        classes: List<String>,
+        urls: Array<URL>,
+        file: Path?
+    ): List<Class<*>> {
         val mapped: MutableList<Class<*>> = mutableListOf()
 
         for (className in classes) {
             try {
                 mapped += classLoader.loadClass(className)
             } catch (e: Exception) {
-                Sandstone.logger.error("Failed to load class '$className'. Other classes will not be loaded to avoid future problems. Additional information: [urls: $urls, file: $file]. Some plugins may not be loaded!", e)
+                Sandstone.logger.error(
+                    "Failed to load class '$className'. Other classes will not be loaded to avoid future problems. Additional information: [urls: $urls, file: $file]. Some plugins may not be loaded!",
+                    e
+                )
                 mapped.clear()
                 break
             }

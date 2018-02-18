@@ -30,24 +30,30 @@ package com.github.projectsandstone.common.plugin
 import com.github.projectsandstone.api.Sandstone
 import com.github.projectsandstone.api.constants.SandstonePlugin
 import com.github.projectsandstone.api.plugin.*
+import com.github.projectsandstone.common.di.SandstonePluginDependencyInjection
+import com.github.projectsandstone.common.di.SandstonePluginGuice
 import com.github.projectsandstone.common.util.DependencyComparator
+import com.google.inject.Injector
 import java.nio.file.Path
 import java.util.*
+import javax.inject.Inject
 
-class SandstonePluginManager : PluginManager {
+class SandstonePluginManager @Inject constructor(private val baseInjector: Injector) : PluginManager {
 
     private val pluginSet = mutableSetOf<PluginContainer>(SandstonePlugin)
     private val failedPluginSet = mutableSetOf<PluginContainer>()
 
     private val dependencyResolver_ = SandstoneDependencyResolver(this)
     private val unmodifiablePluginSet = Collections.unmodifiableSet(this.pluginSet)
-    private val pluginLoader_ = SandstonePluginLoader(this)
+    private val pluginLoader_ = SandstonePluginLoader(this, SandstonePluginGuice(this.baseInjector))
 
     override val dependencyResolver: DependencyResolver
         get() = this.dependencyResolver_
 
     override val pluginLoader: PluginLoader
         get() = this.pluginLoader_
+
+    override val plugins: Set<PluginContainer> = this.unmodifiablePluginSet
 
     override fun loadPlugins(classes: Array<String>): List<PluginContainer> {
         val containers = this.createContainers(classes)
@@ -110,10 +116,6 @@ class SandstonePluginManager : PluginManager {
 
     override fun getFailedPlugin(id: String): PluginContainer? {
         return this.failedPluginSet.find { it.id == id }
-    }
-
-    override fun getPlugins(): Set<PluginContainer> {
-        return unmodifiablePluginSet
     }
 
     private fun addToLoadedSet(pluginContainer: PluginContainer) {

@@ -27,23 +27,29 @@
  */
 package com.github.projectsandstone.common.plugin
 
+import com.github.projectsandstone.api.Platform
+import com.github.projectsandstone.api.constants.SandstonePlatform
 import com.github.projectsandstone.api.plugin.*
+import com.github.projectsandstone.api.util.version.Schemes
 import com.github.projectsandstone.api.util.version.Version
 import com.github.projectsandstone.common.util.CommonVersionScheme
 import org.slf4j.Logger
 import java.nio.file.Path
 import java.util.*
 
-open class SandstonePluginContainer(var id_: String,
-                                    var name_: String,
-                                    var version_: Version,
-                                    var description_: String?,
-                                    var usePlatformInternals_: Boolean,
-                                    override val optional: Boolean,
-                                    override val dependencies: List<DependencyContainer>,
-                                    var authors_: List<String>,
-                                    override val mainClass: String,
-                                    override val targetPlatformNames: List<String>) : PluginContainer {
+open class SandstonePluginContainer(
+    var id_: String,
+    var name_: String,
+    var version_: Version,
+    var description_: String?,
+    var usePlatformInternals_: Boolean,
+    override val optional: Boolean,
+    override val dependencies: List<DependencyContainer>,
+    var authors_: List<String>,
+    override val mainClass: String,
+    override val targetPlatformNames: List<String>,
+    override val platform: Platform
+) : PluginContainer {
 
     internal var definition: SandstonePluginDefinition? = null
     internal var instance_: Any? = null
@@ -107,22 +113,34 @@ open class SandstonePluginContainer(var id_: String,
     }
 
     companion object {
-        fun fromAnnotation(pluginClassLoader: PluginClassLoader, file: Path?, mainClass: String, classes: Array<String>, annotation: Plugin): SandstonePluginContainer {
+        fun fromAnnotation(
+            pluginClassLoader: PluginClassLoader,
+            file: Path?,
+            mainClass: String,
+            classes: Array<String>,
+            annotation: Plugin
+        ): SandstonePluginContainer {
             return SandstonePluginContainer(
-                    id_ = annotation.id,
-                    name_ = annotation.name.ifEmpty { annotation.id },
-                    version_ = Version(annotation.version, CommonVersionScheme),
-                    description_ = annotation.description.nullIfEmpty(),
-                    //file = file,
-                    authors_ = Collections.unmodifiableList(annotation.authors.toList()),
-                    dependencies = Collections.unmodifiableList(annotation.dependencies.ifEmpty { emptyArray() }.map {
-                        SandstoneDependencyContainer(it.id, it.incompatibleVersions, it.isRequired, it.version)
-                    }),
-                    //classLoader = pluginClassLoader,
-                    usePlatformInternals_ = annotation.usePlatformInternals,
-                    mainClass = mainClass,
-                    optional = annotation.optional,
-                    targetPlatformNames = Collections.unmodifiableList(annotation.targetPlatformNames.toList())
+                id_ = annotation.id,
+                name_ = annotation.name.ifEmpty { annotation.id },
+                version_ = Version(annotation.version, Schemes.commonVersionScheme),
+                description_ = annotation.description.nullIfEmpty(),
+                //file = file,
+                authors_ = Collections.unmodifiableList(annotation.authors.toList()),
+                dependencies = Collections.unmodifiableList(annotation.dependencies.ifEmpty { emptyArray() }.map {
+                    SandstoneDependencyContainer(
+                        it.id,
+                        it.incompatibleVersions,
+                        it.isRequired,
+                        it.version
+                    )
+                }),
+                //classLoader = pluginClassLoader,
+                usePlatformInternals_ = annotation.usePlatformInternals,
+                mainClass = mainClass,
+                optional = annotation.optional,
+                targetPlatformNames = Collections.unmodifiableList(annotation.targetPlatformNames.toList()),
+                platform = SandstonePlatform
             ).run {
                 this.classLoader_ = pluginClassLoader
                 this.file_ = file
@@ -137,11 +155,11 @@ open class SandstonePluginContainer(var id_: String,
          */
         private fun String.nullIfEmpty(): String? = if (this.isNotEmpty()) this else null
 
-        inline private fun String.ifEmpty(func: (String) -> String): String =
-                if (this.isNotEmpty()) this else func(this)
+        private inline fun String.ifEmpty(func: (String) -> String): String =
+            if (this.isNotEmpty()) this else func(this)
 
-        inline private fun <T> Array<T>.ifEmpty(func: (Array<T>) -> Array<T>): Array<T> =
-                if (this.isNotEmpty()) this else func(this)
+        private inline fun <T> Array<T>.ifEmpty(func: (Array<T>) -> Array<T>): Array<T> =
+            if (this.isNotEmpty()) this else func(this)
 
     }
 

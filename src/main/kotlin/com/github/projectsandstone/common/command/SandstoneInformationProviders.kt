@@ -27,21 +27,25 @@
  */
 package com.github.projectsandstone.common.command
 
+import com.github.jonathanxd.iutils.kt.typeInfo
 import com.github.jonathanxd.iutils.type.TypeInfo
 import com.github.jonathanxd.kwcommands.information.Information
 import com.github.jonathanxd.kwcommands.information.InformationProvider
-import com.github.jonathanxd.kwcommands.manager.InformationManager
+import com.github.jonathanxd.kwcommands.information.InformationProviders
 import com.github.projectsandstone.api.service.permission.Subject
 
-class SubjectProvider(val manager: InformationManager) : InformationProvider {
-    override fun <T> provide(id: Information.Id): Information<T>? = null
+class SubjectProvider(val manager: InformationProviders) : InformationProvider {
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T> provide(id: Information.Id, type: TypeInfo<T>): Information<T>? =
-            if (id.id == Subject::class.java && "subject" in id.tags)
-                manager.informationSet.firstOrNull {
-                    it.value is Subject
-                } as Information<T>?
-            else null
+    override fun <T> provide(
+        type: TypeInfo<out T>,
+        tags: Array<out String>,
+        providers: InformationProviders
+    ): Information<T>? =
+        if (typeInfo<Subject>().isAssignableFrom(type) && "subject" in tags)
+            manager.informationSet.firstOrNull {
+                it.value is Subject
+            } as Information<T>?
+        else null
 
 }

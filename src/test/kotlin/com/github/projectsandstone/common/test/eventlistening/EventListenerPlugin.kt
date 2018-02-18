@@ -27,6 +27,7 @@
  */
 package com.github.projectsandstone.common.test.eventlistening
 
+import com.github.jonathanxd.iutils.text.Text
 import com.github.projectsandstone.api.Sandstone
 import com.github.projectsandstone.api.entity.EntityType
 import com.github.projectsandstone.api.entity.EntityTypes
@@ -36,7 +37,6 @@ import com.github.projectsandstone.api.event.message.MessageEvent
 import com.github.projectsandstone.api.inventory.CarriedInventory
 import com.github.projectsandstone.api.inventory.Carrier
 import com.github.projectsandstone.api.plugin.Plugin
-import com.github.projectsandstone.api.text.Text
 import com.github.projectsandstone.api.util.SID
 import com.github.projectsandstone.api.world.Location
 import com.github.projectsandstone.api.world.World
@@ -48,7 +48,6 @@ import java.util.*
 
 @Plugin(id = "com.github.projectsandstone.common.test.eventlistenerplugin", name = "Event Listening Test Plugin", version = "1.0.0")
 class EventListenerPlugin @Inject constructor(val logger: Logger) {
-
 
     @Listener
     fun listen(postInit: PostInitializationEvent) {

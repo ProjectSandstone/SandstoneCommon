@@ -27,11 +27,11 @@
  */
 package com.github.projectsandstone.common.service
 
-import com.github.jonathanxd.codeproxy.CodeProxy
 import com.github.jonathanxd.iutils.map.WeakValueHashMap
 import com.github.jonathanxd.iutils.type.TypeInfo
+import com.github.jonathanxd.koresproxy.KoresProxy
+import com.github.jonathanxd.koresproxy.handler.InvocationHandler
 import com.github.projectsandstone.api.Sandstone
-import com.github.projectsandstone.api.event.SandstoneEventFactory
 import com.github.projectsandstone.api.event.SandstoneEventFactoryCache
 import com.github.projectsandstone.api.event.service.ChangeServiceProviderEvent
 import com.github.projectsandstone.api.service.RegisteredProvider
@@ -62,24 +62,31 @@ abstract class SandstoneServiceManager : ServiceManager {
 
         val pluginContainer = Sandstone.game.pluginManager.getRequiredPlugin(plugin)
 
-        val registeredProvider: RegisteredProvider<T> = SandstoneRegisteredProvider(pluginContainer, instance, service)
+        val registeredProvider: RegisteredProvider<T> =
+            SandstoneRegisteredProvider(pluginContainer, instance, service)
 
         /////////////////////////////////////////////////////
 
         if (this.dispatch) {
             val event = SandstoneEventFactoryCache.getInstance()
-                    .createChangeServiceProviderEvent(
-                            TypeInfo.builderOf(ChangeServiceProviderEvent::class.java)
-                                    .of(service)
-                                    .buildGeneric(),
-                            TypeInfo.of(service), oldProvider, registeredProvider)
+                .createChangeServiceProviderEvent(
+                    TypeInfo.builderOf(ChangeServiceProviderEvent::class.java)
+                        .of(service)
+                        .buildGeneric(),
+                    TypeInfo.of(service), oldProvider, registeredProvider
+                )
 
             Sandstone.eventManager.dispatch(event, pluginContainer)
         }
 
         /////////////////////////////////////////////////////
 
-        this.serviceRegListeners.onRegister(registeredProvider.plugin, registeredProvider.service, registeredProvider.provider, registeredProvider)
+        this.serviceRegListeners.onRegister(
+            registeredProvider.plugin,
+            registeredProvider.service,
+            registeredProvider.provider,
+            registeredProvider
+        )
 
         this.services.put(service, registeredProvider)
 
@@ -110,11 +117,19 @@ abstract class SandstoneServiceManager : ServiceManager {
             return this.proxyCache[service] as T
 
         val superClass = if (!service.isInterface) service else Any::class.java
-        val interfaces = if (service.isInterface) arrayOf(service) else emptyArray()
+        val interfaces = if (service.isInterface) listOf(service) else emptyList()
 
-        val instance = CodeProxy.newProxyInstance(service.classLoader, superClass, interfaces, ProxyServiceIHandler(this, service)) as T
+        val instance = KoresProxy.newProxyInstance(
+            arrayOf(),
+            arrayOf()) {
+            it.classLoader(service.classLoader)
+                .superClass(superClass)
+                .interfaces(interfaces)
+                .invocationHandler(InvocationHandler.NULL)
+                .addCustom(ProxyService(this, service))
+        } as T
 
-        this.proxyCache.put(service, instance)
+        this.proxyCache[service] = instance
 
         return instance
     }
@@ -128,17 +143,28 @@ abstract class SandstoneServiceManager : ServiceManager {
         this.serviceRegListeners.add({ plugin, klass, instance -> true }, function)
     }
 
-    override fun <T : Any> watch(predicate: (Any, Class<T>, T) -> Boolean, function: (RegisteredProvider<T>) -> Boolean) {
+    override fun <T : Any> watch(
+        predicate: (Any, Class<T>, T) -> Boolean,
+        function: (RegisteredProvider<T>) -> Boolean
+    ) {
         this.serviceRegListeners.add(predicate, function)
     }
 
     class ServiceRegListeners {
         private val listeners = mutableListOf<RegistryConsumer>()
 
-        fun <T : Any> add(predicate: (Any, Class<T>, T) -> Boolean, function: (RegisteredProvider<T>) -> Boolean) {
+        fun <T : Any> add(
+            predicate: (Any, Class<T>, T) -> Boolean,
+            function: (RegisteredProvider<T>) -> Boolean
+        ) {
             this.listeners.add(object : RegistryConsumer {
                 @Suppress("UNCHECKED_CAST")
-                override fun consume(plugin: Any, service: Class<*>, instance: Any, registeredProvider: RegisteredProvider<*>): Boolean {
+                override fun consume(
+                    plugin: Any,
+                    service: Class<*>,
+                    instance: Any,
+                    registeredProvider: RegisteredProvider<*>
+                ): Boolean {
                     if (!predicate.invoke(plugin, service as Class<T>, instance as T)) {
                         return true
                     }
@@ -148,7 +174,12 @@ abstract class SandstoneServiceManager : ServiceManager {
             })
         }
 
-        fun onRegister(plugin: Any, service: Class<*>, instance: Any, registeredProvider: RegisteredProvider<*>) {
+        fun onRegister(
+            plugin: Any,
+            service: Class<*>,
+            instance: Any,
+            registeredProvider: RegisteredProvider<*>
+        ) {
 
             val iterator = this.listeners.iterator()
 
@@ -162,7 +193,12 @@ abstract class SandstoneServiceManager : ServiceManager {
     }
 
     private interface RegistryConsumer {
-        fun consume(plugin: Any, service: Class<*>, instance: Any, registeredProvider: RegisteredProvider<*>): Boolean
+        fun consume(
+            plugin: Any,
+            service: Class<*>,
+            instance: Any,
+            registeredProvider: RegisteredProvider<*>
+        ): Boolean
     }
 }
 //CodeProxy.newProxyInstance(service.classLoader, )

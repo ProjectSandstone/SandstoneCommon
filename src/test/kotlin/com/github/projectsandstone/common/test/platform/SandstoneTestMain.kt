@@ -45,24 +45,48 @@ object SandstoneTestMain {
     }
 
     fun start() {
-        SandstoneInit.initConsts()
-        SandstoneInit.initGame(TestGame())
-        SandstoneInit.initLogger(TestLogger(null))
-        SandstoneInit.initLoggerFactory(TestLoggerFactory())
-        SandstoneInit.initPath(Paths.get("testenv"))
+        SandstoneInit.initSchemes()
+        SandstoneInit.init(
+            TestGame::class.java,
+            TestLogger(null),
+            TestLoggerFactory(),
+            Paths.get("testenv"),
+            TestImplementation()
+        )
         SandstoneEventFactoryCache.getAsync()
     }
 
     fun init() {
-        Sandstone.eventManager.dispatchAsync(Sandstone.eventFactory.createPreInitializationEvent(), SandstonePlugin)
-        Sandstone.eventManager.dispatch(Sandstone.eventFactory.createInitializationEvent(), SandstonePlugin)
-        Sandstone.eventManager.dispatch(Sandstone.eventFactory.createPostInitializationEvent(), SandstonePlugin)
-        Sandstone.eventManager.dispatch(Sandstone.eventFactory.createServerStartingEvent(), SandstonePlugin)
-        Sandstone.eventManager.dispatch(Sandstone.eventFactory.createServerStartedEvent(emptyList()), SandstonePlugin)
+        Sandstone.eventManager.dispatchAsync(
+            Sandstone.eventFactory.createPreInitializationEvent(),
+            SandstonePlugin
+        )
+        Sandstone.eventManager.dispatch(
+            Sandstone.eventFactory.createInitializationEvent(),
+            SandstonePlugin
+        )
+        Sandstone.eventManager.dispatch(
+            Sandstone.eventFactory.createPostInitializationEvent(),
+            SandstonePlugin
+        )
+        Sandstone.eventManager.dispatch(
+            Sandstone.eventFactory.createServerStartingEvent(),
+            SandstonePlugin
+        )
+        Sandstone.eventManager.dispatch(
+            Sandstone.eventFactory.createServerStartedEvent(emptyList()),
+            SandstonePlugin
+        )
     }
 
     fun stop() {
-        Sandstone.eventManager.dispatch(Sandstone.eventFactory.createServerStoppingEvent(), SandstonePlugin)
-        Sandstone.eventManager.dispatch(Sandstone.eventFactory.createServerStoppedEvent(), SandstonePlugin)
+        Sandstone.eventManager.dispatch(
+            Sandstone.eventFactory.createServerStoppingEvent(),
+            SandstonePlugin
+        )
+        Sandstone.eventManager.dispatch(
+            Sandstone.eventFactory.createServerStoppedEvent(),
+            SandstonePlugin
+        )
     }
 }
