@@ -33,6 +33,7 @@ import org.junit.Test
 import java.time.Duration
 import java.time.Instant
 import java.util.*
+import kotlin.test.assertTrue
 
 class Test {
     @Test
@@ -67,5 +68,6 @@ class Test {
         SandstoneTestMain.init()
         SandstoneTestMain.stop()
 
+        assertTrue(Sandstone.pluginManager.plugins.all { it.instance != null }, "Some plugins failed to load")
     }
 }

@@ -28,6 +28,8 @@
 package com.github.projectsandstone.common
 
 import com.github.jonathanxd.iutils.condition.Conditions
+import com.github.jonathanxd.redin.Redin
+import com.github.jonathanxd.redin.child
 import com.github.projectsandstone.api.Game
 import com.github.projectsandstone.api.Implementation
 import com.github.projectsandstone.api.Sandstone
@@ -36,11 +38,7 @@ import com.github.projectsandstone.api.plugin.PluginState
 import com.github.projectsandstone.api.registry.RegistryEntry
 import com.github.projectsandstone.api.util.extension.registry.getEntryGeneric
 import com.github.projectsandstone.api.util.version.Schemes
-import com.github.projectsandstone.common.guice.GameSandstoneModule
-import com.github.projectsandstone.common.guice.SandstoneModule
-import com.github.projectsandstone.common.guice.SandstoneSchemeModule
-import com.google.inject.AbstractModule
-import com.google.inject.Guice
+import com.github.projectsandstone.common.guice.*
 import org.slf4j.Logger
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
@@ -52,7 +50,9 @@ object SandstoneInit {
 
     @JvmStatic
     fun initSchemes() {
-        Guice.createInjector(SandstoneSchemeModule())
+        Redin {
+            installScheme()
+        }.injectMembers(Schemes)
     }
 
     @JvmStatic
@@ -63,9 +63,21 @@ object SandstoneInit {
         sandstonePath: Path,
         implementation: Implementation
     ) {
-        val basic = Guice.createInjector(GameSandstoneModule(game))
+        val base = Redin {
+            installSandstoneGame(game, logger)
+        }
 
-        basic.createChildInjector(SandstoneModule(logger, loggerFactory, sandstonePath, implementation))
+        val child = base.child {
+            installSandstone(logger, loggerFactory, sandstonePath, implementation)
+        }
+
+        child.inheritParentScopedBindingsCache()
+
+        child.injectMembers(Sandstone)
+
+        /*val basic = Guice.createInjector(GameSandstoneModule(game, logger))
+
+        basic.createChildInjector(SandstoneModule())*/
     }
 
     @JvmStatic

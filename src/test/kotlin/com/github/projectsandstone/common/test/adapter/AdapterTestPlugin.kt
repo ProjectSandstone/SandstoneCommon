@@ -27,11 +27,11 @@
  */
 package com.github.projectsandstone.common.test.adapter
 
+import com.github.koresframework.eventsys.event.annotation.Listener
 import com.github.projectsandstone.api.event.init.PreInitializationEvent
 import com.github.projectsandstone.api.plugin.Plugin
 import com.github.projectsandstone.common.adapter.Adapters
 import com.github.projectsandstone.common.adapter.registerAllConverters
-import com.github.projectsandstone.eventsys.event.annotation.Listener
 import org.slf4j.Logger
 import javax.inject.Inject
 

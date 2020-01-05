@@ -32,10 +32,10 @@ import com.github.projectsandstone.api.event.init.PostInitializationEvent
 import com.github.projectsandstone.api.plugin.Plugin
 import com.github.projectsandstone.api.plugin.PluginContainer
 import com.github.projectsandstone.common.util.extension.typeInfo
-import com.github.projectsandstone.eventsys.event.ListenerSpec
-import com.github.projectsandstone.eventsys.event.annotation.Listener
-import com.github.projectsandstone.eventsys.gen.event.EventClassSpecification
-import com.github.projectsandstone.eventsys.reflect.PropertiesSort
+import com.github.koresframework.eventsys.event.ListenerSpec
+import com.github.koresframework.eventsys.event.annotation.Listener
+import com.github.koresframework.eventsys.gen.event.EventClassSpecification
+import com.github.koresframework.eventsys.reflect.PropertiesSort
 import org.slf4j.Logger
 import javax.inject.Inject
 
@@ -53,10 +53,11 @@ class InvocationTestPlugin @Inject constructor(val logger: Logger, val game: Gam
                 emptyList()
         )
 
-        val evClass = game.eventManager.eventGenerator
-                .createEventClass(MyEvent::class.typeInfo, emptyList(), emptyList())
+        val evClass = game.eventGenerator
+                .createEventClass(MyEvent::class.java)
+                .resolve()
 
-        game.eventManager.eventGenerator.registerEventImplementation(spec, evClass)
+        game.eventGenerator.registerEventImplementation(spec, evClass)
 
         val arg = PropertiesSort.sort(evClass.constructors.first(),
                 arrayOf("message"),
@@ -66,8 +67,9 @@ class InvocationTestPlugin @Inject constructor(val logger: Logger, val game: Gam
 
         val toInvoke = EvListener::class.java.getDeclaredMethod("toInvoke", MyEvent::class.java)
 
-        val generated = game.eventManager.eventGenerator.
-                createMethodListener(container, toInvoke, evListener, ListenerSpec.fromMethod(toInvoke))
+        val generated = game.eventGenerator.
+                createMethodListener(EvListener::class.java, toInvoke, evListener, ListenerSpec.fromMethod(toInvoke))
+                .resolve()
 
         generated.onEvent(myEvent, container)
     }

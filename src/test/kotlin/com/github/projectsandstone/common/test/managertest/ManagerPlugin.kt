@@ -33,7 +33,7 @@ import com.github.projectsandstone.api.event.init.PostInitializationEvent
 import com.github.projectsandstone.api.event.init.ServerStartedEvent
 import com.github.projectsandstone.api.event.service.ChangeServiceProviderEvent
 import com.github.projectsandstone.api.plugin.Plugin
-import com.github.projectsandstone.eventsys.event.annotation.Listener
+import com.github.koresframework.eventsys.event.annotation.Listener
 import org.slf4j.Logger
 import javax.inject.Inject
 

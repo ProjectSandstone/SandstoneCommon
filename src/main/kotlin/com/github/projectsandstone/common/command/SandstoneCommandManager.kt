@@ -76,10 +76,10 @@ class SandstoneCommandManager @Inject constructor(val game: Game) : CommandManag
     override fun registerInstance(any: Any, @PluginInstance ownerPlugin: Any): Boolean =
         this.reflect.registerCommands(fromInstance(any, ownerPlugin), ownerPlugin)
 
-    override fun <T> registerInstance(klass: Class<T>, instance: T, @PluginInstance ownerPlugin: Any): Boolean =
+    override fun <T: Any> registerInstance(klass: Class<T>, instance: T, @PluginInstance ownerPlugin: Any): Boolean =
         this.reflect.registerCommands(fromClass(klass, instance, ownerPlugin), ownerPlugin)
 
-    override fun <T> registerInstance(
+    override fun <T: Any> registerInstance(
         klass: Class<T>,
         instanceProvider: InstanceProvider,
         ownerPlugin: Any

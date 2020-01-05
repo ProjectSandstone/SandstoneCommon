@@ -25,23 +25,25 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common
+package com.github.projectsandstone.common.di
 
-import com.github.koresframework.eventsys.event.EventListener
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-import java.util.concurrent.ThreadFactory
+import com.github.jonathanxd.redin.Injector
+import com.github.jonathanxd.redin.child
+import com.github.projectsandstone.api.Sandstone
+import com.github.projectsandstone.api.plugin.PluginManager
+import com.github.projectsandstone.common.guice.installPlugin
+import com.github.projectsandstone.common.plugin.SandstonePluginContainer
 
-object Constants {
+class SandstonePluginRedin(val injector: Injector) : SandstonePluginDependencyInjection {
 
-    val listenerSorter = Comparator.comparing(EventListener<*>::priority)
-
-    val daemonThreadFactory: ThreadFactory = ThreadFactory {
-        val tr = Executors.defaultThreadFactory().newThread(it)
-        tr.isDaemon = true
-        tr
-    }
-
-    val cachedThreadPool: ExecutorService = Executors.newCachedThreadPool(daemonThreadFactory)
+    override fun createPluginInjector(
+            pluginManager: PluginManager,
+            pluginContainer: SandstonePluginContainer,
+            pluginClass: Class<*>
+    ): Injector = this.injector.child {
+        installPlugin(Sandstone.pluginManager,
+                pluginContainer,
+                pluginClass)
+    }.inheritParentScopedBindingsCache()
 
 }

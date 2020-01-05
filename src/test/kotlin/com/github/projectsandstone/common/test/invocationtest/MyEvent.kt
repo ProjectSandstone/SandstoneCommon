@@ -27,7 +27,7 @@
  */
 package com.github.projectsandstone.common.test.invocationtest
 
-import com.github.projectsandstone.eventsys.event.Event
+import com.github.koresframework.eventsys.event.Event
 
 interface MyEvent : Event {
     val message: String

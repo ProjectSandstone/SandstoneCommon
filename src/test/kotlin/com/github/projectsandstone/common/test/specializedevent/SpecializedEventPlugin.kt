@@ -25,46 +25,40 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.common.test.platform
+package com.github.projectsandstone.common.test.specializedevent
 
+import com.github.jonathanxd.iutils.`object`.LateInit
+import com.github.jonathanxd.kores.type.Generic
+import com.github.jonathanxd.kores.type.genericTypeOf
+import com.github.jonathanxd.redin.Late
 import com.github.koresframework.eventsys.event.EventListenerRegistry
-import com.github.projectsandstone.api.*
-import com.github.projectsandstone.api.command.CommandManager
-import com.github.projectsandstone.api.plugin.PluginManager
-import com.github.projectsandstone.api.registry.Registry
-import com.github.projectsandstone.api.scheduler.Scheduler
-import com.github.projectsandstone.api.service.ServiceManager
-import com.github.projectsandstone.api.util.edition.GameEdition
-import com.github.projectsandstone.common.command.SandstoneCommandManager
 import com.github.koresframework.eventsys.event.EventManager
-import com.github.koresframework.eventsys.gen.event.CommonEventGenerator
+import com.github.koresframework.eventsys.event.annotation.Listener
 import com.github.koresframework.eventsys.gen.event.EventGenerator
-import java.nio.file.Path
-import java.nio.file.Paths
+import com.github.koresframework.eventsys.util.create
+import com.github.projectsandstone.api.event.init.PostInitializationEvent
+import com.github.projectsandstone.api.plugin.Plugin
+import org.slf4j.Logger
 import javax.inject.Inject
 
-class TestGame @Inject constructor(
-        override val eventManager: EventManager,
-        override val eventGenerator: EventGenerator,
-        override val eventListenerRegistry: EventListenerRegistry,
-        override val pluginManager: PluginManager,
-        override val registry: Registry
-) : Game {
-    override val gamePath: Path = Paths.get("/")
+@Plugin(id = "com.github.projectsandstone.common.test.specializedevent", name = "Specialization test plugin", version = "1.0")
+class SpecializedEventPlugin @Inject constructor(val logger: Logger,
+                                                 val eventGenerator: EventGenerator,
+                                                 val eventManager: EventManager,
+                                                 @Late val plugin: LateInit.Ref<SpecializedEventPlugin>) {
 
-    override val platform: Platform = TestPlatform()
+    @Listener
+    fun postInit(init: PostInitializationEvent) {
+        plugin.value
+        val stringMessageEventType = genericTypeOf<MessageEvent<String>>()
+        val messageEventClass = this.eventGenerator.createEventClass<MessageEvent<String>>(
+                stringMessageEventType
+        ).resolve()
 
-    override val savePath: Path = Paths.get("/")
+        val messageEvent = create(messageEventClass, mapOf(
+                "message" to "Hello"
+        ))
 
-    override val scheduler: Scheduler = TestScheduler()
-
-    override val server: Server = TestServer()
-
-    override val serviceManager: ServiceManager = TestServiceManager()
-
-    override val edition: GameEdition = TestGameEdition
-
-    override val objectFactory: SandstoneObjectFactory = TestObjectFactory
-    override val objectHelper: SandstoneObjectHelper = TestObjectHelper
-    override val commandManager: CommandManager = SandstoneCommandManager(this)
+        this.eventManager.dispatch(messageEvent, stringMessageEventType, this)
+    }
 }

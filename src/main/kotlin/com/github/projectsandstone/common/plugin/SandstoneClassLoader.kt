@@ -27,6 +27,7 @@
  */
 package com.github.projectsandstone.common.plugin
 
+import com.github.jonathanxd.kores.type.javaSpecName
 import com.github.projectsandstone.api.Sandstone
 import com.github.projectsandstone.api.plugin.PluginClassLoader
 import com.github.projectsandstone.api.plugin.PluginContainer
@@ -34,6 +35,7 @@ import com.github.projectsandstone.common.Constants
 import java.net.URL
 import java.net.URLClassLoader
 import java.nio.file.Path
+import java.util.*
 
 /**
  * @property file Plugin file path
@@ -47,15 +49,18 @@ class SandstoneClassLoader(
         override val useInternal: Boolean,
         override val classes: List<String>) : URLClassLoader(urls, parent), PluginClassLoader {
 
+    internal val loadedClassesName = mutableSetOf<String>() // String could be compressed
     private val pluginContainers_: MutableList<PluginContainer> = mutableListOf()
 
-    override val pluginContainers: List<PluginContainer>
-        get() = pluginContainers_
+    override val pluginContainers: List<PluginContainer> =
+            Collections.unmodifiableList(this.pluginContainers_)
 
     override var isInitialized: Boolean = false
 
     fun defineClass(name: String, data: ByteArray): Class<*> =
-            defineClass(name, data, 0, data.size)
+            defineClass(name, data, 0, data.size).also {
+                this.loadedClassesName.add(it.javaSpecName)
+            }
 
     override fun loadClass(name: String?): Class<*> {
         this.checkInternalAPI(name)
@@ -71,14 +76,17 @@ class SandstoneClassLoader(
     }
 
     override fun findClass(name: String?): Class<*> {
-        this.checkInternalAPI(name)
+        this.checkInternalAPI(name) // TODO: Remove? findClass does load classes from resources
 
-        return super.findClass(name)
+        return super.findClass(name).also {
+            this.loadedClassesName.add(it.javaSpecName)
+        }
     }
 
     private fun checkInternalAPI(name: String?) {
         Constants.cachedThreadPool.execute {
-            if (!useInternal && Sandstone.game.platform.isInternalClass(name)) {
+            if (!useInternal
+                    && (Sandstone.game.platform.isInternalClass(name) || name == Sandstone::class.java.canonicalName)) {
                 Sandstone.logger.warn("Plugin ${this.getPluginName()} used an internal/platform dependent API without specifying that. ")
             }
         }

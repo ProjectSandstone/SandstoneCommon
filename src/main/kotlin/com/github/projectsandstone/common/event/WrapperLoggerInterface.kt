@@ -27,63 +27,84 @@
  */
 package com.github.projectsandstone.common.event
 
-import com.github.projectsandstone.eventsys.logging.Level
-import com.github.projectsandstone.eventsys.logging.LoggerInterface
-import com.github.projectsandstone.eventsys.logging.MessageType
+import com.github.jonathanxd.iutils.kt.typedKeyOf
+import com.github.koresframework.eventsys.context.EnvironmentContext
+import com.github.koresframework.eventsys.logging.Level
+import com.github.koresframework.eventsys.logging.LoggerInterface
+import com.github.koresframework.eventsys.logging.MessageType
 import org.slf4j.Logger
 
+val loggerKey = typedKeyOf<Logger>("logger")
 
 class WrapperLoggerInterface(val logger: Logger) : LoggerInterface {
 
-    override fun log(message: String, messageType: MessageType) {
-        log(messageType.level, message)
+    override fun log(message: String,
+                     messageType: MessageType,
+                     ctx: EnvironmentContext) {
+        log(messageType.level, message, ctx)
 
         if (messageType.level == Level.FATAL)
             throw FatalException()
     }
 
-    override fun log(message: String, messageType: MessageType, throwable: Throwable) {
-        log(messageType.level, message, throwable)
+    override fun log(message: String,
+                     messageType: MessageType,
+                     throwable: Throwable,
+                     ctx: EnvironmentContext) {
+        log(messageType.level, message, throwable, ctx)
 
         if (messageType.level == Level.FATAL)
             throw FatalException()
     }
 
-    override fun log(messages: List<String>, messageType: MessageType) {
+    override fun log(messages: List<String>,
+                     messageType: MessageType,
+                     ctx: EnvironmentContext) {
         messages.forEach { message ->
-            log(messageType.level, message)
+            log(messageType.level, message, ctx)
         }
 
         if (messageType.level == Level.FATAL)
             throw FatalException()
     }
 
-    override fun log(messages: List<String>, messageType: MessageType, throwable: Throwable) {
+    override fun log(messages: List<String>,
+                     messageType: MessageType,
+                     throwable: Throwable,
+                     ctx: EnvironmentContext) {
         messages.forEach { message ->
-            log(messageType.level, message, throwable)
+            log(messageType.level, message, throwable, ctx)
         }
 
         if (messageType.level == Level.FATAL)
             throw FatalException()
     }
 
-    private fun log(level: Level, message: String, throwable: Throwable) = when(level) {
-        Level.WARN -> this.logger.warn(message, throwable)
+    private fun log(level: Level,
+                    message: String,
+                    throwable: Throwable,
+                    ctx: EnvironmentContext) = when (level) {
+        Level.WARN -> this.logger(ctx).warn(message, throwable)
         Level.ERROR,
-        Level.FATAL -> this.logger.error(message, throwable)
-        Level.DEBUG -> this.logger.debug(message, throwable)
-        Level.TRACE -> this.logger.trace(message, throwable)
-        Level.INFO -> this.logger.info(message, throwable)
+        Level.FATAL -> this.logger(ctx).error(message, throwable)
+        Level.DEBUG -> this.logger(ctx).debug(message, throwable)
+        Level.TRACE -> this.logger(ctx).trace(message, throwable)
+        Level.INFO -> this.logger(ctx).info(message, throwable)
     }
 
-    private fun log(level: Level, message: String) = when(level) {
-        Level.WARN -> this.logger.warn(message)
+    private fun log(level: Level,
+                    message: String,
+                    ctx: EnvironmentContext) = when (level) {
+        Level.WARN -> this.logger(ctx).warn(message)
         Level.ERROR,
-        Level.FATAL -> this.logger.error(message)
-        Level.DEBUG -> this.logger.debug(message)
-        Level.TRACE -> this.logger.trace(message)
-        Level.INFO -> this.logger.info(message)
+        Level.FATAL -> this.logger(ctx).error(message)
+        Level.DEBUG -> this.logger(ctx).debug(message)
+        Level.TRACE -> this.logger(ctx).trace(message)
+        Level.INFO -> this.logger(ctx).info(message)
     }
+
+    private fun logger(ctx: EnvironmentContext) =
+            loggerKey.getOrElse(ctx, this.logger)
 
     class FatalException : Exception()
 }

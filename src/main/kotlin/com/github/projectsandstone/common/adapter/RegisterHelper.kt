@@ -33,17 +33,19 @@ import com.github.jonathanxd.adapterhelper.AdapterSpecification
 import com.github.jonathanxd.adapterhelper.Converter
 import com.github.jonathanxd.iutils.type.TypeUtil
 import com.github.projectsandstone.api.Sandstone
-import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
+import io.github.classgraph.ClassGraph
 import java.lang.reflect.Constructor
 import java.lang.reflect.Modifier
 
 @Suppress("UNCHECKED_CAST")
 fun AdapterManager.registerAllConverters(`package`: String) {
-    val scan = FastClasspathScanner(`package`).strictWhitelist().scan()
-
-    scan.getNamesOfClassesImplementing(Converter::class.java)
+    val scan = ClassGraph()
+            .whitelistPackages(`package`)
+            .enableClassInfo()
+            .scan()
+            .getSubclasses(Converter::class.java.name)
             .map {
-                this.javaClass.classLoader.loadClass(it) as Class<Converter<Any, Any>>
+                it.loadClass(Converter::class.java) as Class<Converter<Any, Any>>
             }
             .filter { Modifier.isPublic(it.modifiers) }
             .forEach {
@@ -77,11 +79,13 @@ fun AdapterManager.registerAllConverters(`package`: String) {
 
 @Suppress("UNCHECKED_CAST")
 fun AdapterManager.registerAllAdapters(`package`: String) {
-    val scan = FastClasspathScanner(`package`).strictWhitelist().scan()
-
-    scan.getNamesOfClassesImplementing(Adapter::class.java)
+    val scan = ClassGraph()
+            .whitelistPackages(`package`)
+            .enableClassInfo()
+            .scan()
+            .getSubclasses(Adapter::class.java.name)
             .map {
-                this.javaClass.classLoader.loadClass(it) as Class<Adapter<Any>>
+                it.loadClass(Adapter::class.java) as Class<Adapter<Any>>
             }
             .filter { Modifier.isPublic(it.modifiers) }
             .forEach {

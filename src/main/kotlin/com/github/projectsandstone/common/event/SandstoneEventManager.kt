@@ -28,54 +28,55 @@
 package com.github.projectsandstone.common.event
 
 import com.github.jonathanxd.iutils.type.TypeInfo
+import com.github.koresframework.eventsys.channel.ChannelSet
+import com.github.koresframework.eventsys.event.*
+import com.github.koresframework.eventsys.gen.event.CommonEventGenerator
+import com.github.koresframework.eventsys.gen.event.EventGenerator
+import com.github.koresframework.eventsys.impl.*
+import com.github.koresframework.eventsys.logging.LoggerInterface
 import com.github.projectsandstone.api.Sandstone
 import com.github.projectsandstone.common.Constants
-import com.github.projectsandstone.eventsys.event.Event
-import com.github.projectsandstone.eventsys.event.EventDispatcher
-import com.github.projectsandstone.eventsys.event.EventListener
-import com.github.projectsandstone.eventsys.event.EventManager
-import com.github.projectsandstone.eventsys.gen.event.CommonEventGenerator
-import com.github.projectsandstone.eventsys.gen.event.EventGenerator
-import com.github.projectsandstone.eventsys.impl.CommonEventManager
-import com.github.projectsandstone.eventsys.impl.EventListenerContainer
 import java.lang.reflect.Method
+import javax.inject.Inject
 
 /**
  * Sandstone Event Manager common implementation
  */
-class SandstoneEventManager : EventManager {
-    private val logger by lazy(LazyThreadSafetyMode.NONE) { WrapperLoggerInterface(Sandstone.logger) }
+class SandstoneEventManager @Inject constructor(
+        val eventListenerRegistry: EventListenerRegistry,
+        val eventGenerator: EventGenerator,
+        override val eventDispatcher: EventDispatcher
+) : EventManager {
+    /*private val logger by lazy(LazyThreadSafetyMode.NONE) { WrapperLoggerInterface(Sandstone.logger) }
 
-    private val commonManager: EventManager by lazy(LazyThreadSafetyMode.NONE) {
-        CommonEventManager(
+    internal val commonGenerator: EventGenerator by lazy(LazyThreadSafetyMode.NONE) {
+        CommonEventGenerator(logger)
+    }
+
+    private val commonRegistry: EventListenerRegistry by lazy(LazyThreadSafetyMode.NONE) {
+        CommonChannelEventListenerRegistry(
+                ChannelSet.ALL,
                 Constants.listenerSorter,
-                Constants.daemonThreadFactory,
                 logger,
-                CommonEventGenerator(logger)
+                commonGenerator
         )
     }
 
-    override val eventDispatcher: EventDispatcher
-        get() = this.commonManager.eventDispatcher
 
-    override val eventGenerator: EventGenerator
-        get() = this.commonManager.eventGenerator
+    internal val commonDispatcher: EventDispatcher by lazy(LazyThreadSafetyMode.NONE) {
+        CommonEventDispatcher(
+                Constants.daemonThreadFactory,
+                commonGenerator,
+                logger,
+                commonRegistry
+        )
+    }*/
 
-    override fun getListeners(): Set<Pair<TypeInfo<*>, EventListener<*>>> =
-            this.commonManager.getListeners()
-
-    override fun <T : Event> getListeners(eventType: TypeInfo<T>): Set<Pair<TypeInfo<T>, EventListener<T>>> =
-            this.commonManager.getListeners(eventType)
-
-    override fun getListenersContainers(): Set<EventListenerContainer<*>> =
-            this.commonManager.getListenersContainers()
-
-    override fun <T : Event> registerListener(owner: Any, eventType: TypeInfo<T>, eventListener: EventListener<T>) =
-            this.commonManager.registerListener(owner, eventType, eventListener)
-
-    override fun registerListeners(owner: Any, listener: Any) =
-            this.commonManager.registerListeners(owner, listener)
-
-    override fun registerMethodListener(owner: Any, instance: Any?, method: Method) =
-            this.commonManager.registerMethodListener(owner, instance, method)
+    internal val commonManager: EventManager by lazy(LazyThreadSafetyMode.NONE) {
+        CommonEventManager(
+                this.eventGenerator,
+                this.eventDispatcher,
+                this.eventListenerRegistry
+        )
+    }
 }

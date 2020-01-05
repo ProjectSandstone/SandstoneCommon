@@ -37,7 +37,7 @@ import org.slf4j.Logger
 import java.nio.file.Path
 import java.util.*
 
-open class SandstonePluginContainer(
+open class SandstonePluginContainer constructor(
     var id_: String,
     var name_: String,
     var version_: Version,

@@ -40,11 +40,11 @@ import com.github.projectsandstone.api.plugin.Plugin
 import com.github.projectsandstone.api.util.SID
 import com.github.projectsandstone.api.world.Location
 import com.github.projectsandstone.api.world.World
-import com.github.projectsandstone.eventsys.event.annotation.Listener
-import com.github.projectsandstone.eventsys.event.annotation.Name
-import com.google.inject.Inject
+import com.github.koresframework.eventsys.event.annotation.Listener
+import com.github.koresframework.eventsys.event.annotation.Name
 import org.slf4j.Logger
 import java.util.*
+import javax.inject.Inject
 
 @Plugin(id = "com.github.projectsandstone.common.test.eventlistenerplugin", name = "Event Listening Test Plugin", version = "1.0.0")
 class EventListenerPlugin @Inject constructor(val logger: Logger) {

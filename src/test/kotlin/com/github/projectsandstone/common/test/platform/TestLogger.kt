@@ -27,7 +27,7 @@
  */
 package com.github.projectsandstone.common.test.platform
 
-import com.github.projectsandstone.eventsys.logging.Level
+import com.github.koresframework.eventsys.logging.Level
 import org.slf4j.Logger
 import org.slf4j.Marker
 import org.slf4j.helpers.MessageFormatter

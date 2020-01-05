@@ -28,8 +28,12 @@
 package com.github.projectsandstone.common.test.platform
 
 import com.github.projectsandstone.api.Platform
+import com.github.projectsandstone.api.constants.SelfPlatformObjectConverter
+import com.github.projectsandstone.api.feature.Feature
+import com.github.projectsandstone.api.feature.FeatureManager
 import com.github.projectsandstone.api.platform.PlatformObjectConverter
 import com.github.projectsandstone.api.util.version.Version
+import com.github.projectsandstone.common.feature.ProvidedFeatureManager
 import com.github.projectsandstone.common.util.CommonVersionScheme
 
 class TestPlatform : Platform {
@@ -47,6 +51,10 @@ class TestPlatform : Platform {
         return false
     }
 
-    override val platformObjectConverter: PlatformObjectConverter
-        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+    override val platformObjectConverter: PlatformObjectConverter = SelfPlatformObjectConverter
+
+    override val featureManager: FeatureManager = ProvidedFeatureManager()
+
+    override fun <T : Feature<T>> getFeature(type: Class<T>): Feature<T> =
+            this.featureManager[type]
 }

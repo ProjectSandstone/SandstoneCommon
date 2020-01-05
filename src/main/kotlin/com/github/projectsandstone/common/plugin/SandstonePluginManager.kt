@@ -27,13 +27,13 @@
  */
 package com.github.projectsandstone.common.plugin
 
+import com.github.jonathanxd.redin.Injector
 import com.github.projectsandstone.api.Sandstone
 import com.github.projectsandstone.api.constants.SandstonePlugin
 import com.github.projectsandstone.api.plugin.*
-import com.github.projectsandstone.common.di.SandstonePluginDependencyInjection
-import com.github.projectsandstone.common.di.SandstonePluginGuice
+import com.github.projectsandstone.common.di.SandstonePluginRedin
 import com.github.projectsandstone.common.util.DependencyComparator
-import com.google.inject.Injector
+import java.lang.reflect.Type
 import java.nio.file.Path
 import java.util.*
 import javax.inject.Inject
@@ -45,7 +45,7 @@ class SandstonePluginManager @Inject constructor(private val baseInjector: Injec
 
     private val dependencyResolver_ = SandstoneDependencyResolver(this)
     private val unmodifiablePluginSet = Collections.unmodifiableSet(this.pluginSet)
-    private val pluginLoader_ = SandstonePluginLoader(this, SandstonePluginGuice(this.baseInjector))
+    private val pluginLoader_ = SandstonePluginLoader(this, SandstonePluginRedin(this.baseInjector))
 
     override val dependencyResolver: DependencyResolver
         get() = this.dependencyResolver_
@@ -77,7 +77,8 @@ class SandstonePluginManager @Inject constructor(private val baseInjector: Injec
     }
 
     override fun loadAll(pluginContainers: List<PluginContainer>) {
-        val containers = pluginContainers.toMutableList().sortedWith(DependencyComparator(this.dependencyResolver_, pluginContainers))
+        val containers = pluginContainers.toMutableList()
+                .sortedWith(DependencyComparator(this.dependencyResolver_, pluginContainers))
 
         containers.forEach {
             loadPlugin(it)
@@ -109,6 +110,23 @@ class SandstonePluginManager @Inject constructor(private val baseInjector: Injec
         }
     }
 
+    /**
+     * @see SandstonePluginLoader.findPlugins
+     */
+    fun findPlugins(instance: Any): List<PluginContainer> =
+            this.pluginLoader_.findPlugins(instance)
+
+    /**
+     * @see SandstonePluginLoader.findPlugins
+     */
+    fun findPlugins(loadedClass: Class<*>): List<PluginContainer> =
+            this.pluginLoader_.findPlugins(loadedClass)
+
+    /**
+     * @see SandstonePluginLoader.findPlugins
+     */
+    fun findPlugins(type: Type): List<PluginContainer> =
+            this.pluginLoader_.findPlugins(type)
 
     override fun getPlugin(id: String): PluginContainer? {
         return this.pluginSet.find { it.id == id }
